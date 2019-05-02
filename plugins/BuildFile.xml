@@ -1,0 +1,19 @@
+<use   name="DataFormats/HepMCCandidate"/>
+<use   name="DataFormats/JetReco"/>
+<use   name="DataFormats/L1TVertex"/>
+<use   name="DataFormats/Math"/>
+<use   name="DataFormats/PatCandidates"/>
+<use   name="DataFormats/ParticleFlowCandidate"/>
+<use   name="DataFormats/TallinnL1PFTaus"/>
+<use   name="DQMServices/Core"/>
+<use   name="FWCore/Framework"/>
+<use   name="FWCore/ParameterSet"/>
+<use   name="FWCore/Utilities"/>
+<use   name="FWCore/ServiceRegistry"/>
+<use   name="L1Trigger/TallinnL1PFTauAnalyzer"/>
+<use   name="PhysicsTools/JetMCUtils"/>
+<use   name="root"/>
+<export>
+  <lib   name="1"/>
+</export>
+
