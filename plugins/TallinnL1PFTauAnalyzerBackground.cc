@@ -66,3 +66,7 @@ void TallinnL1PFTauAnalyzerBackground::analyze(const edm::Event& evt, const edm:
 
 void TallinnL1PFTauAnalyzerBackground::endJob()
 {}
+
+#include "FWCore/Framework/interface/MakerMacros.h"
+
+DEFINE_FWK_MODULE(TallinnL1PFTauAnalyzerBackground);
