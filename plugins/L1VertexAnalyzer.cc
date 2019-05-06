@@ -102,3 +102,7 @@ void L1VertexAnalyzer::analyze(const edm::Event& evt, const edm::EventSetup& es)
 
 void L1VertexAnalyzer::endJob()
 {}
+
+#include "FWCore/Framework/interface/MakerMacros.h"
+
+DEFINE_FWK_MODULE(L1VertexAnalyzer);

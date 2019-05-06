@@ -52,20 +52,20 @@ process.genTauLeptons = cms.EDFilter("GenParticleSelector",
 process.analysisSequence += process.genTauLeptons
 
 process.selectedGenTauLeptons = cms.EDFilter("GenParticleAntiOverlapSelector",
-    src = cms.InputTag('genTauLeptons'),
-    srcNotToBeFiltered = cms.VInputTag('selectedGenHadTaus'),
-    dRmin = cms.double(0.5),
-    invert = cms.bool(True),
-    filter = cms.bool(True)                                                          
+  src = cms.InputTag('genTauLeptons'),
+  srcNotToBeFiltered = cms.VInputTag('selectedGenHadTaus'),
+  dRmin = cms.double(0.5),
+  invert = cms.bool(True),
+  filter = cms.bool(True)                                                          
 )
 process.analysisSequence += process.selectedGenTauLeptons
 
 process.genMatchedOfflinePFTaus = cms.EDFilter("PATTauAntiOverlapSelector",
-    src = cms.InputTag('slimmedTaus'),
-    srcNotToBeFiltered = cms.VInputTag('selectedGenHadTaus'),
-    dRmin = cms.double(0.3),
-    invert = cms.bool(True),
-    filter = cms.bool(True)                                                          
+  src = cms.InputTag('slimmedTaus'),
+  srcNotToBeFiltered = cms.VInputTag('selectedGenHadTaus'),
+  dRmin = cms.double(0.3),
+  invert = cms.bool(True),
+  filter = cms.bool(True)                                                          
 )
 process.analysisSequence += process.genMatchedOfflinePFTaus
 #--------------------------------------------------------------------------------
@@ -88,19 +88,29 @@ process.analysisSequence += process.dumpOfflinePFTaus
 #--------------------------------------------------------------------------------
 
 #--------------------------------------------------------------------------------
-process.genMatchedTallinL1PFTaus = cms.EDFilter("TallinnL1PFTauAntiOverlapSelector",
-  src = cms.InputTag('TallinnL1PFTauProducer:L1PFTaus'),
+process.genMatchedTallinL1PFTausPF = cms.EDFilter("TallinnL1PFTauAntiOverlapSelector",
+  src = cms.InputTag('TallinnL1PFTauProducerPF'),
   srcNotToBeFiltered = cms.VInputTag('selectedGenHadTaus'),
   dRmin = cms.double(0.3),
   invert = cms.bool(True),
   filter = cms.bool(False)                                                          
 )
-process.analysisSequence += process.genMatchedTallinL1PFTaus
+process.analysisSequence += process.genMatchedTallinL1PFTausPF
 
-process.dumpTallinL1PFTaus = cms.EDAnalyzer("DumpTallinL1PFTaus",
-  src = cms.InputTag('genMatchedTallinL1PFTaus')                           
+process.dumpTallinL1PFTausPF = cms.EDAnalyzer("DumpTallinL1PFTaus",
+  src = cms.InputTag('genMatchedTallinL1PFTausPF')                           
 )
-process.analysisSequence += process.dumpTallinL1PFTaus
+process.analysisSequence += process.dumpTallinL1PFTausPF
+
+process.genMatchedTallinL1PFTausPuppi = process.genMatchedTallinL1PFTausPF.clone(
+  src = cms.InputTag('TallinnL1PFTauProducerPuppi')
+)    
+process.analysisSequence += process.genMatchedTallinL1PFTausPuppi
+
+process.dumpTallinL1PFTausPuppi = process.dumpTallinL1PFTausPF.clone(
+  src = cms.InputTag('genMatchedTallinL1PFTausPuppi')                           
+)
+process.analysisSequence += process.dumpTallinL1PFTausPuppi
 
 process.genMatchedL1PFCands = cms.EDFilter("L1PFCandidateAntiOverlapSelector",
   src = cms.InputTag('l1pfCandidates:PF'),

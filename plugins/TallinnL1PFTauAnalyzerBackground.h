@@ -9,8 +9,8 @@
 #include "DQMServices/Core/interface/DQMStore.h" 
 #include "DQMServices/Core/interface/MonitorElement.h"
 
-#include "DataFormats/TallinnL1PFTaus/interface/TallinnL1PFTau.h"         // l1t::TallinnL1PFTau
-#include "DataFormats/TallinnL1PFTaus/interface/TallinnL1PFTauFwd.h"      // l1t::TallinnL1PFTauCollection
+#include "DataFormats/TallinnL1PFTaus/interface/TallinnL1PFTau.h"    // l1t::TallinnL1PFTau
+#include "DataFormats/TallinnL1PFTaus/interface/TallinnL1PFTauFwd.h" // l1t::TallinnL1PFTauCollection
 
 #include <TH1.h>
 #include <TH2.h>
@@ -95,23 +95,23 @@ class TallinnL1PFTauAnalyzerBackground : public edm::EDAnalyzer
       bool numL1PFTaus_isZero = false;
       for ( int idxBin = 1; idxBin <= numBinsX; ++idxBin )
       {
-	double min_pt = xAxis->GetBinCenter(idxBin);
+	double ptThreshold = xAxis->GetBinCenter(idxBin);
 	int numL1PFTaus_passingPt = 0;
 	if ( !numL1PFTaus_isZero ) 
 	{
 	  for ( auto l1PFTau : l1PFTaus_passingAbsEta ) 
           {
-	    if ( l1PFTau->pt() > min_pt ) ++numL1PFTaus_passingPt;
+	    if ( l1PFTau->pt() > ptThreshold ) ++numL1PFTaus_passingPt;
 	  }
 	  if ( numL1PFTaus_passingPt == 0 ) numL1PFTaus_isZero = true;
 	}
 	if ( numL1PFTaus_passingPt > yAxis->GetXmax() ) numL1PFTaus_passingPt = TMath::Nint(yAxis->GetXmax() - 0.5);
-	histogram_->Fill(min_pt, numL1PFTaus_passingPt, evtWeight);
+	histogram_->Fill(ptThreshold, numL1PFTaus_passingPt, evtWeight);
       }
     }
     MonitorElement* me_;
     TH2* histogram_;
-    double max_absEta_;
+    double max_absEta_;    
     double max_relChargedIso_;
     double max_absChargedIso_;
   };

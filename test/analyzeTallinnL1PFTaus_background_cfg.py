@@ -45,11 +45,30 @@ process.GlobalTag = GlobalTag(process.GlobalTag, '100X_upgrade2023_realistic_v1'
 process.analysisSequence = cms.Sequence()
 
 #--------------------------------------------------------------------------------
-process.analyzeTallinL1PFTaus = cms.EDAnalyzer("TallinnL1PFTauAnalyzerBackground",
-  srcTallinnL1PFTaus = cms.InputTag('TallinnL1PFTauProducer:L1PFTaus'),
-  dqmDirectory = cms.string("TallinnL1PFTauAnalyzerBackground")
+process.analyzeTallinL1PFTausPF = cms.EDAnalyzer("TallinnL1PFTauAnalyzerBackground",
+  srcTallinnL1PFTaus = cms.InputTag('TallinnL1PFTauProducerPF'),
+  dqmDirectory = cms.string("TallinnL1PFTauAnalyzerBackgroundPF")
 )
-process.analysisSequence += process.analyzeTallinL1PFTaus
+process.analysisSequence += process.analyzeTallinL1PFTausPF
+
+process.analyzeTallinL1PFTauIsolationPF = cms.EDAnalyzer("TallinnL1PFTauIsolationAnalyzer",
+  src = cms.InputTag('TallinnL1PFTauProducerPF'),
+  srcGenTaus = cms.InputTag(''),                                               
+  dqmDirectory = cms.string("TallinnL1PFTauIsolationAnalyzerPF")
+)
+process.analysisSequence += process.analyzeTallinL1PFTauIsolationPF
+
+process.analyzeTallinL1PFTausPuppi = process.analyzeTallinL1PFTausPF.clone(
+  srcTallinnL1PFTaus = cms.InputTag('TallinnL1PFTauProducerPuppi'),
+  dqmDirectory = cms.string("TallinnL1PFTauAnalyzerBackgroundPuppi")
+)
+process.analysisSequence += process.analyzeTallinL1PFTausPuppi
+
+process.analyzeTallinL1PFTauIsolationPuppi = process.analyzeTallinL1PFTauIsolationPF.clone(
+  src = cms.InputTag('TallinnL1PFTauProducerPuppi'),
+  dqmDirectory = cms.string("TallinnL1PFTauIsolationAnalyzerPuppi")
+)
+process.analysisSequence += process.analyzeTallinL1PFTauIsolationPuppi
 #--------------------------------------------------------------------------------
 
 process.DQMStore = cms.Service("DQMStore")
