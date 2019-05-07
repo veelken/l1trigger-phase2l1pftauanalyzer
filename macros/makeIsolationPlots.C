@@ -512,7 +512,7 @@ void makeIsolationPlots()
 	std::map<std::string, TGraph*> graphs_roc;         // key = observable
         for ( std::vector<std::string>::const_iterator observable = observables.begin();
 	      observable != observables.end(); ++observable ) {
-          std::string histogramName = Form("%s%s/%s_%s_%s", 
+          std::string histogramName = Form("%s%s/%s_all_%s_%s", 
             dqmDirectory.data(), pfAlgo->data(), observable->data(), absEtaRange->data(), ptThreshold->data());
 	  TH1* histogram_signal = loadHistogram(inputFile_signal, histogramName);
 	  histograms_signal[*observable] = histogram_signal;
@@ -522,13 +522,13 @@ void makeIsolationPlots()
 	  histograms_background[*observable] = histogram_background;
 	  TH1* histogram_background_rebinned = ( rebin[*observable] > 1 ) ? histogram_background->Rebin(rebin[*observable]) : histogram_signal;
 
-	  TGraph graph_roc = compGraph_rocCurve(histogram_signal, histogram_background);
+	  TGraph* graph_roc = compGraph_rocCurve(histogram_signal, histogram_background);
 	  graphs_roc[*observable] = graph_roc;
 
 	  std::vector<std::string> labelTextLines = getLabelTextLines(*ptThreshold);
           std::string outputFileName_distribution = Form("makeIsolationPlots_%s_%s_%s_%s.png", 
 	    observable->data(), pfAlgo->data(), absEtaRange->data(), ptThreshold->data());
-          showHistograms(1150, 1150,
+          showHistograms(1150, 850,
 			 histogram_signal_rebinned,     "Signal",
 			 histogram_background_rebinned, "Background",
 			 0, "",
@@ -536,16 +536,16 @@ void makeIsolationPlots()
 			 0, "",
 			 0, "",
 			 colors, lineStyles, 
-			 0.045, 0.18, 0.17, 0.23, 0.26, 
+			 0.050, 0.66, 0.74, 0.23, 0.15, 
 			 labelTextLines, 0.050,
-			 0.63, 0.65, 0.26, 0.07, 
+			 0.70, 0.62, 0.23, 0.06, 
 			 xMin[*observable], xMax[*observable], xAxisTitles[*observable], 1.2, 
 			 false, 0., 1.09, "Events", 1.4, 
 			 outputFileName_distribution);
 	}
 
 	std::vector<std::string> labelTextLines = getLabelTextLines(*ptThreshold);
-	std::string outputFileName_roc = Form("makeIsolationPlots_%s_%s_%s.png", 
+	std::string outputFileName_roc = Form("makeIsolationPlots_rocCurves_%s_%s_%s.png", 
 	  pfAlgo->data(), absEtaRange->data(), ptThreshold->data());
 	showGraphs(1150, 1150,
 		   graphs_roc["absChargedIso"],  legendEntries["absChargedIso"],
