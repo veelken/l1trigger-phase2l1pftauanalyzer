@@ -97,6 +97,19 @@ process.analyzeVertices = cms.EDAnalyzer("L1VertexAnalyzer",
 )
 process.analysisSequence += process.analyzeVertices
 
+process.analyzeTracks = cms.EDAnalyzer("L1TrackAnalyzer",
+  srcGenTaus = cms.InputTag('selectedGenHadTaus'),
+  srcOfflineVertices = cms.InputTag('offlineSlimmedPrimaryVertices'),
+  srcOfflineTracks = cms.InputTag('generalTracks'),
+  srcOfflinePFCands = cms.InputTag('particleFlow'),
+  srcL1Vertices = cms.InputTag('VertexProducer:l1vertextdr'),                           
+  srcL1Tracks = cms.InputTag('TTTracksFromTracklet:Level1TTTracks'),
+  srcL1PFVertex_z = cms.InputTag('l1pfProducerBarrel:z0'),
+  srcL1PFCands = cms.InputTag('l1pfCandidates:PF'),
+  dqmDirectory = cms.string("L1TrackAnalyzer")
+)
+process.analysisSequence += process.analyzeTracks
+
 process.analyzeTallinL1PFTausPF = cms.EDAnalyzer("TallinnL1PFTauAnalyzerSignal",
   srcNumerator = cms.InputTag('TallinnL1PFTauProducerPF'),
   srcDenominator = cms.InputTag('offlineMatchedGenHadTaus'),                                               

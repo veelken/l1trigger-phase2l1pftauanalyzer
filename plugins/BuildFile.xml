@@ -13,6 +13,7 @@
 <use   name="L1Trigger/TallinnL1PFTauAnalyzer"/>
 <use   name="PhysicsTools/JetMCUtils"/>
 <use   name="root"/>
+<!--Flags CXXFLAGS="-ggdb3 -Og" /-->
 <export>
   <lib   name="1"/>
 </export>

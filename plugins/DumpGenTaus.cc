@@ -37,7 +37,7 @@ void DumpGenTaus::analyze(const edm::Event& evt, const edm::EventSetup& es)
   std::cout << " src = " << src_ << std::endl;
 
   edm::Handle<reco::GenJetCollection> genTaus;
-  evt.getByLabel(src_, genTaus);
+  evt.getByToken(token_, genTaus);
 
   // sort genTau collection by decreasing pT
   reco::GenJetCollection genTaus_sorted = *genTaus;

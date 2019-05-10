@@ -34,7 +34,7 @@ void DumpGenParticles::analyze(const edm::Event& evt, const edm::EventSetup& es)
   std::cout << " src = " << src_ << std::endl;
 
   edm::Handle<reco::GenParticleCollection> genParticles;
-  evt.getByLabel(src_, genParticles);
+  evt.getByToken(token_, genParticles);
 
   // sort genTau collection by decreasing pT
   reco::GenParticleCollection genParticles_sorted = *genParticles;

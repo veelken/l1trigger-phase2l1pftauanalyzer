@@ -85,8 +85,8 @@ class TallinnL1PFTauAnalyzerSignal : public edm::EDAnalyzer
       histogram_pt_numerator_ = me_pt_numerator_->getTH1();
       assert(histogram_pt_numerator_);
       TString histogramName_pt_denominator = Form("effL1PFTau_vs_pt_denominator_%s", histogramName_suffix.Data());
-      me_pt_denominator_ = dqmStore.book1D(histogramName_pt_denominator.Data(), histogramName_pt_numerator.Data(), 16, 20., 100.);
-      histogram_pt_denominator_ = me_pt_numerator_->getTH1();
+      me_pt_denominator_ = dqmStore.book1D(histogramName_pt_denominator.Data(), histogramName_pt_denominator.Data(), 16, 20., 100.);
+      histogram_pt_denominator_ = me_pt_denominator_->getTH1();
       assert(histogram_pt_denominator_);
 
       TString histogramName_eta_numerator = Form("effL1PFTau_vs_eta_numerator_%s", histogramName_suffix.Data());
@@ -94,8 +94,8 @@ class TallinnL1PFTauAnalyzerSignal : public edm::EDAnalyzer
       histogram_eta_numerator_ = me_eta_numerator_->getTH1();
       assert(histogram_eta_numerator_);
       TString histogramName_eta_denominator = Form("effL1PFTau_vs_eta_denominator_%s", histogramName_suffix.Data());
-      me_eta_denominator_ = dqmStore.book1D(histogramName_eta_denominator.Data(), histogramName_eta_numerator.Data(), 30, -3., +3.);
-      histogram_eta_denominator_ = me_eta_numerator_->getTH1();
+      me_eta_denominator_ = dqmStore.book1D(histogramName_eta_denominator.Data(), histogramName_eta_denominator.Data(), 30, -3., +3.);
+      histogram_eta_denominator_ = me_eta_denominator_->getTH1();
       assert(histogram_eta_denominator_);
 
       TString histogramName_phi_numerator = Form("effL1PFTau_vs_phi_numerator_%s", histogramName_suffix.Data());
@@ -103,8 +103,8 @@ class TallinnL1PFTauAnalyzerSignal : public edm::EDAnalyzer
       histogram_phi_numerator_ = me_phi_numerator_->getTH1();
       assert(histogram_phi_numerator_);
       TString histogramName_phi_denominator = Form("effL1PFTau_vs_phi_denominator_%s", histogramName_suffix.Data());
-      me_phi_denominator_ = dqmStore.book1D(histogramName_phi_denominator.Data(), histogramName_phi_numerator.Data(), 18, -TMath::Pi(), +TMath::Pi());
-      histogram_phi_denominator_ = me_phi_numerator_->getTH1();
+      me_phi_denominator_ = dqmStore.book1D(histogramName_phi_denominator.Data(), histogramName_phi_denominator.Data(), 18, -TMath::Pi(), +TMath::Pi());
+      histogram_phi_denominator_ = me_phi_denominator_->getTH1();
       assert(histogram_phi_denominator_);
     }
     void fillHistograms(const l1t::TallinnL1PFTauCollection& numeratorTaus, const reco::GenJetCollection& denominatorTaus, double evtWeight)

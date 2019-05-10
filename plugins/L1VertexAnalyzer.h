@@ -9,7 +9,7 @@
 #include "DQMServices/Core/interface/DQMStore.h" 
 #include "DQMServices/Core/interface/MonitorElement.h"
 
-#include "DataFormats/L1TVertex/interface/Vertex.h" // l1t::Vertex, l1t::VertexCollection
+#include "DataFormats/L1TVertex/interface/Vertex.h"     // l1t::Vertex, l1t::VertexCollection
 #include "DataFormats/VertexReco/interface/Vertex.h"    // reco::Vertex
 #include "DataFormats/VertexReco/interface/VertexFwd.h" // reco::VertexCollection
 
