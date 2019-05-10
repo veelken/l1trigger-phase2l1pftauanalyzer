@@ -22,21 +22,23 @@ process.source = cms.Source("PoolSource",
 
 #--------------------------------------------------------------------------------
 # set input files
-#
-#inputFilePath = '/store/user/veelken/'
-#inputFile_regex = r"[a-zA-Z0-9_/:.-]*trigPATtuple_[a-zA-Z0-9-_]+.root"
-#
+
+import os
+import re
+
+inputFilePath = '/hdfs/cms/store/user/sbhowmik/NeutrinoGun_E_10GeV/PhaseIIMTDTDRAutumn18MiniAOD_20190505/190505_093529/0000/'
+inputFile_regex = r"[a-zA-Z0-9_/:.-]*NTuple_TallinnL1PFTauProducer_[a-zA-Z0-9-_]+.root"
+
 # check if name of inputFile matches regular expression
-#inputFileNames = []
-#files = [ "".join([ "file:", inputFilePath, file ]) for file in os.listdir(inputFilePath) ]
-#for file in files:
-#    #print "file = %s" % file
-#    inputFile_matcher = re.compile(inputFile_regex)
-#    if inputFile_matcher.match(file):
-#        inputFileNames.append(file)
-#print "inputFileNames = %s" % inputFileNames 
-#
-#process.source.fileNames = cms.untracked.vstring(inputFileNames)
+inputFileNames = []
+files = [ "".join([ "file:", inputFilePath, file ]) for file in os.listdir(inputFilePath) ]
+for file in files:
+    inputFile_matcher = re.compile(inputFile_regex)
+    if inputFile_matcher.match(file):
+        inputFileNames.append(file)
+print "inputFileNames = %s" % inputFileNames 
+
+process.source.fileNames = cms.untracked.vstring(inputFileNames)
 #--------------------------------------------------------------------------------
 
 from Configuration.AlCa.GlobalTag import GlobalTag

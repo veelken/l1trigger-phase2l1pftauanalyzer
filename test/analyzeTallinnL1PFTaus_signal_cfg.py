@@ -22,21 +22,23 @@ process.source = cms.Source("PoolSource",
 
 #--------------------------------------------------------------------------------
 # set input files
-#
-#inputFilePath = '/store/user/veelken/'
-#inputFile_regex = r"[a-zA-Z0-9_/:.-]*trigPATtuple_[a-zA-Z0-9-_]+.root"
-#
+
+import os
+import re
+
+inputFilePath = '/hdfs/cms/store/user/sbhowmik/VBFHToTauTau_M125_14TeV_powheg_pythia8_correctedGridpack/PhaseIIMTDTDRAutumn18MiniAOD_20190505/190505_093730/0000/'
+inputFile_regex = r"[a-zA-Z0-9_/:.-]*NTuple_TallinnL1PFTauProducer_[a-zA-Z0-9-_]+.root"
+
 # check if name of inputFile matches regular expression
-#inputFileNames = []
-#files = [ "".join([ "file:", inputFilePath, file ]) for file in os.listdir(inputFilePath) ]
-#for file in files:
-#    #print "file = %s" % file
-#    inputFile_matcher = re.compile(inputFile_regex)
-#    if inputFile_matcher.match(file):
-#        inputFileNames.append(file)
-#print "inputFileNames = %s" % inputFileNames 
-#
-#process.source.fileNames = cms.untracked.vstring(inputFileNames)
+inputFileNames = []
+files = [ "".join([ "file:", inputFilePath, file ]) for file in os.listdir(inputFilePath) ]
+for file in files:
+    inputFile_matcher = re.compile(inputFile_regex)
+    if inputFile_matcher.match(file):
+        inputFileNames.append(file)
+print "inputFileNames = %s" % inputFileNames 
+
+process.source.fileNames = cms.untracked.vstring(inputFileNames)
 #--------------------------------------------------------------------------------
 
 from Configuration.AlCa.GlobalTag import GlobalTag
@@ -100,12 +102,15 @@ process.analysisSequence += process.analyzeVertices
 process.analyzeTracks = cms.EDAnalyzer("L1TrackAnalyzer",
   srcGenTaus = cms.InputTag('selectedGenHadTaus'),
   srcOfflineVertices = cms.InputTag('offlineSlimmedPrimaryVertices'),
-  srcOfflineTracks = cms.InputTag('generalTracks'),
-  srcOfflinePFCands = cms.InputTag('particleFlow'),
+  #srcOfflineTracks = cms.InputTag('generalTracks'),
+  srcOfflineTracks = cms.InputTag(''),                                        
+  #srcOfflinePFCands = cms.InputTag('particleFlow'),
+  srcOfflinePFCands = cms.InputTag(''), 
   srcL1Vertices = cms.InputTag('VertexProducer:l1vertextdr'),                           
   srcL1Tracks = cms.InputTag('TTTracksFromTracklet:Level1TTTracks'),
   srcL1PFVertex_z = cms.InputTag('l1pfProducerBarrel:z0'),
-  srcL1PFCands = cms.InputTag('l1pfCandidates:PF'),
+  #srcL1PFCands = cms.InputTag('l1pfCandidates:PF'),
+  srcL1PFCands = cms.InputTag(''),                                      
   dqmDirectory = cms.string("L1TrackAnalyzer")
 )
 process.analysisSequence += process.analyzeTracks
