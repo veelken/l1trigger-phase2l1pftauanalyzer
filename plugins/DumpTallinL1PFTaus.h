@@ -28,6 +28,8 @@ class DumpTallinL1PFTaus : public edm::EDAnalyzer
 
   edm::InputTag src_;
   edm::EDGetTokenT<l1t::TallinnL1PFTauCollection> token_;
+
+  bool debug_;
 };
 
 #endif   
