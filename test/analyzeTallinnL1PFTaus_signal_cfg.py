@@ -38,7 +38,7 @@ for file in files:
         inputFileNames.append(file)
 print "inputFileNames = %s" % inputFileNames 
 
-process.source.fileNames = cms.untracked.vstring(inputFileNames)
+#process.source.fileNames = cms.untracked.vstring(inputFileNames)
 #--------------------------------------------------------------------------------
 
 from Configuration.AlCa.GlobalTag import GlobalTag
@@ -115,37 +115,61 @@ process.analyzeTracks = cms.EDAnalyzer("L1TrackAnalyzer",
 )
 process.analysisSequence += process.analyzeTracks
 
-process.analyzeTallinL1PFTausPF = cms.EDAnalyzer("TallinnL1PFTauAnalyzerSignal",
-  srcNumerator = cms.InputTag('TallinnL1PFTauProducerPF'),
+process.analyzeTallinL1PFTausWithStripsPF = cms.EDAnalyzer("TallinnL1PFTauAnalyzerSignal",
+  srcNumerator = cms.InputTag('TallinnL1PFTauProducerWithStripsPF'),
   srcDenominator = cms.InputTag('offlineMatchedGenHadTaus'),                                               
-  dqmDirectory = cms.string("TallinnL1PFTauAnalyzerSignalPF")
+  dqmDirectory = cms.string("TallinnL1PFTauAnalyzerSignalWithStripsPF")
 )
-process.analysisSequence += process.analyzeTallinL1PFTausPF
+process.analysisSequence += process.analyzeTallinL1PFTausWithStripsPF
 
-process.analyzeTallinL1PFTauIsolationPF = cms.EDAnalyzer("TallinnL1PFTauIsolationAnalyzer",
-  src = cms.InputTag('TallinnL1PFTauProducerPF'),
+process.analyzeTallinL1PFTausWithoutStripsPF = process.analyzeTallinL1PFTausWithStripsPF.clone(
+  srcNumerator = cms.InputTag('TallinnL1PFTauProducerWithoutStripsPF'),
+  dqmDirectory = cms.string("TallinnL1PFTauAnalyzerSignalWithoutStripsPF")
+)
+process.analysisSequence += process.analyzeTallinL1PFTausWithoutStripsPF
+
+process.analyzeTallinL1PFTauIsolationWithStripsPF = cms.EDAnalyzer("TallinnL1PFTauIsolationAnalyzer",
+  src = cms.InputTag('TallinnL1PFTauProducerWithStripsPF'),
   srcGenTaus = cms.InputTag('offlineMatchedGenHadTaus'),                                               
-  dqmDirectory = cms.string("TallinnL1PFTauIsolationAnalyzerPF")
+  dqmDirectory = cms.string("TallinnL1PFTauIsolationAnalyzerWithStripsPF")
 )
-process.analysisSequence += process.analyzeTallinL1PFTauIsolationPF
+process.analysisSequence += process.analyzeTallinL1PFTauIsolationWithStripsPF
 
-process.analyzeTallinL1PFTausPuppi = process.analyzeTallinL1PFTausPF.clone(
-  srcNumerator = cms.InputTag('TallinnL1PFTauProducerPuppi'),
-  dqmDirectory = cms.string("TallinnL1PFTauAnalyzerSignalPuppi")
+process.analyzeTallinL1PFTauIsolationWithoutStripsPF = process.analyzeTallinL1PFTauIsolationWithStripsPF.clone(
+  src = cms.InputTag('TallinnL1PFTauProducerWithoutStripsPF'),
+  dqmDirectory = cms.string("TallinnL1PFTauIsolationAnalyzerWithoutStripsPF")
 )
-process.analysisSequence += process.analyzeTallinL1PFTausPuppi
+process.analysisSequence += process.analyzeTallinL1PFTauIsolationWithoutStripsPF
 
-process.analyzeTallinL1PFTauIsolationPuppi = process.analyzeTallinL1PFTauIsolationPF.clone(
-  src = cms.InputTag('TallinnL1PFTauProducerPuppi'),
-  dqmDirectory = cms.string("TallinnL1PFTauIsolationAnalyzerPuppi")
+process.analyzeTallinL1PFTausWithStripsPuppi = process.analyzeTallinL1PFTausWithStripsPF.clone(
+  srcNumerator = cms.InputTag('TallinnL1PFTauProducerWithStripsPuppi'),
+  dqmDirectory = cms.string("TallinnL1PFTauAnalyzerSignalWithStripsPuppi")
 )
-process.analysisSequence += process.analyzeTallinL1PFTauIsolationPuppi
+process.analysisSequence += process.analyzeTallinL1PFTausWithStripsPuppi
+
+process.analyzeTallinL1PFTausWithoutStripsPuppi = process.analyzeTallinL1PFTausWithStripsPuppi.clone(
+  srcNumerator = cms.InputTag('TallinnL1PFTauProducerWithoutStripsPuppi'),
+  dqmDirectory = cms.string("TallinnL1PFTauAnalyzerSignalWithoutStripsPuppi")
+)
+process.analysisSequence += process.analyzeTallinL1PFTausWithoutStripsPuppi
+
+process.analyzeTallinL1PFTauIsolationWithStripsPuppi = process.analyzeTallinL1PFTauIsolationWithStripsPF.clone(
+  src = cms.InputTag('TallinnL1PFTauProducerWithStripsPuppi'),
+  dqmDirectory = cms.string("TallinnL1PFTauIsolationAnalyzerWithStripsPuppi")
+)
+process.analysisSequence += process.analyzeTallinL1PFTauIsolationWithStripsPuppi
+
+process.analyzeTallinL1PFTauIsolationWithoutStripsPuppi = process.analyzeTallinL1PFTauIsolationWithStripsPuppi.clone(
+  src = cms.InputTag('TallinnL1PFTauProducerWithoutStripsPuppi'),
+  dqmDirectory = cms.string("TallinnL1PFTauIsolationAnalyzerWithoutStripsPuppi")
+)
+process.analysisSequence += process.analyzeTallinL1PFTauIsolationWithoutStripsPuppi
 #--------------------------------------------------------------------------------
 
 process.DQMStore = cms.Service("DQMStore")
 
 process.savePlots = cms.EDAnalyzer("DQMSimpleFileSaver",
-    outputFileName = cms.string('TallinnL1PFTauAnalyzer_signal_2019May02.root')
+    outputFileName = cms.string('TallinnL1PFTauAnalyzer_signal_2019May14.root')
 )
 
 process.p = cms.Path(process.analysisSequence + process.savePlots)

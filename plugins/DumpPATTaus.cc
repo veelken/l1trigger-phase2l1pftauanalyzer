@@ -50,11 +50,12 @@ namespace
   void printPackedPFCand(const reco::Candidate& pfCand, const reco::Candidate::Point& primaryVertexPos)
   {
     std::cout << " pdgId = " << pfCand.pdgId() << ":"
-	      << " pT = " << pfCand.pt() << ", eta = " << pfCand.eta() << ", phi = " << pfCand.phi() << std::endl;
+	      << " pT = " << pfCand.pt() << ", eta = " << pfCand.eta() << ", phi = " << pfCand.phi();
     if ( pfCand.charge() != 0 )
     {
       std::cout << " (dz = " << std::fabs(pfCand.vertex().z() - primaryVertexPos.z()) << ")";
     }
+    std::cout << std::endl;
   }
 
   void printPackedPFCands(const reco::CandidatePtrVector& pfCands, const reco::Candidate::Point& primaryVertexPos)

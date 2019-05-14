@@ -16,8 +16,9 @@ process.maxEvents = cms.untracked.PSet(
 
 process.source = cms.Source("PoolSource",
     fileNames = cms.untracked.vstring(
+        'file:/home/veelken/CMSSW_10_5_0_pre1/src/L1Trigger/TallinnL1PFTaus/test/NTuple_TallinnL1PFTauProducer.root'                        
         #'file:/home/veelken/CMSSW_10_5_0_pre1/src/L1Trigger/TallinnL1PFTaus/test/NTuple_TallinnL1PFTauProducer_2019May13.root'
-        'file:/home/veelken/CMSSW_10_5_0_pre1/src/L1Trigger/TallinnL1PFTaus/test/NTuple_TallinnL1PFTauProducer_DEBUG.root'
+        #'file:/home/veelken/CMSSW_10_5_0_pre1/src/L1Trigger/TallinnL1PFTaus/test/NTuple_TallinnL1PFTauProducer_DEBUG.root'
     )
 )
 
@@ -89,7 +90,7 @@ process.analysisSequence += process.dumpOfflinePFTaus
 #--------------------------------------------------------------------------------
 
 #--------------------------------------------------------------------------------
-process.genMatchedTallinL1PFTausPF = cms.EDFilter("TallinnL1PFTauAntiOverlapSelector",
+process.genMatchedTallinL1PFTausWithStripsPF = cms.EDFilter("TallinnL1PFTauAntiOverlapSelector",
   src = cms.InputTag('TallinnL1PFTauProducerWithStripsPF'),
   srcNotToBeFiltered = cms.VInputTag('selectedGenHadTaus'),
   dRmin = cms.double(0.3),
@@ -104,7 +105,7 @@ process.dumpTallinL1PFTausPF = cms.EDAnalyzer("DumpTallinL1PFTaus",
 )
 process.analysisSequence += process.dumpTallinL1PFTausPF
 
-process.genMatchedTallinL1PFTausPuppi = process.genMatchedTallinL1PFTausPF.clone(
+process.genMatchedTallinL1PFTausWithStripsPuppi = process.genMatchedTallinL1PFTausPF.clone(
   src = cms.InputTag('TallinnL1PFTauProducerWithStripsPuppi'),
   debug = cms.untracked.bool(True)
 )    
