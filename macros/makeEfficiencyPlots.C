@@ -91,7 +91,7 @@ void showGraphs(double canvasSizeX, double canvasSizeY,
   canvas->SetGridy(1);
 
   if ( !graph1 ) {
-    std::cerr << "<showGraphs>: histogram1 = NULL --> skipping !!" << std::endl;
+    std::cerr << "<showGraphs>: graph1 = NULL --> skipping !!" << std::endl;
     return;
   }
 
