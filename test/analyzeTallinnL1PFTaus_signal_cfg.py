@@ -11,7 +11,7 @@ process.load('Configuration.StandardSequences.MagneticField_cff')
 process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
 
 process.maxEvents = cms.untracked.PSet(
-    input = cms.untracked.int32(1000)
+    input = cms.untracked.int32(-1)
 )
 
 process.source = cms.Source("PoolSource",
@@ -26,7 +26,8 @@ process.source = cms.Source("PoolSource",
 import os
 import re
 
-inputFilePath = '/hdfs/cms/store/user/sbhowmik/VBFHToTauTau_M125_14TeV_powheg_pythia8_correctedGridpack/PhaseIIMTDTDRAutumn18MiniAOD_20190505/190505_093730/0000/'
+#inputFilePath = '/hdfs/cms/store/user/sbhowmik/VBFHToTauTau_M125_14TeV_powheg_pythia8_correctedGridpack/PhaseIIMTDTDRAutumn18MiniAOD_20190505/190505_093730/0000/'
+inputFilePath = '/hdfs/cms/store/user/sbhowmik/VBFHToTauTau_M125_14TeV_powheg_pythia8_correctedGridpack/PhaseIIMTDTDRAutumn18MiniAOD_20190514_2/190514_143851/0000/'
 inputFile_regex = r"[a-zA-Z0-9_/:.-]*NTuple_TallinnL1PFTauProducer_[a-zA-Z0-9-_]+.root"
 
 # check if name of inputFile matches regular expression
@@ -49,7 +50,7 @@ process.analysisSequence = cms.Sequence()
 #--------------------------------------------------------------------------------
 process.selectedGenHadTaus = cms.EDFilter("GenJetSelector",
   src = cms.InputTag('tauGenJetsSelectorAllHadrons'),
-  cut = cms.string('pt > 20. & abs(eta) < 1.0'),
+  cut = cms.string('pt > 20. & abs(eta) < 1.4'),
   filter = cms.bool(False)
 )
 process.analysisSequence += process.selectedGenHadTaus
@@ -65,7 +66,7 @@ process.analysisSequence += process.genMatchedOfflinePFTaus
 
 process.selectedOfflinePFTaus = cms.EDFilter("PATTauSelector",
   src = cms.InputTag('genMatchedOfflinePFTaus'),
-  cut = cms.string("pt > 20. & abs(eta) < 1.0 & tauID('decayModeFinding') > 0.5 & tauID('byLooseCombinedIsolationDeltaBetaCorr3Hits') > 0.5")
+  cut = cms.string("pt > 20. & abs(eta) < 1.4 & tauID('decayModeFinding') > 0.5 & tauID('byLooseCombinedIsolationDeltaBetaCorr3Hits') > 0.5")
 )
 process.analysisSequence += process.selectedOfflinePFTaus
 
@@ -102,16 +103,14 @@ process.analysisSequence += process.analyzeVertices
 process.analyzeTracks = cms.EDAnalyzer("L1TrackAnalyzer",
   srcGenTaus = cms.InputTag('selectedGenHadTaus'),
   srcOfflineVertices = cms.InputTag('offlineSlimmedPrimaryVertices'),
-  #srcOfflineTracks = cms.InputTag('generalTracks'),
-  srcOfflineTracks = cms.InputTag(''),                                        
-  #srcOfflinePFCands = cms.InputTag('particleFlow'),
-  srcOfflinePFCands = cms.InputTag(''), 
+  srcOfflineTracks = cms.InputTag('generalTracks'),
+  srcOfflinePFCands = cms.InputTag('particleFlow'),
   srcL1Vertices = cms.InputTag('VertexProducer:l1vertextdr'),                           
   srcL1Tracks = cms.InputTag('TTTracksFromTracklet:Level1TTTracks'),
   srcL1PFVertex_z = cms.InputTag('l1pfProducerBarrel:z0'),
-  #srcL1PFCands = cms.InputTag('l1pfCandidates:PF'),
-  srcL1PFCands = cms.InputTag(''),                                      
-  dqmDirectory = cms.string("L1TrackAnalyzer")
+  srcL1PFCands = cms.InputTag('l1pfCandidates:PF'),
+  dqmDirectory = cms.string("L1TrackAnalyzer"),
+  debug = cms.bool(False)                                     
 )
 process.analysisSequence += process.analyzeTracks
 
@@ -174,6 +173,6 @@ process.savePlots = cms.EDAnalyzer("DQMSimpleFileSaver",
 
 process.p = cms.Path(process.analysisSequence + process.savePlots)
 
-#process.options = cms.untracked.PSet(
-#    wantSummary = cms.untracked.bool(True)
-#)
+process.options = cms.untracked.PSet(
+    wantSummary = cms.untracked.bool(True)
+)

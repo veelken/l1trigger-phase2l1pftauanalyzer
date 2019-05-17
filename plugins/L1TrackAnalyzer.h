@@ -94,6 +94,45 @@ namespace
   
   typedef GenChargedHadronToTrackMatch_and_genTau_decayMode<reco::Track, GenChargedHadronToOfflineTrackMatch> GenChargedHadronToOfflineTrackMatch_and_genTau_decayMode;
   typedef GenChargedHadronToTrackMatch_and_genTau_decayMode<l1t::Track, GenChargedHadronToL1TrackMatch> GenChargedHadronToL1TrackMatch_and_genTau_decayMode;
+
+  template <class T>
+  void printGenChargedHadronToTrackMatches(const std::vector<const T*>& genChargedHadronToTrackMatches)
+  {
+    size_t idx = 0;
+    for ( auto match : genChargedHadronToTrackMatches )
+    {
+      std::cout << " genChargedHadron (#" << idx << "):" 
+		<< " pT = " << match->genChargedHadron_pt() << ","
+		<< " eta = " << match->genChargedHadron_eta() << ","
+		<< " phi = " << match->genChargedHadron_phi() << ","
+		<< " which is matched to recTrack:";
+      if ( match->hasRecTrack() )
+      {
+	std::cout << " pT = " << match->recTrack_pt() << ","
+		  << " eta = " << match->recTrack_eta() << ","
+		  << " phi = " << match->recTrack_phi() 
+		  << " (dR = " << match->dR() << ")";
+      }
+      else
+      {
+	std::cout << " N/A";
+      }
+      std::cout << std::endl;
+      ++idx;
+    }
+  }
+
+  template <class T>
+  void printGenChargedHadronToTrackMatches(const std::vector<T>& genChargedHadronToTrackMatches)
+  {
+    std::vector<const T*> genChargedHadronToTrackMatches_ptr;
+    for ( typename std::vector<T>::const_iterator match = genChargedHadronToTrackMatches.begin();
+	  match != genChargedHadronToTrackMatches.end(); ++match )
+    {
+      genChargedHadronToTrackMatches_ptr.push_back(&(*match));
+    }
+    printGenChargedHadronToTrackMatches(genChargedHadronToTrackMatches_ptr);
+  }
 }
 
 class L1TrackAnalyzer : public edm::EDAnalyzer 
@@ -231,6 +270,8 @@ class L1TrackAnalyzer : public edm::EDAnalyzer
     template <class T>
     void fillHistograms(const std::vector<const T*>& cleanedGenChargedHadronToTrackMatches, double evtWeight)
     {
+      //std::cout << "<efficiencyPlotEntryType::fillHistograms (evtWeight = " << evtWeight << ")>:" << std::endl;
+
       double minDeltaR = 1.e+3;
       for ( auto match1 : cleanedGenChargedHadronToTrackMatches )
       {
@@ -241,20 +282,29 @@ class L1TrackAnalyzer : public edm::EDAnalyzer
         }
       }
 
+      //size_t idx = 0;
       for ( auto match : cleanedGenChargedHadronToTrackMatches )
       {
+	//std::cout << " genChargedHadron (#" << idx << "):" 
+	//	    << " pT = " << match->genChargedHadron_pt() << ","
+	//	    << " eta = " << match->genChargedHadron_eta() << ","
+	//	    << " phi = " << match->genChargedHadron_phi() << std::endl;
+	//++idx;
+	  
 	if ( genTau_decayMode_ != "all" && match->genTau_decayMode() != genTau_decayMode_ ) continue;
 
 	if ( match->genChargedHadron_pt() > genChargedHadron_min_pt_ && TMath::Abs(match->genChargedHadron_eta()) < genChargedHadron_max_absEta_ )
 	{
 	  if ( match->hasRecTrack() )
 	  {
+	    //std::cout << " filling numerator histograms" << std::endl; 
 	    histogram_pt_numerator_->Fill(match->genChargedHadron_pt(), evtWeight);
 	    histogram_eta_numerator_->Fill(match->genChargedHadron_eta(), evtWeight);
 	    histogram_phi_numerator_->Fill(match->genChargedHadron_phi(), evtWeight);
 	    histogram_minDeltaR_numerator_->Fill(minDeltaR, evtWeight);
 	  }
 
+	  //std::cout << " filling denominator histograms" << std::endl; 
 	  histogram_pt_denominator_->Fill(match->genChargedHadron_pt(), evtWeight);
 	  histogram_eta_denominator_->Fill(match->genChargedHadron_eta(), evtWeight);
 	  histogram_phi_denominator_->Fill(match->genChargedHadron_phi(), evtWeight);
@@ -300,6 +350,8 @@ class L1TrackAnalyzer : public edm::EDAnalyzer
   std::vector<efficiencyPlotEntryType*> efficiencyPlots_l1Tracks_wQualityCuts_;
   std::vector<efficiencyPlotEntryType*> efficiencyPlots_l1PFCandTracks_woQualityCuts_;
   std::vector<efficiencyPlotEntryType*> efficiencyPlots_l1PFCandTracks_wQualityCuts_;
+
+  bool debug_;
 };
 
 #endif   

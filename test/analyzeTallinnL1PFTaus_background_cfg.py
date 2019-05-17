@@ -11,7 +11,7 @@ process.load('Configuration.StandardSequences.MagneticField_cff')
 process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
 
 process.maxEvents = cms.untracked.PSet(
-    input = cms.untracked.int32(1000)
+    input = cms.untracked.int32(-1)
 )
 
 process.source = cms.Source("PoolSource",
@@ -26,19 +26,25 @@ process.source = cms.Source("PoolSource",
 import os
 import re
 
-inputFilePath = '/hdfs/cms/store/user/sbhowmik/NeutrinoGun_E_10GeV/PhaseIIMTDTDRAutumn18MiniAOD_20190505/190505_093529/0000/'
+#inputFilePaths = [ '/hdfs/cms/store/user/sbhowmik/NeutrinoGun_E_10GeV/PhaseIIMTDTDRAutumn18MiniAOD_20190505/190505_093529/0000/' ]
+inputFilePaths = [
+    '/hdfs/cms/store/user/sbhowmik/NeutrinoGun_E_10GeV/PhaseIIMTDTDRAutumn18MiniAOD_20190514/190514_212818/0000/',
+    '/hdfs/cms/store/user/sbhowmik/NeutrinoGun_E_10GeV/PhaseIIMTDTDRAutumn18MiniAOD_20190514/190514_212818/0001/',
+    '/hdfs/cms/store/user/sbhowmik/NeutrinoGun_E_10GeV/PhaseIIMTDTDRAutumn18MiniAOD_20190514/190514_212818/0002/',
+]    
 inputFile_regex = r"[a-zA-Z0-9_/:.-]*NTuple_TallinnL1PFTauProducer_[a-zA-Z0-9-_]+.root"
 
 # check if name of inputFile matches regular expression
 inputFileNames = []
-files = [ "".join([ "file:", inputFilePath, file ]) for file in os.listdir(inputFilePath) ]
-for file in files:
-    inputFile_matcher = re.compile(inputFile_regex)
-    if inputFile_matcher.match(file):
-        inputFileNames.append(file)
+for inputFilePath in inputFilePaths:
+    files = [ "".join([ "file:", inputFilePath, file ]) for file in os.listdir(inputFilePath) ]
+    for file in files:
+        inputFile_matcher = re.compile(inputFile_regex)
+        if inputFile_matcher.match(file):
+            inputFileNames.append(file)
 print "inputFileNames = %s" % inputFileNames 
 
-#process.source.fileNames = cms.untracked.vstring(inputFileNames)
+process.source.fileNames = cms.untracked.vstring(inputFileNames)
 #--------------------------------------------------------------------------------
 
 from Configuration.AlCa.GlobalTag import GlobalTag

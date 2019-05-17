@@ -13,6 +13,7 @@ enum { kQualityCuts_disabled, kQualityCuts_enabled };
 
 L1TrackAnalyzer::L1TrackAnalyzer(const edm::ParameterSet& cfg)
   : moduleLabel_(cfg.getParameter<std::string>("@module_label"))
+  , debug_(cfg.getParameter<bool>("debug"))
 {
   src_genTaus_ = cfg.getParameter<edm::InputTag>("srcGenTaus");
   token_genTaus_ = consumes<reco::GenJetCollection>(src_genTaus_);
@@ -92,49 +93,63 @@ void L1TrackAnalyzer::beginJob()
   }
 
   DQMStore& dqmStore = (*edm::Service<DQMStore>());
-  dqmStore.setCurrentFolder(dqmDirectory_.data());
 
   std::vector<std::string> genTau_decayModes = { "oneProng0Pi0", "oneProng1Pi0", "oneProng2Pi0", "threeProng0Pi0", "threeProng1Pi0", "all" };
   std::vector<double> genChargedHadron_absEtaRanges = { 1.0, 1.4 };
-  for ( auto genTau_decayMode : genTau_decayModes )
+  for ( auto genChargedHadron_absEtaRange : genChargedHadron_absEtaRanges )
   {
-    for ( auto genChargedHadron_absEtaRange : genChargedHadron_absEtaRanges )
+    for ( auto genTau_decayMode : genTau_decayModes )
     {
+      TString dqmDirectory = dqmDirectory_.data();
+      dqmDirectory.Append(Form("/absEtaLt%1.2f", genChargedHadron_absEtaRange));
+      std::string genTau_decayMode_capitalized = genTau_decayMode;
+      genTau_decayMode_capitalized[0] = toupper(genTau_decayMode_capitalized[0]);	
+      dqmDirectory.Append(Form("/gen%sTau", genTau_decayMode_capitalized.data()));
+      dqmDirectory = dqmDirectory.ReplaceAll(".", "p");
+
+      dqmStore.setCurrentFolder(Form("%s/offlineTrack_woQualityCuts", dqmDirectory.Data()));
       efficiencyPlotEntryType* efficiencyPlot_offlineTracks_woQualityCuts = new efficiencyPlotEntryType(
         "offlineTrack_woQualityCuts", 1., genChargedHadron_absEtaRange, genTau_decayMode); 
       efficiencyPlot_offlineTracks_woQualityCuts->bookHistograms(dqmStore);
       efficiencyPlots_offlineTracks_woQualityCuts_.push_back(efficiencyPlot_offlineTracks_woQualityCuts);
-            
+
+      dqmStore.setCurrentFolder(Form("%s/offlineTrack_wQualityCuts", dqmDirectory.Data()));
       efficiencyPlotEntryType* efficiencyPlot_offlineTracks_wQualityCuts = new efficiencyPlotEntryType(
         "offlineTrack_wQualityCuts", 1., genChargedHadron_absEtaRange, genTau_decayMode); 
       efficiencyPlot_offlineTracks_wQualityCuts->bookHistograms(dqmStore);
       efficiencyPlots_offlineTracks_wQualityCuts_.push_back(efficiencyPlot_offlineTracks_wQualityCuts);
       
+      dqmStore.setCurrentFolder(Form("%s/offlinePFCandTrack_woQualityCuts", dqmDirectory.Data()));
       efficiencyPlotEntryType* efficiencyPlot_offlinePFCandTracks_woQualityCuts = new efficiencyPlotEntryType(
         "offlinePFCandTrack_woQualityCuts", 1., genChargedHadron_absEtaRange, genTau_decayMode); 
       efficiencyPlot_offlinePFCandTracks_woQualityCuts->bookHistograms(dqmStore);
       efficiencyPlots_offlinePFCandTracks_woQualityCuts_.push_back(efficiencyPlot_offlinePFCandTracks_woQualityCuts);
             
+      dqmStore.setCurrentFolder(Form("%s/offlinePFCandTrack_wQualityCuts", dqmDirectory.Data()));
       efficiencyPlotEntryType* efficiencyPlot_offlinePFCandTracks_wQualityCuts = new efficiencyPlotEntryType(
         "offlinePFCandTrack_wQualityCuts", 1., genChargedHadron_absEtaRange, genTau_decayMode); 
       efficiencyPlot_offlinePFCandTracks_wQualityCuts->bookHistograms(dqmStore);
       efficiencyPlots_offlinePFCandTracks_wQualityCuts_.push_back(efficiencyPlot_offlinePFCandTracks_wQualityCuts);
       
+      dqmStore.setCurrentFolder(Form("%s/l1Track_woQualityCuts", dqmDirectory.Data()));
       efficiencyPlotEntryType* efficiencyPlot_l1Tracks_woQualityCuts = new efficiencyPlotEntryType(
         "l1Track_woQualityCuts", 1., genChargedHadron_absEtaRange, genTau_decayMode); 
       efficiencyPlot_l1Tracks_woQualityCuts->bookHistograms(dqmStore);
       efficiencyPlots_l1Tracks_woQualityCuts_.push_back(efficiencyPlot_l1Tracks_woQualityCuts);
             
+      dqmStore.setCurrentFolder(Form("%s/l1Track_wQualityCuts", dqmDirectory.Data()));
       efficiencyPlotEntryType* efficiencyPlot_l1Tracks_wQualityCuts = new efficiencyPlotEntryType(
         "l1Track_wQualityCuts", 1., genChargedHadron_absEtaRange, genTau_decayMode); 
       efficiencyPlot_l1Tracks_wQualityCuts->bookHistograms(dqmStore);
       efficiencyPlots_l1Tracks_wQualityCuts_.push_back(efficiencyPlot_l1Tracks_wQualityCuts);
       
+      dqmStore.setCurrentFolder(Form("%s/l1PFCandTrack_woQualityCuts", dqmDirectory.Data()));
       efficiencyPlotEntryType* efficiencyPlot_l1PFCandTracks_woQualityCuts = new efficiencyPlotEntryType(
         "l1PFCandTrack_woQualityCuts", 1., genChargedHadron_absEtaRange, genTau_decayMode); 
       efficiencyPlot_l1PFCandTracks_woQualityCuts->bookHistograms(dqmStore);
       efficiencyPlots_l1PFCandTracks_woQualityCuts_.push_back(efficiencyPlot_l1PFCandTracks_woQualityCuts);
             
+      dqmStore.setCurrentFolder(Form("%s/l1PFCandTrack_wQualityCuts", dqmDirectory.Data()));
       efficiencyPlotEntryType* efficiencyPlot_l1PFCandTracks_wQualityCuts = new efficiencyPlotEntryType(
         "l1PFCandTrack_wQualityCuts", 1., genChargedHadron_absEtaRange, genTau_decayMode); 
       efficiencyPlot_l1PFCandTracks_wQualityCuts->bookHistograms(dqmStore);
@@ -159,28 +174,46 @@ namespace
 
   // auxiliary function for matches between generator-level charged hadrons produced in tau decays and offline reconstructed tracks
   std::vector<GenChargedHadronToOfflineTrackMatch_and_genTau_decayMode> 
-  getGenChargedHadronToOfflineTrackMatches(const std::vector<GenChargedHadron_and_genTau_decayMode>& genTauChargedHadrons, std::vector<const reco::Track*> recTracks)
+  getGenChargedHadronToOfflineTrackMatches(const std::vector<GenChargedHadron_and_genTau_decayMode>& genTauChargedHadrons, std::vector<const reco::Track*> recTracks, bool debug)
   {
     std::vector<GenChargedHadronToOfflineTrackMatch_and_genTau_decayMode> genChargedHadronToTrackMatches;
     const double dRmatch = 0.05;
+    size_t idxGenTauChargedHadron = 0;
     for ( auto genTauChargedHadron : genTauChargedHadrons )
     {
+      size_t idxRecTrack = 0;
       for ( auto recTrack : recTracks )
       {
 	double dR = deltaR(genTauChargedHadron.genChargedHadron_eta(), genTauChargedHadron.genChargedHadron_phi(), recTrack->eta(), recTrack->phi());
 	if ( dR < dRmatch ) 
         {
-	  genChargedHadronToTrackMatches.push_back(GenChargedHadronToOfflineTrackMatch_and_genTau_decayMode(
+	  if ( debug ) 
+	  {
+	    std::cout << "matching genChargedHadron (#" << idxGenTauChargedHadron << "):"
+		      << " pT = " << genTauChargedHadron.genChargedHadron_pt() << ","
+		      << " eta = " << genTauChargedHadron.genChargedHadron_eta() << ","
+		      << " phi = " << genTauChargedHadron.genChargedHadron_phi() << ","
+		      << " to recTrack (#" << idxRecTrack << "):" 
+		      << " pT = " << recTrack->pt() << ","
+		      << " eta = " << recTrack->eta() << ","
+		      << " phi = " << recTrack->phi() 
+		      << " (dR = " << dR << ")" << std::endl;
+	  }
+  	  genChargedHadronToTrackMatches.push_back(GenChargedHadronToOfflineTrackMatch_and_genTau_decayMode(
 	    GenChargedHadronToOfflineTrackMatch(genTauChargedHadron.genChargedHadron(), recTrack),
 	    genTauChargedHadron.genTau_decayMode(),
 	    dR));
 	}
+	++idxRecTrack;
       }
+
       // CV: add "empty" match to allow for genParticles without recTrack match (tracking inefficiency)
       genChargedHadronToTrackMatches.push_back(GenChargedHadronToOfflineTrackMatch_and_genTau_decayMode(
 	GenChargedHadronToOfflineTrackMatch(genTauChargedHadron.genChargedHadron(), nullptr), 
 	genTauChargedHadron.genTau_decayMode(),
 	1.e+3));
+
+      ++idxGenTauChargedHadron;
     }
     return genChargedHadronToTrackMatches;
   }
@@ -188,44 +221,62 @@ namespace
   // auxiliary function to select "good quality" tracks reconstructed on L1 trigger level
   bool passesL1TrackQualityCuts(const l1t::Track& track, double primaryVertex_z)
   {    
-    //bool passesQualityCuts = ( TMath::Abs(track.vertex().z() - primaryVertex_z) < 0.2 ) ? true : false;
+    //bool passesQualityCuts = ( TMath::Abs(track.vertex().z() - primaryVertex_z) < 0.4 ) ? true : false;
     bool passesQualityCuts = true; // CV: dz cut not implemented for l1t::Track yet
     return passesQualityCuts;
   }
 
   bool passesL1TrackQualityCuts(const l1t::PFTrack& track, double primaryVertex_z)
   {    
-    bool passesQualityCuts = ( TMath::Abs(track.vertex().z() - primaryVertex_z) < 0.2 ) ? true : false;
+    bool passesQualityCuts = ( TMath::Abs(track.vertex().z() - primaryVertex_z) < 0.4 ) ? true : false;
     return passesQualityCuts;
   }
 
   // auxiliary function for matches between generator-level charged hadrons produced in tau decays and tracks reconstructed on L1 trigger level
   std::vector<GenChargedHadronToL1TrackMatch_and_genTau_decayMode> 
-  getGenChargedHadronToL1TrackMatches(const std::vector<GenChargedHadron_and_genTau_decayMode>& genTauChargedHadrons, std::vector<const l1t::Track*> recTracks)
+  getGenChargedHadronToL1TrackMatches(const std::vector<GenChargedHadron_and_genTau_decayMode>& genTauChargedHadrons, std::vector<const l1t::Track*> recTracks, bool debug)
   {
     std::vector<GenChargedHadronToL1TrackMatch_and_genTau_decayMode> genChargedHadronToTrackMatches;
     const double dRmatch = 0.05;
+    size_t idxGenTauChargedHadron = 0;
     for ( auto genTauChargedHadron : genTauChargedHadrons )
     {
+      size_t idxRecTrack = 0;
       for ( auto recTrack : recTracks )
       {
 	const unsigned nParam = 4;
+	double recTrack_pt  = recTrack->getMomentum(nParam).perp();
 	double recTrack_eta = recTrack->getMomentum(nParam).eta();
 	double recTrack_phi = recTrack->getMomentum(nParam).phi();
 	double dR = deltaR(genTauChargedHadron.genChargedHadron_eta(), genTauChargedHadron.genChargedHadron_phi(), recTrack_eta, recTrack_phi);
 	if ( dR < dRmatch ) 
         {
+	  if ( debug ) 
+	  {
+	    std::cout << "matching genChargedHadron (#" << idxGenTauChargedHadron << "):"
+		      << " pT = " << genTauChargedHadron.genChargedHadron_pt() << ","
+		      << " eta = " << genTauChargedHadron.genChargedHadron_eta() << ","
+		      << " phi = " << genTauChargedHadron.genChargedHadron_phi() << ","
+		      << " to recTrack (#" << idxRecTrack << "):" 
+		      << " pT = " << recTrack_pt << ","
+		      << " eta = " << recTrack_eta << ","
+		      << " phi = " << recTrack_phi 
+		      << " (dR = " << dR << ")" << std::endl;
+	  }
 	  genChargedHadronToTrackMatches.push_back(GenChargedHadronToL1TrackMatch_and_genTau_decayMode(
 	    GenChargedHadronToL1TrackMatch(genTauChargedHadron.genChargedHadron(), recTrack),
 	    genTauChargedHadron.genTau_decayMode(),
 	    dR));
 	}
+	++idxRecTrack;
       }
       // CV: add "empty" match to allow for genParticles without recTrack match (tracking inefficiency)
       genChargedHadronToTrackMatches.push_back(GenChargedHadronToL1TrackMatch_and_genTau_decayMode(
 	GenChargedHadronToL1TrackMatch(genTauChargedHadron.genChargedHadron(), nullptr),
 	genTauChargedHadron.genTau_decayMode(),
 	1.e+3));
+
+      ++idxGenTauChargedHadron;
     }
     return genChargedHadronToTrackMatches;
   }
@@ -240,12 +291,13 @@ namespace
   // auxiliary function to clean matches (in order to guarantee that each generator-level charged hadron and each reconstructed track is used in the matching only once)
   template <class T>
   std::vector<const T*> 
-  cleanGenChargedHadronToTrackMatches(const std::vector<T>& genChargedHadronToTrackMatches)
+  cleanGenChargedHadronToTrackMatches(const std::vector<T>& genChargedHadronToTrackMatches, bool debug)
   {
     std::list<const T*> matches_remaining;
-    for ( auto match : genChargedHadronToTrackMatches )
+    for ( typename std::vector<T>::const_iterator match = genChargedHadronToTrackMatches.begin();
+	  match != genChargedHadronToTrackMatches.end(); ++match )
     {
-      matches_remaining.push_back(&match);
+      matches_remaining.push_back(&(*match));
     }
 
     std::vector<const T*> matches_selected;
@@ -254,6 +306,13 @@ namespace
       matches_remaining.sort(isLowerDeltaR<T>);
       const T* bestMatch = matches_remaining.front();
       assert(bestMatch);
+      if ( debug )
+      {
+        std::cout << "bestMatch (#" << matches_selected.size() << "):" 
+	  	  << " pT = " << bestMatch->genChargedHadron_pt() << ","
+		  << " eta = " << bestMatch->genChargedHadron_eta() << ","
+		  << " phi = " << bestMatch->genChargedHadron_phi() << std::endl;
+      }
       matches_selected.push_back(bestMatch);
       for ( auto match : matches_remaining ) 
       {
@@ -305,7 +364,6 @@ void L1TrackAnalyzer::analyze(const edm::Event& evt, const edm::EventSetup& es)
   {
     edm::Handle<reco::TrackCollection> offlineTracks;
     evt.getByToken(token_offlineTracks_, offlineTracks);
-  
     for ( int idxQualityCuts = kQualityCuts_disabled; idxQualityCuts <= kQualityCuts_enabled; ++idxQualityCuts )
     {
       std::vector<const reco::Track*> selectedOfflineTracks;
@@ -317,12 +375,36 @@ void L1TrackAnalyzer::analyze(const edm::Event& evt, const edm::EventSetup& es)
 	  selectedOfflineTracks.push_back(&(*recTrack));
 	}
       }
+
+      if ( debug_ )
+      {
+	size_t idx = 0;
+	for ( auto recTrack : selectedOfflineTracks )
+	{
+	  std::cout << "recTrack #" << idx << ":" 
+		    << " pT = " << recTrack->pt() << ", eta = " << recTrack->eta() << ", phi = " << recTrack->phi() << std::endl;
+	  ++idx;
+	}
+      }
       
       std::vector<GenChargedHadronToOfflineTrackMatch_and_genTau_decayMode> genChargedHadronToTrackMatches = getGenChargedHadronToOfflineTrackMatches(
 	genTauChargedHadrons,
-	selectedOfflineTracks);     
+	selectedOfflineTracks,
+	debug_);   
+      if ( debug_ )
+      {
+	std::cout << "genChargedHadronToTrackMatches BEFORE cleaning:" << std::endl;
+	printGenChargedHadronToTrackMatches(genChargedHadronToTrackMatches);
+      }
+
       std::vector<const GenChargedHadronToOfflineTrackMatch_and_genTau_decayMode*> cleanedGenChargedHadronToTrackMatches = cleanGenChargedHadronToTrackMatches(
-        genChargedHadronToTrackMatches);     
+        genChargedHadronToTrackMatches,
+	debug_); 
+      if ( debug_ )
+      {
+	std::cout << "genChargedHadronToTrackMatches AFTER cleaning:" << std::endl;
+	printGenChargedHadronToTrackMatches(cleanedGenChargedHadronToTrackMatches);
+      }
 
       const std::vector<efficiencyPlotEntryType*>* efficiencyPlots = nullptr;
       if      ( idxQualityCuts == kQualityCuts_disabled )  efficiencyPlots = &efficiencyPlots_offlineTracks_woQualityCuts_;
@@ -365,9 +447,11 @@ void L1TrackAnalyzer::analyze(const edm::Event& evt, const edm::EventSetup& es)
       
       std::vector<GenChargedHadronToOfflineTrackMatch_and_genTau_decayMode> genChargedHadronToTrackMatches = getGenChargedHadronToOfflineTrackMatches(
 	genTauChargedHadrons,
-	selectedOfflineTracks);     
+	selectedOfflineTracks,
+	debug_);     
       std::vector<const GenChargedHadronToOfflineTrackMatch_and_genTau_decayMode*> cleanedGenChargedHadronToTrackMatches = cleanGenChargedHadronToTrackMatches(
-        genChargedHadronToTrackMatches);     
+        genChargedHadronToTrackMatches,
+	debug_);     
 
       const std::vector<efficiencyPlotEntryType*>* efficiencyPlots = nullptr;
       if      ( idxQualityCuts == kQualityCuts_disabled )  efficiencyPlots = &efficiencyPlots_offlinePFCandTracks_woQualityCuts_;
@@ -408,9 +492,11 @@ void L1TrackAnalyzer::analyze(const edm::Event& evt, const edm::EventSetup& es)
       
         std::vector<GenChargedHadronToL1TrackMatch_and_genTau_decayMode> genChargedHadronToTrackMatches = getGenChargedHadronToL1TrackMatches(
   	  genTauChargedHadrons,
-          selectedL1Tracks);     
+          selectedL1Tracks,
+	  debug_);     
         std::vector<const GenChargedHadronToL1TrackMatch_and_genTau_decayMode*> cleanedGenChargedHadronToTrackMatches = cleanGenChargedHadronToTrackMatches(
-          genChargedHadronToTrackMatches);     
+          genChargedHadronToTrackMatches,
+	  debug_);     
 
         const std::vector<efficiencyPlotEntryType*>* efficiencyPlots = nullptr;
         if      ( idxQualityCuts == kQualityCuts_disabled )  efficiencyPlots = &efficiencyPlots_l1Tracks_woQualityCuts_;
@@ -460,9 +546,11 @@ void L1TrackAnalyzer::analyze(const edm::Event& evt, const edm::EventSetup& es)
       
       std::vector<GenChargedHadronToL1TrackMatch_and_genTau_decayMode> genChargedHadronToTrackMatches = getGenChargedHadronToL1TrackMatches(
 	genTauChargedHadrons,
-	selectedL1Tracks);     
+	selectedL1Tracks,
+	debug_);     
       std::vector<const GenChargedHadronToL1TrackMatch_and_genTau_decayMode*> cleanedGenChargedHadronToTrackMatches = cleanGenChargedHadronToTrackMatches(
-        genChargedHadronToTrackMatches);     
+        genChargedHadronToTrackMatches,
+	debug_);     
 
       const std::vector<efficiencyPlotEntryType*>* efficiencyPlots = nullptr;
       if      ( idxQualityCuts == kQualityCuts_disabled )  efficiencyPlots = &efficiencyPlots_l1PFCandTracks_woQualityCuts_;

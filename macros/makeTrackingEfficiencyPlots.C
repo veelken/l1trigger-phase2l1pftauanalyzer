@@ -250,7 +250,7 @@ void makeTrackingEfficiencyPlots()
   observables.push_back("minDeltaR");
 
   std::vector<std::string> absEtaRanges;
-  absEtaRanges.push_back("absEtaLt1p00");
+  //absEtaRanges.push_back("absEtaLt1p00");
   absEtaRanges.push_back("absEtaLt1p40");
 
   std::vector<std::string> decayModes;

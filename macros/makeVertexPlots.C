@@ -82,7 +82,7 @@ void showHistograms(double canvasSizeX, double canvasSizeY,
   
   canvas->SetTopMargin(0.05);
   canvas->SetLeftMargin(0.14);
-  canvas->SetBottomMargin(0.12);
+  canvas->SetBottomMargin(0.14);
   canvas->SetRightMargin(0.05);
 
   canvas->SetLogy(useLogScale);
@@ -199,6 +199,21 @@ void showHistograms(double canvasSizeX, double canvasSizeY,
   delete canvas;  
 }
 
+double compIntegral_within_Range(const TH1* histogram, double xMin, double xMax)
+{
+  const TAxis* xAxis = histogram->GetXaxis();
+  double integral = 0.;
+  int numBinsX = xAxis->GetNbins();
+  for ( int idxBinX = 1; idxBinX <= numBinsX; ++idxBinX ) { 
+    double binCenter = xAxis->GetBinCenter(idxBinX);
+    double binContent = histogram->GetBinContent(idxBinX);
+    if ( binCenter >= xMin && binCenter < xMax ) {
+      integral += binContent;
+    }
+  }
+  return integral;
+}
+
 void makeVertexPlots()
 {
 //--- stop ROOT from keeping references to all histograms
@@ -263,6 +278,17 @@ void makeVertexPlots()
       TH1* histogram_offline = loadHistogram(inputFile, histogramName_offline);
       TH1* histogram_offline_rebinned = ( rebin[*observable] > 1 ) ? histogram_offline->Rebin(rebin[*observable]) : histogram_offline;
       
+      if ( (*observable) == "delta_z" ) {
+	std::cout << "Efficiency for dz < 0.2 cm:" << std::endl;
+	std::cout << " L1 Tracks = " << compIntegral_within_Range(histogram_l1, -0.2, +0.2) << std::endl;
+	std::cout << " L1 PFlow = " << compIntegral_within_Range(histogram_l1pf, -0.2, +0.2) << std::endl;
+	std::cout << " Offline Tracks = " << compIntegral_within_Range(histogram_offline, -0.2, +0.2) << std::endl;
+	std::cout << "Efficiency for dz < 0.4 cm:" << std::endl;
+	std::cout << " L1 Tracks = " << compIntegral_within_Range(histogram_l1, -0.4, +0.4) << std::endl;
+	std::cout << " L1 PFlow = " << compIntegral_within_Range(histogram_l1pf, -0.4, +0.4) << std::endl;
+	std::cout << " Offline Tracks = " << compIntegral_within_Range(histogram_offline, -0.4, +0.4) << std::endl;
+      }
+
       std::vector<std::string> labelTextLines;
       std::string outputFileName;
       if      ( idxSignal_or_Background == kSignal     ) outputFileName = Form("makeVertexPlots_signal_%s.png",     observable->data());
@@ -280,7 +306,7 @@ void makeVertexPlots()
 		     labelTextLines, 0.050,
 		     0.70, 0.62, 0.23, 0.06, 
 		     xMin[*observable], xMax[*observable], xAxisTitles[*observable], 1.2, 
-		     true, 1.e-3, 0.99e+1, "Events", 1.4, 
+		     true, 1.e-4, 1.99, "Events", 1.4, 
 		     outputFileName);
     }
   }
