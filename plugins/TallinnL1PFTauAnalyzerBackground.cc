@@ -35,15 +35,15 @@ void TallinnL1PFTauAnalyzerBackground::beginJob()
   DQMStore& dqmStore = (*edm::Service<DQMStore>());
   dqmStore.setCurrentFolder(dqmDirectory_.data());
 
-  ratePlots_.push_back(new ratePlotEntryType(1.0, 0.40, -1.)); // vLoose
-  ratePlots_.push_back(new ratePlotEntryType(1.0, 0.20, -1.)); // Loose
-  ratePlots_.push_back(new ratePlotEntryType(1.0, 0.10, -1.)); // Medium
-  ratePlots_.push_back(new ratePlotEntryType(1.0, 0.05, -1.)); // Tight
+  ratePlots_.push_back(new ratePlotEntryType(1.0, 0.40, -1., 0.4)); // vLoose
+  ratePlots_.push_back(new ratePlotEntryType(1.0, 0.20, -1., 0.4)); // Loose
+  ratePlots_.push_back(new ratePlotEntryType(1.0, 0.10, -1., 0.4)); // Medium
+  ratePlots_.push_back(new ratePlotEntryType(1.0, 0.05, -1., 0.4)); // Tight
   
-  ratePlots_.push_back(new ratePlotEntryType(1.4, 0.40, -1.)); // vLoose
-  ratePlots_.push_back(new ratePlotEntryType(1.4, 0.20, -1.)); // Loose
-  ratePlots_.push_back(new ratePlotEntryType(1.4, 0.10, -1.)); // Medium
-  ratePlots_.push_back(new ratePlotEntryType(1.4, 0.05, -1.)); // Tight
+  ratePlots_.push_back(new ratePlotEntryType(1.4, 0.40, -1., 0.4)); // vLoose
+  ratePlots_.push_back(new ratePlotEntryType(1.4, 0.20, -1., 0.4)); // Loose
+  ratePlots_.push_back(new ratePlotEntryType(1.4, 0.10, -1., 0.4)); // Medium
+  ratePlots_.push_back(new ratePlotEntryType(1.4, 0.05, -1., 0.4)); // Tight
 
   for ( auto ratePlot : ratePlots_ ) 
   {

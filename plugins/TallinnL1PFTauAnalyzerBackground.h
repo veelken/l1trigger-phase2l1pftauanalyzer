@@ -15,7 +15,7 @@
 #include <TH1.h>
 #include <TH2.h>
 #include <TString.h> // TString, Form()
-#include <TMath.h> // TMath::Abs(), TMath::Nint()
+#include <TMath.h>   // TMath::Abs(), TMath::Nint()
 
 #include <vector>
 #include <string>
@@ -54,12 +54,13 @@ class TallinnL1PFTauAnalyzerBackground : public edm::EDAnalyzer
 
   struct ratePlotEntryType
   {
-    ratePlotEntryType(double max_absEta, double max_relChargedIso, double max_absChargedIso)
+    ratePlotEntryType(double max_absEta, double max_relChargedIso, double max_absChargedIso, double max_dz)
       : me_(nullptr)
       , histogram_(nullptr)
       , max_absEta_(max_absEta)
       , max_relChargedIso_(max_relChargedIso)
       , max_absChargedIso_(max_absChargedIso)
+      , max_dz_(max_dz)
     {}
     ~ratePlotEntryType() 
     {}
@@ -96,17 +97,33 @@ class TallinnL1PFTauAnalyzerBackground : public edm::EDAnalyzer
       for ( int idxBin = 1; idxBin <= numBinsX; ++idxBin )
       {
 	double ptThreshold = xAxis->GetBinCenter(idxBin);
-	int numL1PFTaus_passingPt = 0;
+	int max_numL1PFTaus_passingPt = 0;
 	if ( !numL1PFTaus_isZero ) 
 	{
-	  for ( auto l1PFTau : l1PFTaus_passingAbsEta ) 
+	  for ( auto l1PFTau1 : l1PFTaus_passingAbsEta ) 
           {
-	    if ( l1PFTau->pt() > ptThreshold ) ++numL1PFTaus_passingPt;
+	    int numL1PFTaus_passingPt = 0;
+	    for ( auto l1PFTau2 : l1PFTaus_passingAbsEta )
+	    {
+	      if ( l1PFTau2->pt() > ptThreshold )
+	      {
+	        if ( l1PFTau1->leadChargedPFCand().isNonnull() && l1PFTau1->leadChargedPFCand()->pfTrack().isNonnull() &&
+		     l1PFTau2->leadChargedPFCand().isNonnull() && l1PFTau2->leadChargedPFCand()->pfTrack().isNonnull() )
+		{
+		  double dz = TMath::Abs(l1PFTau1->leadChargedPFCand()->pfTrack()->vertex().z() - l1PFTau2->leadChargedPFCand()->pfTrack()->vertex().z());
+		  if ( dz < max_dz_ ) ++numL1PFTaus_passingPt;
+		}
+	      }
+	    }
+	    if ( numL1PFTaus_passingPt > max_numL1PFTaus_passingPt ) 
+	    {
+	      max_numL1PFTaus_passingPt = numL1PFTaus_passingPt;
+	    }
 	  }
-	  if ( numL1PFTaus_passingPt == 0 ) numL1PFTaus_isZero = true;
+	  if ( max_numL1PFTaus_passingPt == 0 ) numL1PFTaus_isZero = true;
 	}
-	if ( numL1PFTaus_passingPt > yAxis->GetXmax() ) numL1PFTaus_passingPt = TMath::Nint(yAxis->GetXmax() - 0.5);
-	histogram_->Fill(ptThreshold, numL1PFTaus_passingPt, evtWeight);
+	if ( max_numL1PFTaus_passingPt > yAxis->GetXmax() ) max_numL1PFTaus_passingPt = TMath::Nint(yAxis->GetXmax() - 0.5);
+	histogram_->Fill(ptThreshold, max_numL1PFTaus_passingPt, evtWeight);
       }
     }
     MonitorElement* me_;
@@ -114,6 +131,7 @@ class TallinnL1PFTauAnalyzerBackground : public edm::EDAnalyzer
     double max_absEta_;    
     double max_relChargedIso_;
     double max_absChargedIso_;
+    double max_dz_;
   };
   std::vector<ratePlotEntryType*> ratePlots_;
 };

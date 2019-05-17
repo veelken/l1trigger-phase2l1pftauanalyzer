@@ -114,55 +114,56 @@ process.analyzeTracks = cms.EDAnalyzer("L1TrackAnalyzer",
 )
 process.analysisSequence += process.analyzeTracks
 
-process.analyzeTallinL1PFTausWithStripsPF = cms.EDAnalyzer("TallinnL1PFTauAnalyzerSignal",
-  srcNumerator = cms.InputTag('TallinnL1PFTauProducerWithStripsPF'),
-  srcDenominator = cms.InputTag('offlineMatchedGenHadTaus'),                                               
-  dqmDirectory = cms.string("TallinnL1PFTauAnalyzerSignalWithStripsPF")
-)
-process.analysisSequence += process.analyzeTallinL1PFTausWithStripsPF
+for useStrips in [ True, False ]:
+    for applyPreselection in [ True, False ]:
+        moduleNameBase = "TallinnL1PFTauProducer"
+        moduleLabel = None
+        if useStrips and applyPreselection:
+            moduleLabel = "WithStripsAndPreselection"
+        elif useStrips and not applyPreselection:
+            moduleLabel = "WithStripsWithoutPreselection"
+        elif not useStrips and applyPreselection:
+            moduleLabel = "WithoutStripsWithPreselection"
+        elif not useStrips and not applyPreselection:
+            moduleLabel = "WithoutStripsAndPreselection"
+        else:
+            raise ValueError("Invalid Combination of 'useStrips' and 'applyPreselection' Configuration parameters !!")
 
-process.analyzeTallinL1PFTausWithoutStripsPF = process.analyzeTallinL1PFTausWithStripsPF.clone(
-  srcNumerator = cms.InputTag('TallinnL1PFTauProducerWithoutStripsPF'),
-  dqmDirectory = cms.string("TallinnL1PFTauAnalyzerSignalWithoutStripsPF")
-)
-process.analysisSequence += process.analyzeTallinL1PFTausWithoutStripsPF
+        moduleNamePF_TallinnL1PFTauAnalyzerSignal = "analyzeTallinnL1PFTaus" + moduleLabel + "PF"
+        modulePF_TallinnL1PFTauAnalyzerSignal = cms.EDAnalyzer("TallinnL1PFTauAnalyzerSignal",
+          srcNumerator = cms.InputTag(moduleNameBase + moduleLabel + "PF"),
+          srcDenominator = cms.InputTag('offlineMatchedGenHadTaus'),                                               
+          dqmDirectory = cms.string("TallinnL1PFTauAnalyzerSignal" + moduleLabel + "PF")
+        )
+        setattr(process, moduleNamePF_TallinnL1PFTauAnalyzerSignal, modulePF_TallinnL1PFTauAnalyzerSignal)
+        process.analysisSequence += getattr(process, moduleNamePF_TallinnL1PFTauAnalyzerSignal)
 
-process.analyzeTallinL1PFTauIsolationWithStripsPF = cms.EDAnalyzer("TallinnL1PFTauIsolationAnalyzer",
-  src = cms.InputTag('TallinnL1PFTauProducerWithStripsPF'),
-  srcGenTaus = cms.InputTag('offlineMatchedGenHadTaus'),                                               
-  dqmDirectory = cms.string("TallinnL1PFTauIsolationAnalyzerWithStripsPF")
-)
-process.analysisSequence += process.analyzeTallinL1PFTauIsolationWithStripsPF
+        moduleNamePF_TallinnL1PFTauIsolationAnalyzer = "analyzeTallinL1PFTauIsolation" + moduleLabel + "PF"
+        modulePF_TallinnL1PFTauIsolationAnalyzer = cms.EDAnalyzer("TallinnL1PFTauIsolationAnalyzer",
+          src = cms.InputTag(moduleNameBase + moduleLabel + "PF"),
+          srcGenTaus = cms.InputTag(''),                                               
+          dqmDirectory = cms.string("TallinnL1PFTauIsolationAnalyzer" + moduleLabel + "PF")
+        )
+        setattr(process, moduleNamePF_TallinnL1PFTauIsolationAnalyzer, modulePF_TallinnL1PFTauIsolationAnalyzer)
+        process.analysisSequence += getattr(process, moduleNamePF_TallinnL1PFTauIsolationAnalyzer)
 
-process.analyzeTallinL1PFTauIsolationWithoutStripsPF = process.analyzeTallinL1PFTauIsolationWithStripsPF.clone(
-  src = cms.InputTag('TallinnL1PFTauProducerWithoutStripsPF'),
-  dqmDirectory = cms.string("TallinnL1PFTauIsolationAnalyzerWithoutStripsPF")
-)
-process.analysisSequence += process.analyzeTallinL1PFTauIsolationWithoutStripsPF
+        moduleNamePuppi_TallinnL1PFTauAnalyzerSignal = "analyzeTallinnL1PFTaus" + moduleLabel + "Puppi"
+        modulePuppi_TallinnL1PFTauAnalyzerSignal = cms.EDAnalyzer("TallinnL1PFTauAnalyzerSignal",
+          srcNumerator = cms.InputTag(moduleNameBase + moduleLabel + "Puppi"),
+          srcDenominator = cms.InputTag('offlineMatchedGenHadTaus'),        
+          dqmDirectory = cms.string("TallinnL1PFTauAnalyzerSignal" + moduleLabel + "Puppi")
+        )
+        setattr(process, moduleNamePuppi_TallinnL1PFTauAnalyzerSignal, modulePuppi_TallinnL1PFTauAnalyzerSignal)
+        process.analysisSequence += getattr(process, moduleNamePuppi_TallinnL1PFTauAnalyzerSignal)
 
-process.analyzeTallinL1PFTausWithStripsPuppi = process.analyzeTallinL1PFTausWithStripsPF.clone(
-  srcNumerator = cms.InputTag('TallinnL1PFTauProducerWithStripsPuppi'),
-  dqmDirectory = cms.string("TallinnL1PFTauAnalyzerSignalWithStripsPuppi")
-)
-process.analysisSequence += process.analyzeTallinL1PFTausWithStripsPuppi
-
-process.analyzeTallinL1PFTausWithoutStripsPuppi = process.analyzeTallinL1PFTausWithStripsPuppi.clone(
-  srcNumerator = cms.InputTag('TallinnL1PFTauProducerWithoutStripsPuppi'),
-  dqmDirectory = cms.string("TallinnL1PFTauAnalyzerSignalWithoutStripsPuppi")
-)
-process.analysisSequence += process.analyzeTallinL1PFTausWithoutStripsPuppi
-
-process.analyzeTallinL1PFTauIsolationWithStripsPuppi = process.analyzeTallinL1PFTauIsolationWithStripsPF.clone(
-  src = cms.InputTag('TallinnL1PFTauProducerWithStripsPuppi'),
-  dqmDirectory = cms.string("TallinnL1PFTauIsolationAnalyzerWithStripsPuppi")
-)
-process.analysisSequence += process.analyzeTallinL1PFTauIsolationWithStripsPuppi
-
-process.analyzeTallinL1PFTauIsolationWithoutStripsPuppi = process.analyzeTallinL1PFTauIsolationWithStripsPuppi.clone(
-  src = cms.InputTag('TallinnL1PFTauProducerWithoutStripsPuppi'),
-  dqmDirectory = cms.string("TallinnL1PFTauIsolationAnalyzerWithoutStripsPuppi")
-)
-process.analysisSequence += process.analyzeTallinL1PFTauIsolationWithoutStripsPuppi
+        moduleNamePuppi_TallinnL1PFTauIsolationAnalyzer = "analyzeTallinL1PFTauIsolation" + moduleLabel + "Puppi"
+        modulePuppi_TallinnL1PFTauIsolationAnalyzer = cms.EDAnalyzer("TallinnL1PFTauIsolationAnalyzer",
+          src = cms.InputTag(moduleNameBase + moduleLabel + "Puppi"),
+          srcGenTaus = cms.InputTag(''), 
+          dqmDirectory = cms.string("TallinnL1PFTauIsolationAnalyzer" + moduleLabel + "Puppi")
+        )
+        setattr(process, moduleNamePuppi_TallinnL1PFTauIsolationAnalyzer, modulePuppi_TallinnL1PFTauIsolationAnalyzer)
+        process.analysisSequence += getattr(process, moduleNamePuppi_TallinnL1PFTauIsolationAnalyzer)
 #--------------------------------------------------------------------------------
 
 process.DQMStore = cms.Service("DQMStore")

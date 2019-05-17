@@ -91,7 +91,7 @@ process.analysisSequence += process.dumpOfflinePFTaus
 
 #--------------------------------------------------------------------------------
 process.genMatchedTallinL1PFTausPF = cms.EDFilter("TallinnL1PFTauAntiOverlapSelector",
-  src = cms.InputTag('TallinnL1PFTauProducerWithStripsPF'),
+  src = cms.InputTag('TallinnL1PFTauProducerWithStripsAndPreselectionPF'),
   srcNotToBeFiltered = cms.VInputTag('selectedGenHadTaus'),
   dRmin = cms.double(0.3),
   invert = cms.bool(True),
@@ -106,7 +106,7 @@ process.dumpTallinL1PFTausPF = cms.EDAnalyzer("DumpTallinL1PFTaus",
 process.analysisSequence += process.dumpTallinL1PFTausPF
 
 process.genMatchedTallinL1PFTausPuppi = process.genMatchedTallinL1PFTausPF.clone(
-  src = cms.InputTag('TallinnL1PFTauProducerWithStripsPuppi'),
+  src = cms.InputTag('TallinnL1PFTauProducerWithStripsAndPreselectionPuppi'),
   debug = cms.untracked.bool(True)
 )    
 process.analysisSequence += process.genMatchedTallinL1PFTausPuppi

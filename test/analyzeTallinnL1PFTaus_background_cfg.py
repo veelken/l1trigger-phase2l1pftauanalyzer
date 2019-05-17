@@ -44,7 +44,7 @@ for inputFilePath in inputFilePaths:
             inputFileNames.append(file)
 print "inputFileNames = %s" % inputFileNames 
 
-process.source.fileNames = cms.untracked.vstring(inputFileNames)
+#process.source.fileNames = cms.untracked.vstring(inputFileNames)
 #--------------------------------------------------------------------------------
 
 from Configuration.AlCa.GlobalTag import GlobalTag
@@ -53,60 +53,61 @@ process.GlobalTag = GlobalTag(process.GlobalTag, '100X_upgrade2023_realistic_v1'
 process.analysisSequence = cms.Sequence()
 
 #--------------------------------------------------------------------------------
-process.analyzeTallinL1PFTausWithStripsPF = cms.EDAnalyzer("TallinnL1PFTauAnalyzerBackground",
-  srcTallinnL1PFTaus = cms.InputTag('TallinnL1PFTauProducerWithStripsPF'),
-  dqmDirectory = cms.string("TallinnL1PFTauAnalyzerBackgroundWithStripsPF")
-)
-process.analysisSequence += process.analyzeTallinL1PFTausWithStripsPF
+for useStrips in [ True, False ]:
+    for applyPreselection in [ True, False ]:
+        moduleNameBase = "TallinnL1PFTauProducer"
+        moduleLabel = None
+        if useStrips and applyPreselection:
+            moduleLabel = "WithStripsAndPreselection"
+        elif useStrips and not applyPreselection:
+            moduleLabel = "WithStripsWithoutPreselection"
+        elif not useStrips and applyPreselection:
+            moduleLabel = "WithoutStripsWithPreselection"
+        elif not useStrips and not applyPreselection:
+            moduleLabel = "WithoutStripsAndPreselection"
+        else:
+            raise ValueError("Invalid Combination of 'useStrips' and 'applyPreselection' Configuration parameters !!")
 
-process.analyzeTallinL1PFTausWithoutStripsPF = process.analyzeTallinL1PFTausWithStripsPF.clone(
-  srcTallinnL1PFTaus = cms.InputTag('TallinnL1PFTauProducerWithoutStripsPF'),
-  dqmDirectory = cms.string("TallinnL1PFTauAnalyzerBackgroundWithoutStripsPF")
-)
-process.analysisSequence += process.analyzeTallinL1PFTausWithoutStripsPF
+        moduleNamePF_TallinnL1PFTauAnalyzerBackground = "analyzeTallinnL1PFTaus" + moduleLabel + "PF"
+        modulePF_TallinnL1PFTauAnalyzerBackground = cms.EDAnalyzer("TallinnL1PFTauAnalyzerBackground",
+          srcTallinnL1PFTaus = cms.InputTag(moduleNameBase + moduleLabel + "PF"),
+          dqmDirectory = cms.string("TallinnL1PFTauAnalyzerBackground" + moduleLabel + "PF")
+        )
+        setattr(process, moduleNamePF_TallinnL1PFTauAnalyzerBackground, modulePF_TallinnL1PFTauAnalyzerBackground)
+        process.analysisSequence += getattr(process, moduleNamePF_TallinnL1PFTauAnalyzerBackground)
 
-process.analyzeTallinL1PFTauIsolationWithStripsPF = cms.EDAnalyzer("TallinnL1PFTauIsolationAnalyzer",
-  src = cms.InputTag('TallinnL1PFTauProducerWithStripsPF'),
-  srcGenTaus = cms.InputTag(''),                                               
-  dqmDirectory = cms.string("TallinnL1PFTauIsolationAnalyzerWithStripsPF")
-)
-process.analysisSequence += process.analyzeTallinL1PFTauIsolationWithStripsPF
+        moduleNamePF_TallinnL1PFTauIsolationAnalyzer = "analyzeTallinL1PFTauIsolation" + moduleLabel + "PF"
+        modulePF_TallinnL1PFTauIsolationAnalyzer = cms.EDAnalyzer("TallinnL1PFTauIsolationAnalyzer",
+          src = cms.InputTag(moduleNameBase + moduleLabel + "PF"),
+          srcGenTaus = cms.InputTag(''),                                               
+          dqmDirectory = cms.string("TallinnL1PFTauIsolationAnalyzer" + moduleLabel + "PF")
+        )
+        setattr(process, moduleNamePF_TallinnL1PFTauIsolationAnalyzer, modulePF_TallinnL1PFTauIsolationAnalyzer)
+        process.analysisSequence += getattr(process, moduleNamePF_TallinnL1PFTauIsolationAnalyzer)
+        
+        moduleNamePuppi_TallinnL1PFTauAnalyzerBackground = "analyzeTallinnL1PFTaus" + moduleLabel + "Puppi"
+        modulePuppi_TallinnL1PFTauAnalyzerBackground = cms.EDAnalyzer("TallinnL1PFTauAnalyzerBackground",
+          srcTallinnL1PFTaus = cms.InputTag(moduleNameBase + moduleLabel + "Puppi"),
+          dqmDirectory = cms.string("TallinnL1PFTauAnalyzerBackground" + moduleLabel + "Puppi")
+        )
+        setattr(process, moduleNamePuppi_TallinnL1PFTauAnalyzerBackground, modulePuppi_TallinnL1PFTauAnalyzerBackground)
+        process.analysisSequence += getattr(process, moduleNamePuppi_TallinnL1PFTauAnalyzerBackground)
 
-process.analyzeTallinL1PFTauIsolationWithoutStripsPF = process.analyzeTallinL1PFTauIsolationWithStripsPF.clone(
-  src = cms.InputTag('TallinnL1PFTauProducerWithoutStripsPF'),
-  dqmDirectory = cms.string("TallinnL1PFTauIsolationAnalyzerWithoutStripsPF")
-)
-process.analysisSequence += process.analyzeTallinL1PFTauIsolationWithoutStripsPF
-
-process.analyzeTallinL1PFTausWithStripsPuppi = process.analyzeTallinL1PFTausWithStripsPF.clone(
-  srcTallinnL1PFTaus = cms.InputTag('TallinnL1PFTauProducerWithStripsPuppi'),
-  dqmDirectory = cms.string("TallinnL1PFTauAnalyzerBackgroundWithStripsPuppi")
-)
-process.analysisSequence += process.analyzeTallinL1PFTausWithStripsPuppi
-
-process.analyzeTallinL1PFTausWithoutStripsPuppi = process.analyzeTallinL1PFTausWithStripsPuppi.clone(
-  srcTallinnL1PFTaus = cms.InputTag('TallinnL1PFTauProducerWithoutStripsPuppi'),
-  dqmDirectory = cms.string("TallinnL1PFTauAnalyzerBackgroundWithoutStripsPuppi")    
-)
-process.analysisSequence += process.analyzeTallinL1PFTausWithoutStripsPuppi
-
-process.analyzeTallinL1PFTauIsolationWithStripsPuppi = process.analyzeTallinL1PFTauIsolationWithStripsPF.clone(
-  src = cms.InputTag('TallinnL1PFTauProducerWithStripsPuppi'),
-  dqmDirectory = cms.string("TallinnL1PFTauIsolationAnalyzerWithStripsPuppi")
-)
-process.analysisSequence += process.analyzeTallinL1PFTauIsolationWithStripsPuppi
-
-process.analyzeTallinL1PFTauIsolationWithoutStripsPuppi = process.analyzeTallinL1PFTauIsolationWithStripsPuppi.clone(
-  src = cms.InputTag('TallinnL1PFTauProducerWithoutStripsPuppi'),
-  dqmDirectory = cms.string("TallinnL1PFTauIsolationAnalyzerWithoutStripsPuppi")
-)
-process.analysisSequence += process.analyzeTallinL1PFTauIsolationWithoutStripsPuppi
+        moduleNamePuppi_TallinnL1PFTauIsolationAnalyzer = "analyzeTallinL1PFTauIsolation" + moduleLabel + "Puppi"
+        modulePuppi_TallinnL1PFTauIsolationAnalyzer = cms.EDAnalyzer("TallinnL1PFTauIsolationAnalyzer",
+          src = cms.InputTag(moduleNameBase + moduleLabel + "Puppi"),
+          srcGenTaus = cms.InputTag(''),                                               
+          dqmDirectory = cms.string("TallinnL1PFTauIsolationAnalyzer" + moduleLabel + "Puppi")
+        )
+        setattr(process, moduleNamePuppi_TallinnL1PFTauIsolationAnalyzer, modulePuppi_TallinnL1PFTauIsolationAnalyzer)
+        process.analysisSequence += getattr(process, moduleNamePuppi_TallinnL1PFTauIsolationAnalyzer)
 #--------------------------------------------------------------------------------
 
 process.DQMStore = cms.Service("DQMStore")
 
 process.savePlots = cms.EDAnalyzer("DQMSimpleFileSaver",
-    outputFileName = cms.string('TallinnL1PFTauAnalyzer_background_2019May14.root')
+    #outputFileName = cms.string('TallinnL1PFTauAnalyzer_background_2019May14.root')
+    outputFileName = cms.string('TallinnL1PFTauAnalyzer_background.root')                               
 )
 
 process.p = cms.Path(process.analysisSequence + process.savePlots)
