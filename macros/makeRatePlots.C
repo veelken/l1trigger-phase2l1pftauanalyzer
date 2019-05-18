@@ -211,7 +211,7 @@ void makeRatePlots()
   gROOT->SetBatch(true);
 
   std::string inputFilePath = Form("%s/src/L1Trigger/TallinnL1PFTauAnalyzer/test/", gSystem->Getenv("CMSSW_BASE"));
-  std::string inputFileName = "TallinnL1PFTauAnalyzer_background_2019May02.root";
+  std::string inputFileName = "TallinnL1PFTauAnalyzer_background_2019May14.root";
   std::string inputFileName_full = inputFilePath;
   if ( inputFileName_full.find_last_of("/") != (inputFileName_full.size() - 1) ) inputFileName_full.append("/");
   inputFileName_full.append(inputFileName);
@@ -222,8 +222,14 @@ void makeRatePlots()
   }
 
   std::vector<std::string> pfAlgos;
-  pfAlgos.push_back("PF");
-  pfAlgos.push_back("Puppi");
+  pfAlgos.push_back("WithStripsAndPreselectionPF");
+  pfAlgos.push_back("WithStripsWithoutPreselectionPF");
+  pfAlgos.push_back("WithoutStripsWithPreselectionPF");
+  pfAlgos.push_back("WithoutStripsAndPreselectionPF");
+  pfAlgos.push_back("WithStripsAndPreselectionPuppi");
+  pfAlgos.push_back("WithStripsWithoutPreselectionPuppi");
+  pfAlgos.push_back("WithoutStripsWithPreselectionPuppi");
+  pfAlgos.push_back("WithoutStripsAndPreselectionPuppi");
 
   std::vector<std::string> absEtaRanges;
   absEtaRanges.push_back("absEtaLt1p00");

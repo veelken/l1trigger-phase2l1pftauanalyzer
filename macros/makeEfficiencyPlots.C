@@ -240,7 +240,7 @@ void makeEfficiencyPlots()
   gROOT->SetBatch(true);
 
   std::string inputFilePath = Form("%s/src/L1Trigger/TallinnL1PFTauAnalyzer/test/", gSystem->Getenv("CMSSW_BASE"));
-  std::string inputFileName = "TallinnL1PFTauAnalyzer_signal_2019May02.root";
+  std::string inputFileName = "TallinnL1PFTauAnalyzer_signal_2019May14.root";
   std::string inputFileName_full = inputFilePath;
   if ( inputFileName_full.find_last_of("/") != (inputFileName_full.size() - 1) ) inputFileName_full.append("/");
   inputFileName_full.append(inputFileName);
@@ -251,8 +251,14 @@ void makeEfficiencyPlots()
   }
 
   std::vector<std::string> pfAlgos;
-  pfAlgos.push_back("PF");
-  pfAlgos.push_back("Puppi");
+  pfAlgos.push_back("WithStripsAndPreselectionPF");
+  pfAlgos.push_back("WithStripsWithoutPreselectionPF");
+  pfAlgos.push_back("WithoutStripsWithPreselectionPF");
+  pfAlgos.push_back("WithoutStripsAndPreselectionPF");
+  pfAlgos.push_back("WithStripsAndPreselectionPuppi");
+  pfAlgos.push_back("WithStripsWithoutPreselectionPuppi");
+  pfAlgos.push_back("WithoutStripsWithPreselectionPuppi");
+  pfAlgos.push_back("WithoutStripsAndPreselectionPuppi");
 
   std::vector<std::string> observables;
   observables.push_back("pt");
@@ -324,11 +330,11 @@ void makeEfficiencyPlots()
           std::map<std::string, TGraph*> graphs_efficiency_vs_isolationWPs; // key = isolationWP
           for ( std::vector<std::string>::const_iterator isolationWP = isolationWPs.begin();
 	        isolationWP != isolationWPs.end(); ++isolationWP ) {
-            std::string histogramName_numerator = Form("%s%s/effL1PFTau_vs_pT_numerator_all_%s_%s_%s", 
-              dqmDirectory.data(), pfAlgo->data(), absEtaRange->data(), ptThreshold->data(), isolationWP->data());
+            std::string histogramName_numerator = Form("%s%s/effL1PFTau_vs_%s_numerator_all_%s_%s_%s", 
+              dqmDirectory.data(), pfAlgo->data(), observable->data(), absEtaRange->data(), ptThreshold->data(), isolationWP->data());
             TH1* histogram_numerator = loadHistogram(inputFile, histogramName_numerator);
-	    std::string histogramName_denominator = Form("%s%s/effL1PFTau_vs_pT_denominator_all_%s_%s_%s", 
-              dqmDirectory.data(), pfAlgo->data(), absEtaRange->data(), ptThreshold->data(), isolationWP->data());
+	    std::string histogramName_denominator = Form("%s%s/effL1PFTau_vs_%s_denominator_all_%s_%s_%s", 
+              dqmDirectory.data(), pfAlgo->data(), observable->data(), absEtaRange->data(), ptThreshold->data(), isolationWP->data());
             TH1* histogram_denominator = loadHistogram(inputFile, histogramName_denominator);
 	    TGraph* graph_efficiency = makeEfficiencyGraph(histogram_numerator, histogram_denominator);
 	    graphs_efficiency_vs_isolationWPs[*isolationWP] = graph_efficiency;
@@ -362,11 +368,11 @@ void makeEfficiencyPlots()
 	    std::map<std::string, TGraph*> graphs_efficiency_vs_decayModes; // key = decayMode
 	    for ( std::vector<std::string>::const_iterator decayMode = decayModes.begin();
 		  decayMode != decayModes.end(); ++decayMode ) {
-  	      std::string histogramName_numerator = Form("%s%s/effL1PFTau_vs_pT_numerator_%s_%s_%s_%s", 
-	        dqmDirectory.data(), pfAlgo->data(), decayMode->data(), absEtaRange->data(), ptThreshold->data(), isolationWP->data());
+  	      std::string histogramName_numerator = Form("%s%s/effL1PFTau_vs_%s_numerator_%s_%s_%s_%s", 
+	        dqmDirectory.data(), pfAlgo->data(), observable->data(), decayMode->data(), absEtaRange->data(), ptThreshold->data(), isolationWP->data());
               TH1* histogram_numerator = loadHistogram(inputFile, histogramName_numerator);
-	      std::string histogramName_denominator = Form("%s%s/effL1PFTau_vs_pT_denominator_%s_%s_%s_%s", 
-                dqmDirectory.data(), pfAlgo->data(), decayMode->data(), absEtaRange->data(), ptThreshold->data(), isolationWP->data());
+	      std::string histogramName_denominator = Form("%s%s/effL1PFTau_vs_%s_denominator_%s_%s_%s_%s", 
+                dqmDirectory.data(), pfAlgo->data(), observable->data(), decayMode->data(), absEtaRange->data(), ptThreshold->data(), isolationWP->data());
               TH1* histogram_denominator = loadHistogram(inputFile, histogramName_denominator);
 	      TGraph* graph_efficiency = makeEfficiencyGraph(histogram_numerator, histogram_denominator);
 	      graphs_efficiency_vs_decayModes[*decayMode] = graph_efficiency;
