@@ -48,12 +48,13 @@ class TallinnL1PFTauIsolationAnalyzer : public edm::EDAnalyzer
   edm::EDGetTokenT<l1t::TallinnL1PFTauCollection> token_l1Taus_;
   edm::InputTag src_genTaus_;
   edm::EDGetTokenT<reco::GenJetCollection> token_genTaus_;
+  double dRmatch_;
   edm::InputTag src_rho_;
   edm::EDGetTokenT<float> token_rho_;
 
   std::string inputFileName_rhoCorr_;
   TFile* inputFile_rhoCorr_;
-  LocalFileInPath histogramName_rhoCorr_;
+  std::string histogramName_rhoCorr_;
   TH1* histogram_rhoCorr_;
 
   std::string dqmDirectory_;
@@ -88,12 +89,12 @@ class TallinnL1PFTauIsolationAnalyzer : public edm::EDAnalyzer
       if      ( min_absEta_ >= 0. && max_absEta_ > min_absEta_ ) histogramName_suffix.Append(Form("_absEta%1.2fto%1.2f", min_absEta_, max_absEta_));
       else if ( min_absEta_ >= 0.                              ) histogramName_suffix.Append(Form("_absEtaGt%1.2f",      min_absEta_             ));
       else if (                      max_absEta_ >          0. ) histogramName_suffix.Append(Form("_absEtaLt%1.2f",                   max_absEta_));
-      else throw throw cms::Exception("isolationPlotEntryType") 
+      else throw cms::Exception("isolationPlotEntryType") 
 	     << " Invalid Configuration parameters min_absEta = " << min_absEta_ << " and max_absEta = " << max_absEta_ << "!!\n";
       if      ( min_pt_     >  0. && max_pt_     > min_pt_     ) histogramName_suffix.Append(Form("_pt%1.2fto%1.2f",     min_pt_,     max_pt_    ));
       else if ( min_pt_     >  0.                              ) histogramName_suffix.Append(Form("_ptGt%1.2f",          min_pt_                 ));
       else if (                      max_pt_     >          0. ) histogramName_suffix.Append(Form("_ptLt%1.2f",                       max_pt_    ));
-      else throw throw cms::Exception("isolationPlotEntryType") 
+      else throw cms::Exception("isolationPlotEntryType") 
 	     << " Invalid Configuration parameters min_pt = "     << min_pt_     << " and max_pt = "     << max_pt_     << "!!\n";      
       histogramName_suffix = histogramName_suffix.ReplaceAll(".", "p");
 
@@ -169,8 +170,8 @@ class TallinnL1PFTauIsolationAnalyzer : public edm::EDAnalyzer
     }
     void fillHistograms(const l1t::TallinnL1PFTau& l1Tau, double rhoCorr, double evtWeight)
     {
-      if ( (l1Tau.pt()              > min_pt_  || min_pt     <= 0.) && (l1Tau.pt()              < max_pt_  || max_pt_    <= 0.) &&
-	   (TMath::Abs(l1Tau.eta()) > min_eta_ || min_absEta <= 0.) && (TMath::Abs(l1Tau.eta()) < max_eta_ || max_absEta <= 0.) )
+      if ( (l1Tau.pt()              > min_pt_     || min_pt_     <= 0.) && (l1Tau.pt()              < max_pt_     || max_pt_     <= 0.) &&
+	   (TMath::Abs(l1Tau.eta()) > min_absEta_ || min_absEta_ <= 0.) && (TMath::Abs(l1Tau.eta()) < max_absEta_ || max_absEta_ <= 0.) )
       {
 	double sumChargedIso = l1Tau.sumChargedIso();
 	histogram_absChargedIso_->Fill(sumChargedIso, evtWeight);
@@ -201,11 +202,11 @@ class TallinnL1PFTauIsolationAnalyzer : public edm::EDAnalyzer
 	histogram_pt_->Fill(l1Tau.pt(), evtWeight);
       }
     }
-    void fillHistograms_woGenMatching(const l1t::Tallinn& l1Tau, double rhoCorr, double evtWeight)
+    void fillHistograms_woGenMatching(const l1t::TallinnL1PFTau& l1Tau, double rhoCorr, double evtWeight)
     {
       fillHistograms(l1Tau, rhoCorr, evtWeight);
     }
-    void fillHistograms_wGenMatching(const l1t::Tallinn& l1Tau, double rhoCorr, bool isMatched, const std::string& genTau_decayMode, double evtWeight)
+    void fillHistograms_wGenMatching(const l1t::TallinnL1PFTau& l1Tau, double rhoCorr, bool isMatched, const std::string& genTau_decayMode, double evtWeight)
     {
       if ( isMatched && (decayMode_ == "all" || genTau_decayMode == decayMode_) )
       {
@@ -218,6 +219,10 @@ class TallinnL1PFTauIsolationAnalyzer : public edm::EDAnalyzer
     TH1* histogram_absNeutralIso_;
     MonitorElement* me_absCombinedIso_;
     TH1* histogram_absCombinedIso_;
+    MonitorElement* me_absCombinedIso_wDeltaBetaCorr_;
+    TH1* histogram_absCombinedIso_wDeltaBetaCorr_;
+    MonitorElement* me_absCombinedIso_wRhoCorr_;
+    TH1* histogram_absCombinedIso_wRhoCorr_;
     MonitorElement* me_relChargedIso_;
     TH1* histogram_relChargedIso_;
     MonitorElement* me_relNeutralIso_;

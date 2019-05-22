@@ -52,7 +52,7 @@ void RhoCorrAnalyzer::beginJob()
   assert(histogram_EventCounter_);
 }
     
-void L1TrackAnalyzer::analyze(const edm::Event& evt, const edm::EventSetup& es)
+void RhoCorrAnalyzer::analyze(const edm::Event& evt, const edm::EventSetup& es)
 {
   edm::Handle<float> rho;
   evt.getByToken(token_rho_, rho);
@@ -80,11 +80,11 @@ void L1TrackAnalyzer::analyze(const edm::Event& evt, const edm::EventSetup& es)
   histogram_EventCounter_->Fill(0., evtWeight);
 }
 
-void L1TrackAnalyzer::endJob()
+void RhoCorrAnalyzer::endJob()
 {
   if ( histogram_EventCounter_->Integral() > 0. )
   {
-    std::cout << "<L1TrackAnalyzer::endJob (moduleLabel = " << moduleLabel_ << ")>:" << std::endl;
+    std::cout << "<RhoCorrAnalyzer::endJob (moduleLabel = " << moduleLabel_ << ")>:" << std::endl;
     std::cout << "scaling histogram = " << histogram_neutralPFCandPt_vs_absEta_->GetName() << " by factor = " << (1./histogram_EventCounter_->Integral()) << std::endl;
     histogram_neutralPFCandPt_vs_absEta_->Scale(1./histogram_EventCounter_->Integral());
   }
