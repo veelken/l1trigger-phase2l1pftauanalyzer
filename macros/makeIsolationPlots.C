@@ -3,6 +3,9 @@
 #include <TCanvas.h>
 #include <TFile.h>
 #include <TH1.h>
+#include <TH2.h>
+#include <TProfile.h>
+#include <TF1.h>
 #include <TGraph.h>
 #include <TLegend.h>
 #include <TMath.h>
@@ -58,6 +61,17 @@ TH1* loadHistogram(TFile* inputFile, const std::string& histogramName)
   if ( integral > 0. ) {
     histogram->Scale(1./integral);
   }
+  return histogram;
+}
+
+TH2* loadHistogram2d(TFile* inputFile, const std::string& histogramName)
+{
+  TH2* histogram = dynamic_cast<TH2*>(inputFile->Get(histogramName.data()));
+  if ( !histogram ) {
+    std::cerr << "Failed to load histogram = " << histogramName << " from file = " << inputFile->GetName() << " !!" << std::endl;
+    assert(0);
+  }
+  if ( !histogram->GetSumw2N() ) histogram->Sumw2();
   return histogram;
 }
 
@@ -414,6 +428,226 @@ std::vector<std::string> getLabelTextLines(const std::string& ptThreshold)
   return labelTextLines;
 }
 
+void showFitFunctions(double canvasSizeX, double canvasSizeY,
+		      TProfile* profile1, TF1* fitFunction1, const std::string& legendEntry1,
+		      TProfile* profile2, TF1* fitFunction2, const std::string& legendEntry2,
+		      TProfile* profile3, TF1* fitFunction3, const std::string& legendEntry3,
+		      TProfile* profile4, TF1* fitFunction4, const std::string& legendEntry4,
+		      TProfile* profile5, TF1* fitFunction5, const std::string& legendEntry5,
+		      TProfile* profile6, TF1* fitFunction6, const std::string& legendEntry6,
+		      int colors[], int markerStyles[], int lineStyles[], 
+		      double legendTextSize, double legendPosX, double legendPosY, double legendSizeX, double legendSizeY, 
+		      std::vector<std::string>& labelTextLines, double labelTextSize,
+		      double labelPosX, double labelPosY, double labelSizeX, double labelSizeY,
+		      double xMin, double xMax, const std::string& xAxisTitle, double xAxisOffset,
+		      bool useLogScale, double yMin, double yMax, const std::string& yAxisTitle, double yAxisOffset,
+		      const std::string& outputFileName)
+{
+  TCanvas* canvas = new TCanvas("canvas", "canvas", canvasSizeX, canvasSizeY);
+  canvas->SetFillColor(10);
+  canvas->SetBorderSize(2);
+  
+  canvas->SetTopMargin(0.05);
+  canvas->SetLeftMargin(0.14);
+  canvas->SetBottomMargin(0.12);
+  canvas->SetRightMargin(0.05);
+
+  canvas->SetLogy(useLogScale);
+  
+  canvas->SetGridx(1);
+  canvas->SetGridy(1);
+
+  if ( !(profile1 && fitFunction1) ) {
+    std::cerr << "<showHistograms>: profile1 = NULL or fitFunction1 = NULL --> skipping !!" << std::endl;
+    return;
+  }
+
+  profile1->SetTitle("");
+  profile1->SetStats(false);
+  profile1->SetMinimum(yMin);
+  profile1->SetMaximum(yMax);
+
+  TAxis* xAxis = profile1->GetXaxis();
+  xAxis->SetTitle(xAxisTitle.data());
+  xAxis->SetTitleSize(0.045);
+  xAxis->SetTitleOffset(xAxisOffset);  
+  if ( xMax > xMin ) {
+    std::cout << "limiting x-axis range to " << xMin << ".." << xMax << std::endl;
+    xAxis->SetRangeUser(xMin, xMax);
+  }
+
+  TAxis* yAxis = profile1->GetYaxis();
+  yAxis->SetTitle(yAxisTitle.data());
+  yAxis->SetTitleSize(0.045);
+  yAxis->SetTitleOffset(yAxisOffset);
+
+  profile1->SetLineColor(colors[0]);
+  profile1->SetLineWidth(2);
+  profile1->SetLineStyle(1);
+  profile1->SetMarkerColor(colors[0]);
+  profile1->SetMarkerSize(2);
+  profile1->SetMarkerStyle(markerStyles[0]);
+  profile1->Draw("e1p");
+
+  fitFunction1->SetLineColor(colors[0]);
+  fitFunction1->SetLineWidth(2);
+  fitFunction1->SetLineStyle(lineStyles[0]);
+  fitFunction1->Draw("Lsame");
+
+  if ( profile2 && fitFunction2 ) {
+    profile2->SetLineColor(colors[1]);
+    profile2->SetLineWidth(2);
+    profile2->SetLineStyle(1);
+    profile2->SetMarkerColor(colors[1]);
+    profile2->SetMarkerSize(2);
+    profile2->SetMarkerStyle(markerStyles[1]);
+    profile2->Draw("e1psame");
+
+    fitFunction2->SetLineColor(colors[1]);
+    fitFunction2->SetLineWidth(2);
+    fitFunction2->SetLineStyle(lineStyles[1]);
+    fitFunction2->Draw("Lsame");
+  }
+
+  if ( profile3 && fitFunction3 ) {
+    profile3->SetLineColor(colors[2]);
+    profile3->SetLineWidth(2);
+    profile3->SetLineStyle(1);
+    profile3->SetMarkerColor(colors[2]);
+    profile3->SetMarkerSize(2);
+    profile3->SetMarkerStyle(markerStyles[2]);
+    profile3->Draw("e1psame");
+
+    fitFunction3->SetLineColor(colors[2]);
+    fitFunction3->SetLineWidth(2);
+    fitFunction3->SetLineStyle(lineStyles[2]);
+    fitFunction3->Draw("Lsame");
+  }
+  
+  if ( profile4 && fitFunction4 ) {
+    profile4->SetLineColor(colors[3]);
+    profile4->SetLineWidth(2);
+    profile4->SetLineStyle(1);
+    profile4->SetMarkerColor(colors[3]);
+    profile4->SetMarkerSize(2);
+    profile4->SetMarkerStyle(markerStyles[3]);
+    profile4->Draw("e1psame");
+
+    fitFunction4->SetLineColor(colors[3]);
+    fitFunction4->SetLineWidth(2);
+    fitFunction4->SetLineStyle(lineStyles[3]);
+    fitFunction4->Draw("Lsame");
+  }
+
+  if ( profile5 && fitFunction5 ) {
+    profile5->SetLineColor(colors[4]);
+    profile5->SetLineWidth(2);
+    profile5->SetLineStyle(1);
+    profile5->SetMarkerColor(colors[4]);
+    profile5->SetMarkerSize(2);
+    profile5->SetMarkerStyle(markerStyles[4]);
+    profile5->Draw("e1psame");
+
+    fitFunction5->SetLineColor(colors[4]);
+    fitFunction5->SetLineWidth(2);
+    fitFunction5->SetLineStyle(lineStyles[4]);
+    fitFunction5->Draw("Lsame");
+  }
+  
+  if ( profile6 && fitFunction6 ) {
+    profile6->SetLineColor(colors[5]);
+    profile6->SetLineWidth(2);
+    profile6->SetLineStyle(1);
+    profile6->SetMarkerColor(colors[5]);
+    profile6->SetMarkerSize(2);
+    profile6->SetMarkerStyle(markerStyles[5]);
+    profile6->Draw("e1psame");
+
+    fitFunction6->SetLineColor(colors[5]);
+    fitFunction6->SetLineWidth(2);
+    fitFunction6->SetLineStyle(lineStyles[5]);
+    fitFunction6->Draw("Lsame");
+  }
+
+  TLegend* legend = 0;
+  if ( legendEntry1 != "" ) {
+    legend = new TLegend(legendPosX, legendPosY, legendPosX + legendSizeX, legendPosY + legendSizeY, "", "brNDC"); 
+    legend->SetBorderSize(0);
+    legend->SetFillColor(0);
+    legend->SetTextSize(legendTextSize);
+    legend->AddEntry(fitFunction1, legendEntry1.data(), "l");
+    if ( profile2 && fitFunction2 ) legend->AddEntry(fitFunction2, legendEntry2.data(), "l");
+    if ( profile3 && fitFunction3 ) legend->AddEntry(fitFunction3, legendEntry3.data(), "l");
+    if ( profile4 && fitFunction4 ) legend->AddEntry(fitFunction4, legendEntry4.data(), "l");
+    if ( profile5 && fitFunction5 ) legend->AddEntry(fitFunction5, legendEntry5.data(), "l");
+    if ( profile6 && fitFunction6 ) legend->AddEntry(fitFunction6, legendEntry6.data(), "l");
+    legend->Draw();
+  }
+
+  TPaveText* label = 0;
+  if ( labelTextLines.size() > 0 ) {
+    label = new TPaveText(labelPosX, labelPosY, labelPosX + labelSizeX, labelPosY + labelSizeY, "brNDC");
+    for ( std::vector<std::string>::const_iterator labelTextLine = labelTextLines.begin();
+          labelTextLine != labelTextLines.end(); ++labelTextLine ) {
+      label->AddText(labelTextLine->data());
+    }
+    label->SetFillColor(10);
+    label->SetBorderSize(0);
+    label->SetTextColor(1);
+    label->SetTextAlign(12);
+    label->SetTextSize(labelTextSize);
+    label->Draw();
+  }
+
+  profile1->Draw("axissame");
+
+  canvas->Update();
+  std::string outputFileName_plot = "plots/";
+  size_t idx = outputFileName.find_last_of('.');
+  outputFileName_plot.append(std::string(outputFileName, 0, idx));
+  if ( idx != std::string::npos ) canvas->Print(std::string(outputFileName_plot).append(std::string(outputFileName, idx)).data());
+  canvas->Print(std::string(outputFileName_plot).append(".png").data());
+  canvas->Print(std::string(outputFileName_plot).append(".pdf").data());
+  
+  delete label;
+  delete legend;
+  delete canvas;  
+}
+
+double square(double x)
+{
+  return x*x;
+}
+
+double compFitRMS(const TH2* histogram, const TF1* fitFunction)
+{
+  const TAxis* xAxis = histogram->GetXaxis();
+  int numBinsX = xAxis->GetNbins();
+  const TAxis* yAxis = histogram->GetYaxis();
+  int numBinsY = yAxis->GetNbins();
+  double rms2 = 0.;
+  double sum  = 0.;
+  for ( int idxBinX = 1; idxBinX <= numBinsX; ++idxBinX )
+  {
+    double binCenterX   = xAxis->GetBinCenter(idxBinX);
+    double fitFunctionX = binCenterX;
+    double fitFunctionY = fitFunction->Eval(fitFunctionX);
+    for ( int idxBinY = 1; idxBinY <= numBinsY; ++idxBinY )
+    {
+      double binCenterY = yAxis->GetBinCenter(idxBinY);
+      double binContent = histogram->GetBinContent(idxBinX, idxBinY);
+      rms2 += binContent*square(binCenterY - fitFunctionY);
+      sum  += binContent;
+    }
+  }
+  if ( sum > 0. ) 
+  {
+    rms2 /= sum;
+  }
+  double rms = TMath::Sqrt(rms2);
+  return rms;
+}
+
 void makeIsolationPlots()
 {
 //--- stop ROOT from keeping references to all histograms
@@ -423,9 +657,9 @@ void makeIsolationPlots()
   gROOT->SetBatch(true);
 
   std::string inputFilePath = Form("%s/src/L1Trigger/TallinnL1PFTauAnalyzer/test/", gSystem->Getenv("CMSSW_BASE"));
-  std::string inputFileName_signal = "TallinnL1PFTauAnalyzer_signal_2019May02.root";
+  std::string inputFileName_signal = "TallinnL1PFTauAnalyzer_signal_2019May14.root";
   TFile* inputFile_signal = openFile(inputFilePath, inputFileName_signal);
-  std::string inputFileName_background = "TallinnL1PFTauAnalyzer_background_2019May02.root";
+  std::string inputFileName_background = "TallinnL1PFTauAnalyzer_background_2019May14.root";
   TFile* inputFile_background = openFile(inputFilePath, inputFileName_background);
 
   std::vector<std::string> pfAlgos;
@@ -441,6 +675,24 @@ void makeIsolationPlots()
   ptThresholds.push_back("ptGt30");
   ptThresholds.push_back("ptGt40");
 
+  std::vector<std::string> binning_absEta;
+  binning_absEta.push_back("absEta0p00to0p30");
+  binning_absEta.push_back("absEta0p30to0p60");
+  binning_absEta.push_back("absEta0p60to0p90");
+  binning_absEta.push_back("absEta0p90to1p20");
+  binning_absEta.push_back("absEta1p20to1p50");
+  //binning_absEta.push_back("absEta1p50to1p80");
+  //binning_absEta.push_back("absEta1p80to2p10");
+  //binning_absEta.push_back("absEta2p10to2p40");
+  //binning_absEta.push_back("absEta2p40to2p70");
+  //binning_absEta.push_back("absEta2p70to3p00");
+  
+  std::vector<std::string> binning_pt;
+  binning_pt.push_back("pt20to30");
+  binning_pt.push_back("pt30to40");
+  binning_pt.push_back("pt40to60");
+  binning_pt.push_back("pt60to100");
+
   std::vector<std::string> observables;
   observables.push_back("absChargedIso");
   observables.push_back("absNeutralIso");
@@ -451,40 +703,43 @@ void makeIsolationPlots()
   observables.push_back("pt");
 
   std::map<std::string, int> rebin; // key = observable
-  rebin["pt"]             =   5;
-  rebin["absChargedIso"]  =   5;
-  rebin["absNeutralIso"]  =   5;
-  rebin["absCombinedIso"] =   5;
-  rebin["relChargedIso"]  =   2;
-  rebin["relNeutralIso"]  =   2;
-  rebin["relCombinedIso"] =   2;
+  rebin["pt"]                     =   5;
+  rebin["absChargedIso"]          =   5;
+  rebin["absNeutralIso"]          =   5;
+  rebin["absCombinedIso"]         =   5;
+  rebin["relChargedIso"]          =   2;
+  rebin["relNeutralIso"]          =   2;
+  rebin["relCombinedIso"]         =   2;
+  rebin["sumChargedIsoPileup"]    =   2;
 
   std::map<std::string, double> xMin; // key = observable
-  xMin["pt"]             =   0.;
-  xMin["absChargedIso"]  =   0.;
-  xMin["absNeutralIso"]  =   0.;
-  xMin["absCombinedIso"] =   0.;
-  xMin["relChargedIso"]  =   0.;
-  xMin["relNeutralIso"]  =   0.;
-  xMin["relCombinedIso"] =   0.;
+  xMin["pt"]                      =   0.;
+  xMin["absChargedIso"]           =   0.;
+  xMin["absNeutralIso"]           =   0.;
+  xMin["absCombinedIso"]          =   0.;
+  xMin["relChargedIso"]           =   0.;
+  xMin["relNeutralIso"]           =   0.;
+  xMin["relCombinedIso"]          =   0.; 
+  xMin["sumChargedIsoPileup"]     =   0.; 
 
   std::map<std::string, double> xMax; // key = observable
-  xMax["pt"]             = 100.;
-  xMax["absChargedIso"]  =  25.;
-  xMax["absNeutralIso"]  =  25.;
-  xMax["absCombinedIso"] =  25.;
-  xMax["relChargedIso"]  =   1.;
-  xMax["relNeutralIso"]  =   1.;
-  xMax["relCombinedIso"] =   1.;
+  xMax["pt"]                      = 100.;
+  xMax["absChargedIso"]           =  25.;
+  xMax["absNeutralIso"]           =  25.;
+  xMax["absCombinedIso"]          =  25.;
+  xMax["relChargedIso"]           =   1.;
+  xMax["relNeutralIso"]           =   1.;
+  xMax["relCombinedIso"]          =   1.;
+  xMax["sumChargedIsoPileup"]     =  25.;
   
   std::map<std::string, std::string> xAxisTitles; // key = observable
-  xAxisTitles["pt"]             = "L1 #tau_{h} p_{T} [GeV]";
-  xAxisTitles["absChargedIso"]  = "L1 #tau I_{ch} [GeV]";
-  xAxisTitles["absNeutralIso"]  = "L1 #tau I_{neu} [GeV]";
-  xAxisTitles["absCombinedIso"] = "L1 #tau I_{cmb} [GeV]";
-  xAxisTitles["relChargedIso"]  = "L1 #tau I_{ch} / p_{T}";
-  xAxisTitles["relNeutralIso"]  = "L1 #tau I_{neu} / p_{T}";
-  xAxisTitles["relCombinedIso"] = "L1 #tau I_{cmb} / p_{T}";
+  xAxisTitles["pt"]               = "L1 #tau_{h} p_{T} [GeV]";
+  xAxisTitles["absChargedIso"]    = "L1 #tau I_{ch} [GeV]";
+  xAxisTitles["absNeutralIso"]    = "L1 #tau I_{neu} [GeV]";
+  xAxisTitles["absCombinedIso"]   = "L1 #tau I_{cmb} [GeV]";
+  xAxisTitles["relChargedIso"]    = "L1 #tau I_{ch} / p_{T}";
+  xAxisTitles["relNeutralIso"]    = "L1 #tau I_{neu} / p_{T}";
+  xAxisTitles["relCombinedIso"]   = "L1 #tau I_{cmb} / p_{T}";
 
   std::map<std::string, std::string> legendEntries; // key = observable
   legendEntries["pt"]             = "p_{T}";
@@ -516,11 +771,13 @@ void makeIsolationPlots()
             dqmDirectory.data(), pfAlgo->data(), observable->data(), absEtaRange->data(), ptThreshold->data());
 	  TH1* histogram_signal = loadHistogram(inputFile_signal, histogramName);
 	  histograms_signal[*observable] = histogram_signal;
-	  TH1* histogram_signal_rebinned = ( rebin[*observable] > 1 ) ? histogram_signal->Rebin(rebin[*observable]) : histogram_signal;
+	  TH1* histogram_signal_rebinned = ( rebin[*observable] > 1 ) ? 
+	    histogram_signal->Rebin(rebin[*observable]) : histogram_signal;
 
 	  TH1* histogram_background = loadHistogram(inputFile_background, histogramName);
 	  histograms_background[*observable] = histogram_background;
-	  TH1* histogram_background_rebinned = ( rebin[*observable] > 1 ) ? histogram_background->Rebin(rebin[*observable]) : histogram_signal;
+	  TH1* histogram_background_rebinned = ( rebin[*observable] > 1 ) ? 
+	    histogram_background->Rebin(rebin[*observable]) : histogram_signal;
 
 	  TGraph* graph_roc = compGraph_rocCurve(histogram_signal, histogram_background);
 	  graphs_roc[*observable] = graph_roc;
@@ -561,6 +818,146 @@ void makeIsolationPlots()
 		   0., 1.09, "Signal Efficiency", 1.2, 
 		   false, 0., 1.09, "Background Rejection", 1.4, 
 		   outputFileName_roc);
+      }
+    }
+  }
+
+  for ( std::vector<std::string>::const_iterator pfAlgo = pfAlgos.begin();
+	pfAlgo != pfAlgos.end(); ++pfAlgo ) {
+    for ( std::vector<std::string>::const_iterator bin_absEta = binning_absEta.begin();
+	  bin_absEta != binning_absEta.end(); ++bin_absEta ) {
+      for ( std::vector<std::string>::const_iterator bin_pt = binning_pt.begin();
+	    bin_pt != binning_pt.end(); ++bin_pt ) {
+	std::string histogramName_absNeutralIso = Form("%s%s/absNeutralIso_all_%s_%s", 
+	  dqmDirectory.data(), pfAlgo->data(), bin_absEta->data(), bin_pt->data());
+	TH1* histogram_absNeutralIso = loadHistogram(inputFile_signal, histogramName_absNeutralIso);
+	TH1* histogram_absNeutralIso_rebinned = ( rebin["absNeutralIso"] > 1 ) ? 
+	  histogram_absNeutralIso->Rebin(rebin["absNeutralIso"]) : histogram_absNeutralIso;
+
+	std::string histogramName_sumChargedIsoPileup = Form("%s%s/sumChargedIsoPileup_all_%s_%s", 
+	  dqmDirectory.data(), pfAlgo->data(), bin_absEta->data(), bin_pt->data());
+	TH1* histogram_sumChargedIsoPileup = loadHistogram(inputFile_signal, histogramName_sumChargedIsoPileup);
+	TH1* histogram_sumChargedIsoPileup_rebinned = ( rebin["sumChargedIsoPileup"] > 1 ) ? 
+	  histogram_sumChargedIsoPileup->Rebin(rebin["sumChargedIsoPileup"]) : histogram_sumChargedIsoPileup;
+
+	std::vector<std::string> labelTextLines;
+	labelTextLines.push_back(Form("%s & %s", bin_pt->data(), bin_absEta->data()));
+	labelTextLines.push_back(Form(" I_{neu}: mean = %1.2f, rms = %1.2f", histogram_absNeutralIso->GetMean(), histogram_absNeutralIso->GetRMS()));
+	labelTextLines.push_back(Form(" I_{ch}^{PU}: mean = %1.2f, rms = %1.2f", histogram_sumChargedIsoPileup->GetMean(), histogram_sumChargedIsoPileup->GetRMS()));
+	std::string outputFileName = Form("makeIsolationPlots_absNeutralIso_vs_sumChargedIsoPileup_%s_%s_%s.png", 
+	  pfAlgo->data(), bin_absEta->data(), bin_pt->data());
+	showHistograms(1150, 850,
+		       histogram_absNeutralIso_rebinned,       "I_{neu}",
+		       histogram_sumChargedIsoPileup_rebinned, "I_{ch}^{PU}",
+		       0, "",
+		       0, "",
+		       0, "",
+		       0, "",
+		       colors, lineStyles, 
+		       0.050, 0.66, 0.74, 0.23, 0.15, 
+		       labelTextLines, 0.050,
+		       0.70, 0.62, 0.23, 0.06, 
+		       0., 25., "L1 #tau Isolation [GeV]", 1.2, 
+		       false, 0., 1.09, "Events", 1.4, 
+		       outputFileName);
+      }
+    }
+  }
+
+  std::cout << "correlations:" << std::endl;
+  for ( std::vector<std::string>::const_iterator pfAlgo = pfAlgos.begin();
+	pfAlgo != pfAlgos.end(); ++pfAlgo ) {
+    for ( std::vector<std::string>::const_iterator bin_absEta = binning_absEta.begin();
+	  bin_absEta != binning_absEta.end(); ++bin_absEta ) {
+      for ( std::vector<std::string>::const_iterator bin_pt = binning_pt.begin();
+	    bin_pt != binning_pt.end(); ++bin_pt ) {
+	std::string histogramName_sumNeutralIso_vs_sumChargedIsoPileup = Form("%s%s/sumNeutralIso_vs_sumChargedIsoPileup_all_%s_%s", 
+	  dqmDirectory.data(), pfAlgo->data(), bin_absEta->data(), bin_pt->data());
+	TH2* histogram_sumNeutralIso_vs_sumChargedIsoPileup = loadHistogram2d(inputFile_signal, histogramName_sumNeutralIso_vs_sumChargedIsoPileup);
+	double deltaBeta_correlation = histogram_sumNeutralIso_vs_sumChargedIsoPileup->GetCorrelationFactor();
+	
+	std::string histogramName_sumNeutralIso_vs_rhoCorr = Form("%s%s/sumNeutralIso_vs_rhoCorr_all_%s_%s", 
+	  dqmDirectory.data(), pfAlgo->data(), bin_absEta->data(), bin_pt->data());
+	TH2* histogram_sumNeutralIso_vs_rhoCorr = loadHistogram2d(inputFile_signal, histogramName_sumNeutralIso_vs_rhoCorr);
+	double rho_correlation = histogram_sumNeutralIso_vs_rhoCorr->GetCorrelationFactor();
+
+	std::cout << (*bin_pt) << " & " << bin_absEta->data() << ":" 
+		  << " deltaBeta = " << deltaBeta_correlation << ","	  
+		  << " rho = " << rho_correlation << std::endl;
+      }
+    }
+  }
+
+  std::cout << "linear fits:" << std::endl;
+  for ( std::vector<std::string>::const_iterator pfAlgo = pfAlgos.begin();
+	pfAlgo != pfAlgos.end(); ++pfAlgo ) {
+    for ( std::vector<std::string>::const_iterator bin_absEta = binning_absEta.begin();
+	  bin_absEta != binning_absEta.end(); ++bin_absEta ) {
+      for ( std::vector<std::string>::const_iterator bin_pt = binning_pt.begin();
+	    bin_pt != binning_pt.end(); ++bin_pt ) {
+	std::string histogramName_sumNeutralIso_vs_sumChargedIsoPileup = Form("%s%s/sumNeutralIso_vs_sumChargedIsoPileup_all_%s_%s", 
+	  dqmDirectory.data(), pfAlgo->data(), bin_absEta->data(), bin_pt->data());
+	TH2* histogram_sumNeutralIso_vs_sumChargedIsoPileup = loadHistogram2d(inputFile_signal, histogramName_sumNeutralIso_vs_sumChargedIsoPileup);
+	std::string profileName_sumNeutralIso_vs_sumChargedIsoPileup = Form("sumNeutralIso_vs_sumChargedIsoPileup_all_%s_%s_profile_%s", 
+	  bin_absEta->data(), bin_pt->data(), pfAlgo->data());
+	TProfile* profile_sumNeutralIso_vs_sumChargedIsoPileup = histogram_sumNeutralIso_vs_sumChargedIsoPileup->ProfileX(
+	  histogramName_sumNeutralIso_vs_sumChargedIsoPileup.data(), 1, histogram_sumNeutralIso_vs_sumChargedIsoPileup->GetNbinsY());
+        std::string fitFunctionName_sumNeutralIso_vs_sumChargedIsoPileup = Form("fitFunction_sumNeutralIso_vs_sumChargedIsoPileup_all_%s_%s_%s", 
+          bin_absEta->data(), bin_pt->data(), pfAlgo->data());
+	TF1* fitFunction_sumNeutralIso_vs_sumChargedIsoPileup = new TF1(fitFunctionName_sumNeutralIso_vs_sumChargedIsoPileup.data(), "[0] + [1]*x", 0., 25.);
+	fitFunction_sumNeutralIso_vs_sumChargedIsoPileup->SetParameter(0, 0.);
+	fitFunction_sumNeutralIso_vs_sumChargedIsoPileup->SetParameter(1, 0.5);
+	profile_sumNeutralIso_vs_sumChargedIsoPileup->Fit(fitFunction_sumNeutralIso_vs_sumChargedIsoPileup);
+	double deltaBeta_slope  = fitFunction_sumNeutralIso_vs_sumChargedIsoPileup->GetParameter(1);
+	double deltaBeta_offset = fitFunction_sumNeutralIso_vs_sumChargedIsoPileup->GetParameter(0);
+	double deltaBeta_rms    = compFitRMS(histogram_sumNeutralIso_vs_sumChargedIsoPileup, fitFunction_sumNeutralIso_vs_sumChargedIsoPileup);
+
+	std::string histogramName_sumNeutralIso_vs_rhoCorr = Form("%s%s/sumNeutralIso_vs_rhoCorr_all_%s_%s", 
+	  dqmDirectory.data(), pfAlgo->data(), bin_absEta->data(), bin_pt->data());
+	TH2* histogram_sumNeutralIso_vs_rhoCorr = loadHistogram2d(inputFile_signal, histogramName_sumNeutralIso_vs_rhoCorr);
+        std::string profileName_sumNeutralIso_vs_rhoCorr = Form("sumNeutralIso_vs_rhoCorr_all_%s_%s_profile_%s", 
+          bin_absEta->data(), bin_pt->data(), pfAlgo->data());
+	TProfile* profile_sumNeutralIso_vs_rhoCorr = histogram_sumNeutralIso_vs_rhoCorr->ProfileX(
+	  histogramName_sumNeutralIso_vs_rhoCorr.data(), 1, histogram_sumNeutralIso_vs_rhoCorr->GetNbinsY());
+	std::string fitFunctionName_sumNeutralIso_vs_rhoCorr = Form("fitFunction_sumNeutralIso_vs_rhoCorr_all_%s_%s_%s", 
+          bin_absEta->data(), bin_pt->data(), pfAlgo->data());
+	TF1* fitFunction_sumNeutralIso_vs_rhoCorr = new TF1(fitFunctionName_sumNeutralIso_vs_rhoCorr.data(), "[0] + [1]*x", 0., 25.);
+	fitFunction_sumNeutralIso_vs_rhoCorr->SetParameter(0, 0.);
+	fitFunction_sumNeutralIso_vs_rhoCorr->SetParameter(1, 1.0);
+	profile_sumNeutralIso_vs_rhoCorr->Fit(fitFunction_sumNeutralIso_vs_rhoCorr);
+	double rho_slope  = fitFunction_sumNeutralIso_vs_rhoCorr->GetParameter(1);
+	double rho_offset = fitFunction_sumNeutralIso_vs_rhoCorr->GetParameter(0);
+	double rho_rms    = compFitRMS(histogram_sumNeutralIso_vs_rhoCorr, fitFunction_sumNeutralIso_vs_rhoCorr);
+	
+	std::vector<std::string> labelTextLines;
+	labelTextLines.push_back(Form("%s & %s", bin_pt->data(), bin_absEta->data()));
+	labelTextLines.push_back(Form(" #Delta#beta: slope = %1.2f, offset = %1.2f (rms of fit = %1.2f)", deltaBeta_slope, deltaBeta_offset, deltaBeta_rms));
+	labelTextLines.push_back(Form(" #rho: slope = %1.2f, offset = %1.2f (rms of fit = %1.2f)", rho_slope, rho_offset, rho_rms));
+	std::string outputFileName = Form("makeIsolationPlots_pileupCorrFits_%s_%s_%s.png", 
+	  pfAlgo->data(), bin_absEta->data(), bin_pt->data());
+	showFitFunctions(1150, 850,
+			 profile_sumNeutralIso_vs_sumChargedIsoPileup, fitFunction_sumNeutralIso_vs_sumChargedIsoPileup, "#Delta#beta",
+			 profile_sumNeutralIso_vs_rhoCorr,             fitFunction_sumNeutralIso_vs_rhoCorr,             "#rho",
+			 0, 0, "",
+			 0, 0, "",
+			 0, 0, "",
+			 0, 0, "",
+			 colors, markerStyles, lineStyles, 
+			 0.050, 0.66, 0.74, 0.23, 0.15, 
+			 labelTextLines, 0.050,
+			 0.70, 0.62, 0.23, 0.06, 
+			 0., 25., "I_{ch}^{PU} or #rho^{corr} [GeV]", 1.2, 
+			 false, 0., 1.09, "I_{neu}", 1.4, 
+			 outputFileName);
+
+	std::cout << (*bin_pt) << " & " << bin_absEta->data() << std::endl;
+	std::cout << " deltaBeta: slope = " << deltaBeta_slope << ", offset = " << deltaBeta_offset << " (rms of fit = " << deltaBeta_rms << ")" << std::endl;
+	std::cout << " rho: slope = " << rho_slope << ", offset = " << rho_offset << " (rms of fit = " << rho_rms << ")" << std::endl;
+
+	delete fitFunction_sumNeutralIso_vs_sumChargedIsoPileup;
+	delete profile_sumNeutralIso_vs_sumChargedIsoPileup;
+        delete fitFunction_sumNeutralIso_vs_rhoCorr;
+	delete profile_sumNeutralIso_vs_rhoCorr;
       }
     }
   }
