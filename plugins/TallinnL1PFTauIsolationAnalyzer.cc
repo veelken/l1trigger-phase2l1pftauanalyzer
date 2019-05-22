@@ -3,24 +3,42 @@
 #include "FWCore/ServiceRegistry/interface/Service.h"
 #include "DataFormats/Common/interface/Handle.h"
 
-#include <TMath.h>
+#include "L1Trigger/TallinnL1PFTaus/interface/lutAuxFunctions.h"
 
 #include <iostream>
 #include <iomanip>
 
 TallinnL1PFTauIsolationAnalyzer::TallinnL1PFTauIsolationAnalyzer(const edm::ParameterSet& cfg)
   : moduleLabel_(cfg.getParameter<std::string>("@module_label"))
+  , inputFileName_rhoCorr_(cfg.getParameter<std::string>("inputFileName_rhoCorr"))
+  , inputFile_rhoCorr_(nullptr)
+  , histogramName_rhoCorr_(cfg.getParameter<std::string>("histogramName_rhoCorr"))
+  , histogram_rhoCorr_(nullptr)
 {
-  src_ = cfg.getParameter<edm::InputTag>("src");
-  token_ = consumes<l1t::TallinnL1PFTauCollection>(src_ );
-  srcGenTaus_ = cfg.getParameter<edm::InputTag>("srcGenTaus");
-  tokenGenTaus_ = consumes<reco::GenJetCollection>(srcGenTaus_);
+  src_l1Taus_ = cfg.getParameter<edm::InputTag>("srcL1Taus");
+  token_l1Taus_ = consumes<l1t::TallinnL1PFTauCollection>(src_l1Taus_);
+  src_genTaus_ = cfg.getParameter<edm::InputTag>("srcGenTaus");
+  token_genTaus_ = consumes<reco::GenJetCollection>(src_genTaus_);
+  src_rho_ = cfg.getParameter<edm::InputTag>("srcRho");
+  token_rho_ = consumes<float>(src_rho_);
+
+  if ( inputFileName_rhoCorr_ != "" && histogramName_rhoCorr_ != "" )
+  {
+    inputFile_rhoCorr_ = openFile(inputFileName_rhoCorr_);
+    TH1* histogram_rhoCorr_temp = loadTH1(inputFile_rhoCorr_, histogramName_rhoCorr_);
+    std::string histogramName_rhoCorr = Form("%s_cloned", histogram_rhoCorr_->GetName());
+    histogram_rhoCorr_ = (TH1*)histogram_rhoCorr_temp->Clone(histogramName_rhoCorr.data());
+    delete inputFile_rhoCorr_;
+    inputFile_rhoCorr_ = nullptr;
+  }
 
   dqmDirectory_ = cfg.getParameter<std::string>("dqmDirectory");
 }
 
 TallinnL1PFTauIsolationAnalyzer::~TallinnL1PFTauIsolationAnalyzer()
 {
+  //delete inputFile_rhoCorr_;
+
   for ( auto isolationPlot : isolationPlots_ ) 
   {
     delete isolationPlot;
@@ -51,8 +69,28 @@ void TallinnL1PFTauIsolationAnalyzer::beginJob()
   {
     for ( auto ptThreshold : ptThresholds )
     {
-      isolationPlots_.push_back(new isolationPlotEntryType(ptThreshold, 1.0, decayMode)); 
-      isolationPlots_.push_back(new isolationPlotEntryType(ptThreshold, 1.4, decayMode));
+      isolationPlots_.push_back(new isolationPlotEntryType(ptThreshold, -1., 0., 1.0, decayMode)); 
+      isolationPlots_.push_back(new isolationPlotEntryType(ptThreshold, -1., 0., 1.4, decayMode));
+    }
+  }
+
+  const int numBins_absEta = 10;
+  float binning_absEta[numBins_absEta + 1] = { 
+    0., 0.3, 0.6, 0.9, 1.2, 1.5, 1.8, 2.1, 2.4, 2.7, 3.0 
+  };
+  const int numBins_pt = 4;
+  float binning_pt[numBins_pt + 1] = { 
+    20., 30., 40., 60., 100.
+  };
+  for ( size_t idxBin_absEta = 0; idxBin_absEta < numBins_absEta; ++idxBin_absEta )
+  {
+    float min_absEta = binning_absEta[idxBin_absEta];
+    float max_absEta = binning_absEta[idxBin_absEta + 1];
+    for ( size_t idxBin_pt = 0; idxBin_pt < numBins_pt; ++idxBin_pt )
+    {  
+      float min_pt = binning_pt[idxBin_pt];
+      float max_pt = binning_pt[idxBin_pt + 1];
+      isolationPlots_.push_back(new isolationPlotEntryType(min_pt, max_pt, min_absEta, max_absEta, "all")); 
     }
   }
 
@@ -62,28 +100,76 @@ void TallinnL1PFTauIsolationAnalyzer::beginJob()
   }
 }
 
+namespace
+{
+  double compRhoCorr(double rho, double eta)
+  {
+    
+  }
+}
+
 void TallinnL1PFTauIsolationAnalyzer::analyze(const edm::Event& evt, const edm::EventSetup& es)
 {
   edm::Handle<l1t::TallinnL1PFTauCollection> l1Taus;
-  evt.getByToken(token_, l1Taus);
+  evt.getByToken(token_l1Taus_, l1Taus);
   
   edm::Handle<reco::GenJetCollection> genTaus;
-  if ( srcGenTaus_.label() != "" ) 
+  if ( src_genTaus_.label() != "" ) 
   {
-    evt.getByToken(tokenGenTaus_, genTaus);
+    evt.getByToken(token_genTaus_, genTaus);
   }
 
+  edm::Handle<float> rho;
+  if ( src_rho_.label() != "" ) 
+  {
+    evt.getByToken(token_rho_, rho);
+  }
+  
   const double evtWeight = 1.;
-
-  for ( auto isolationPlot : isolationPlots_ ) 
-  {    
+  
+  for ( l1t::TallinnL1PFTauCollection::const_iterator l1Tau = l1Taus->begin(); l1Tau != l1Taus->end();  ++l1Tau )
+  {
+    std::string genTau_decayMode;
+    double dRmin = 1.e+3;
+    bool isMatched = false;
     if ( srcGenTaus_.label() != "" ) 
     {
-      isolationPlot->fillHistograms_wGenMatching(*l1Taus, *genTaus, evtWeight);
+      for ( reco::GenJetCollection::const_iterator genTau = genTaus->begin(); genTau != genTaus->end(); ++genTau )
+      {
+	double dR = reco::deltaR(genTau->eta(), genTau->phi(), l1Tau->eta(), l1Tau->phi());
+	if ( dR < dRmatch_ && dR < dRmin ) 
+	{ 
+	  genTau_decayMode = JetMCTagUtils::genTauDecayMode(*genTau);
+	  dRmin = dR;
+	  isMatched = true;
+	}
+      }
     }
-    else
+
+    double rhoCorr = 0.;
+    if ( srcRho_.label() != "" ) 
     {
-      isolationPlot->fillHistograms_woGenMatching(*l1Taus, evtWeight);
+      rhoCorr = *rho;
+      int idxBin = histogram_rhoCorr_->FindBin(TMath::Abs(l1Tau->eta()));
+      if ( !(idxBin >= 1 && idxBin <= histogram_rhoCorr_->GetNbins()) )
+      {
+        std::cerr << "Warning in <TallinnL1PFTauIsolationAnalyzer::analyze>:" 
+	  	  << " Failed to compute rho correction for abs(eta) = " << l1Tau->eta() << " --> skipping event !!" << std::endl;
+        return;
+      }
+      rhoCorr *= histogram_rhoCorr_->GetBinContent(idxBin);
+    }
+    
+    for ( auto isolationPlot : isolationPlots_ ) 
+    {    
+      if ( srcGenTaus_.label() != "" ) 
+      {
+        isolationPlot->fillHistograms_wGenMatching(*l1Tau, isMatched, genTau_decayMode, evtWeight);
+      }
+      else
+      {
+        isolationPlot->fillHistograms_woGenMatching(*l1Tau, evtWeight);
+      }
     }  
   }
 }

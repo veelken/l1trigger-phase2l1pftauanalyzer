@@ -697,58 +697,82 @@ void makeIsolationPlots()
   observables.push_back("absChargedIso");
   observables.push_back("absNeutralIso");
   observables.push_back("absCombinedIso");
+  observables.push_back("absCombinedIso_wDeltaBetaCorr");
+  observables.push_back("absCombinedIso_wRhoCorr");
   observables.push_back("relChargedIso");
   observables.push_back("relNeutralIso");
   observables.push_back("relCombinedIso");
+  observables.push_back("relCombinedIso_wDeltaBetaCorr");
+  observables.push_back("relCombinedIso_wRhoCorr"); 
   observables.push_back("pt");
 
   std::map<std::string, int> rebin; // key = observable
-  rebin["pt"]                     =   5;
-  rebin["absChargedIso"]          =   5;
-  rebin["absNeutralIso"]          =   5;
-  rebin["absCombinedIso"]         =   5;
-  rebin["relChargedIso"]          =   2;
-  rebin["relNeutralIso"]          =   2;
-  rebin["relCombinedIso"]         =   2;
-  rebin["sumChargedIsoPileup"]    =   2;
+  rebin["pt"]                                    =   5;
+  rebin["absChargedIso"]                         =   5;
+  rebin["absNeutralIso"]                         =   5;
+  rebin["absCombinedIso"]                        =   5;
+  rebin["absCombinedIso_wDeltaBetaCorr"]         =   5;
+  rebin["absCombinedIso_wRhoCorr"]               =   5;
+  rebin["relChargedIso"]                         =   2;
+  rebin["relNeutralIso"]                         =   2;
+  rebin["relCombinedIso"]                        =   2;
+  rebin["relCombinedIso_wDeltaBetaCorr"]         =   2;
+  rebin["relCombinedIso_wRhoCorr"]               =   2;
+  rebin["sumChargedIsoPileup"]                   =   2;
 
   std::map<std::string, double> xMin; // key = observable
-  xMin["pt"]                      =   0.;
-  xMin["absChargedIso"]           =   0.;
-  xMin["absNeutralIso"]           =   0.;
-  xMin["absCombinedIso"]          =   0.;
-  xMin["relChargedIso"]           =   0.;
-  xMin["relNeutralIso"]           =   0.;
-  xMin["relCombinedIso"]          =   0.; 
-  xMin["sumChargedIsoPileup"]     =   0.; 
+  xMin["pt"]                                     =   0.;
+  xMin["absChargedIso"]                          =   0.;
+  xMin["absNeutralIso"]                          =   0.;
+  xMin["absCombinedIso"]                         =   0.;
+  xMin["absCombinedIso_wDeltaBetaCorr"]          =   0.;
+  xMin["absCombinedIso_wRhoCorr"]                =   0.;
+  xMin["relChargedIso"]                          =   0.;
+  xMin["relNeutralIso"]                          =   0.;
+  xMin["relCombinedIso"]                         =   0.;
+  xMin["relCombinedIso_wDeltaBetaCorr"]          =   0.;
+  xMin["relCombinedIso"]                         =   0.; 
+  xMin["sumChargedIsoPileup"]                    =   0.; 
 
   std::map<std::string, double> xMax; // key = observable
-  xMax["pt"]                      = 100.;
-  xMax["absChargedIso"]           =  25.;
-  xMax["absNeutralIso"]           =  25.;
-  xMax["absCombinedIso"]          =  25.;
-  xMax["relChargedIso"]           =   1.;
-  xMax["relNeutralIso"]           =   1.;
-  xMax["relCombinedIso"]          =   1.;
-  xMax["sumChargedIsoPileup"]     =  25.;
+  xMax["pt"]                                     = 100.;
+  xMax["absChargedIso"]                          =  25.;
+  xMax["absNeutralIso"]                          =  25.;
+  xMax["absCombinedIso"]                         =  25.;
+  xMax["absCombinedIso_wDeltaBetaCorr"]          =  25.;
+  xMax["absCombinedIso_wRhoCorr"]                =  25.;
+  xMax["relChargedIso"]                          =   1.;
+  xMax["relNeutralIso"]                          =   1.;
+  xMax["relCombinedIso"]                         =   1.;
+  xMax["relCombinedIso_wDeltaBetaCorr"]          =   1.;
+  xMax["relCombinedIso_wRhoCorr"]                =   1.;
+  xMax["sumChargedIsoPileup"]                    =  25.;
   
   std::map<std::string, std::string> xAxisTitles; // key = observable
-  xAxisTitles["pt"]               = "L1 #tau_{h} p_{T} [GeV]";
-  xAxisTitles["absChargedIso"]    = "L1 #tau I_{ch} [GeV]";
-  xAxisTitles["absNeutralIso"]    = "L1 #tau I_{neu} [GeV]";
-  xAxisTitles["absCombinedIso"]   = "L1 #tau I_{cmb} [GeV]";
-  xAxisTitles["relChargedIso"]    = "L1 #tau I_{ch} / p_{T}";
-  xAxisTitles["relNeutralIso"]    = "L1 #tau I_{neu} / p_{T}";
-  xAxisTitles["relCombinedIso"]   = "L1 #tau I_{cmb} / p_{T}";
+  xAxisTitles["pt"]                              = "L1 #tau_{h} p_{T} [GeV]";
+  xAxisTitles["absChargedIso"]                   = "L1 #tau I_{ch} [GeV]";
+  xAxisTitles["absNeutralIso"]                   = "L1 #tau I_{neu} [GeV]";
+  xAxisTitles["absCombinedIso"]                  = "L1 #tau I_{cmb} [GeV]";
+  xAxisTitles["absCombinedIso_wDeltaBetaCorr"]   = "#Delta#beta-corrected L1 #tau I_{cmb} [GeV]";
+  xAxisTitles["absCombinedIso_wRhoCorr"]         = "#rho-corrected L1 #tau I_{cmb} [GeV]";
+  xAxisTitles["relChargedIso"]                   = "L1 #tau I_{ch} / p_{T}";
+  xAxisTitles["relNeutralIso"]                   = "L1 #tau I_{neu} / p_{T}";
+  xAxisTitles["relCombinedIso"]                  = "L1 #tau I_{cmb} / p_{T}";
+  xAxisTitles["relCombinedIso_wDeltaBetaCorr"]   = "L1 #tau I_{cmb} / p_{T}";
+  xAxisTitles["relCombinedIso_wRhoCorr"]         = "L1 #tau I_{cmb} / p_{T}";
 
   std::map<std::string, std::string> legendEntries; // key = observable
-  legendEntries["pt"]             = "p_{T}";
-  legendEntries["absChargedIso"]  = "I_{ch}";
-  legendEntries["absNeutralIso"]  = "I_{neu}";
-  legendEntries["absCombinedIso"] = "I_{cmb}";
-  legendEntries["relChargedIso"]  = "I_{ch}";
-  legendEntries["relNeutralIso"]  = "I_{neu}";
-  legendEntries["relCombinedIso"] = "I_{cmb}";
+  legendEntries["pt"]                            = "p_{T}";
+  legendEntries["absChargedIso"]                 = "I_{ch}";
+  legendEntries["absNeutralIso"]                 = "I_{neu}";
+  legendEntries["absCombinedIso"]                = "I_{cmb}";
+  legendEntries["absCombinedIso_wDeltaBetaCorr"] = "I_{cmb} (#Delta#beta-corr.)";
+  legendEntries["absCombinedIso_wRhoCorr"]       = "I_{cmb} (#rho-corr.)";
+  legendEntries["relChargedIso"]                 = "I_{ch}";
+  legendEntries["relNeutralIso"]                 = "I_{neu}";
+  legendEntries["relCombinedIso"]                = "I_{cmb}";
+  legendEntries["relCombinedIso_wDeltaBetaCorr"] = "I_{cmb}(#Delta#beta-corr.)";
+  legendEntries["relCombinedIso_wRhoCorr"]       = "I_{cmb} (#rho-corr.)";
 
   std::string dqmDirectory = "DQMData/TallinnL1PFTauIsolationAnalyzer";
   
@@ -802,22 +826,39 @@ void makeIsolationPlots()
 	}
 
 	std::vector<std::string> labelTextLines = getLabelTextLines(*ptThreshold);
-	std::string outputFileName_roc = Form("makeIsolationPlots_rocCurves_%s_%s_%s.png", 
+	std::string outputFileName_roc_absIso = Form("makeIsolationPlots_rocCurves_absIso_%s_%s_%s.png", 
 	  pfAlgo->data(), absEtaRange->data(), ptThreshold->data());
 	showGraphs(1150, 1150,
-		   graphs_roc["absChargedIso"],  legendEntries["absChargedIso"],
-		   graphs_roc["absNeutralIso"],  legendEntries["absNeutralIso"],
-		   graphs_roc["absCombinedIso"], legendEntries["absCombinedIso"],
-		   graphs_roc["relChargedIso"],  legendEntries["relChargedIso"],
-		   graphs_roc["relNeutralIso"],  legendEntries["relNeutralIso"],
-		   graphs_roc["relCombinedIso"], legendEntries["relCombinedIso"],
+		   graphs_roc["absChargedIso"],                 legendEntries["absChargedIso"],
+		   graphs_roc["absNeutralIso"],                 legendEntries["absNeutralIso"],
+		   graphs_roc["absCombinedIso"],                legendEntries["absCombinedIso"],
+		   graphs_roc["absCombinedIso_wDeltaBetaCorr"], legendEntries["absCombinedIso_wDeltaBetaCorr"],
+		   graphs_roc["absCombinedIso_wRhoCorr"],       legendEntries["absCombinedIso_wRhoCorr"],
+		   graphs_roc["pt"],                            legendEntries["pt"],
+		   0, "",
 		   colors, markerStyles, lineStyles, 
 		   0.045, 0.18, 0.17, 0.23, 0.26, 
 		   labelTextLines, 0.050,
 		   0.63, 0.65, 0.26, 0.07, 
 		   0., 1.09, "Signal Efficiency", 1.2, 
 		   false, 0., 1.09, "Background Rejection", 1.4, 
-		   outputFileName_roc);
+		   outputFileName_roc_absIso);
+	std::string outputFileName_roc_relIso = Form("makeIsolationPlots_rocCurves_relIso_%s_%s_%s.png", 
+	  pfAlgo->data(), absEtaRange->data(), ptThreshold->data());
+	showGraphs(1150, 1150,
+		   graphs_roc["relChargedIso"],                 legendEntries["relChargedIso"],
+		   graphs_roc["relNeutralIso"],                 legendEntries["relNeutralIso"],
+		   graphs_roc["relCombinedIso"],                legendEntries["relCombinedIso"],
+		   graphs_roc["relCombinedIso_wDeltaBetaCorr"], legendEntries["relCombinedIso_wDeltaBetaCorr"],
+		   graphs_roc["relCombinedIso_wRhoCorr"],       legendEntries["relCombinedIso_wRhoCorr"],
+		   graphs_roc["pt"],                            legendEntries["pt"],
+		   colors, markerStyles, lineStyles, 
+		   0.045, 0.18, 0.17, 0.23, 0.26, 
+		   labelTextLines, 0.050,
+		   0.63, 0.65, 0.26, 0.07, 
+		   0., 1.09, "Signal Efficiency", 1.2, 
+		   false, 0., 1.09, "Background Rejection", 1.4, 
+		   outputFileName_roc_relIso);	
       }
     }
   }

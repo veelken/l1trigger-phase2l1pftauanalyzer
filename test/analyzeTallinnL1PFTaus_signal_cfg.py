@@ -139,8 +139,11 @@ for useStrips in [ True, False ]:
 
         moduleNamePF_TallinnL1PFTauIsolationAnalyzer = "analyzeTallinL1PFTauIsolation" + moduleLabel + "PF"
         modulePF_TallinnL1PFTauIsolationAnalyzer = cms.EDAnalyzer("TallinnL1PFTauIsolationAnalyzer",
-          src = cms.InputTag(moduleNameBase + moduleLabel + "PF"),
-          srcGenTaus = cms.InputTag(''),                                               
+          srcL1Taus  = cms.InputTag(moduleNameBase + moduleLabel + "PF"),
+          srcGenTaus = cms.InputTag(''),
+          srcRho = cms.InputTag(''),
+          inputFileName_rhoCorr = cms.string("L1Trigger/TallinnL1PFTauAnalyzer/data/rhoCorr.root"),
+          histogramName_rhoCorr = cms.string("RhoCorrAnalyzerPF/neutralPFCandPt_vs_absEta"),                           
           dqmDirectory = cms.string("TallinnL1PFTauIsolationAnalyzer" + moduleLabel + "PF")
         )
         setattr(process, moduleNamePF_TallinnL1PFTauIsolationAnalyzer, modulePF_TallinnL1PFTauIsolationAnalyzer)
@@ -157,8 +160,11 @@ for useStrips in [ True, False ]:
 
         moduleNamePuppi_TallinnL1PFTauIsolationAnalyzer = "analyzeTallinL1PFTauIsolation" + moduleLabel + "Puppi"
         modulePuppi_TallinnL1PFTauIsolationAnalyzer = cms.EDAnalyzer("TallinnL1PFTauIsolationAnalyzer",
-          src = cms.InputTag(moduleNameBase + moduleLabel + "Puppi"),
-          srcGenTaus = cms.InputTag(''), 
+          srcL1Taus = cms.InputTag(moduleNameBase + moduleLabel + "Puppi"),
+          srcGenTaus = cms.InputTag(''),
+          srcRho = cms.InputTag(''),
+          inputFileName_rhoCorr = cms.string("L1Trigger/TallinnL1PFTauAnalyzer/data/rhoCorr.root"),
+          histogramName_rhoCorr = cms.string("RhoCorrAnalyzerPuppi/neutralPFCandPt_vs_absEta"),                                                         
           dqmDirectory = cms.string("TallinnL1PFTauIsolationAnalyzer" + moduleLabel + "Puppi")
         )
         setattr(process, moduleNamePuppi_TallinnL1PFTauIsolationAnalyzer, modulePuppi_TallinnL1PFTauIsolationAnalyzer)
