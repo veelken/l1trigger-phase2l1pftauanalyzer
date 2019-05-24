@@ -33,10 +33,10 @@ class RhoCorrAnalyzer : public edm::EDAnalyzer
   std::string moduleLabel_;
 
   edm::InputTag src_rho_;
-  edm::EDGetTokenT<float> token_rho_;
+  edm::EDGetTokenT<double> token_rho_;
 
   edm::InputTag src_rhoNeutral_;
-  edm::EDGetTokenT<float> token_rhoNeutral_;
+  edm::EDGetTokenT<double> token_rhoNeutral_;
 
   edm::InputTag src_l1PFCands_;
   edm::EDGetTokenT<l1t::PFCandidateCollection> token_l1PFCands_;

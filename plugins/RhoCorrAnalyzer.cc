@@ -7,10 +7,10 @@ RhoCorrAnalyzer::RhoCorrAnalyzer(const edm::ParameterSet& cfg)
   : moduleLabel_(cfg.getParameter<std::string>("@module_label"))
 {
   src_rho_ = cfg.getParameter<edm::InputTag>("srcRho");
-  token_rho_ = consumes<float>(src_rho_);
+  token_rho_ = consumes<double>(src_rho_);
 
   src_rhoNeutral_ = cfg.getParameter<edm::InputTag>("srcRhoNeutral");
-  token_rhoNeutral_ = consumes<float>(src_rhoNeutral_);
+  token_rhoNeutral_ = consumes<double>(src_rhoNeutral_);
 
   src_l1PFCands_ = cfg.getParameter<edm::InputTag>("srcL1PFCands");
   token_l1PFCands_ = consumes<l1t::PFCandidateCollection>(src_l1PFCands_);
@@ -54,10 +54,10 @@ void RhoCorrAnalyzer::beginJob()
     
 void RhoCorrAnalyzer::analyze(const edm::Event& evt, const edm::EventSetup& es)
 {
-  edm::Handle<float> rho;
+  edm::Handle<double> rho;
   evt.getByToken(token_rho_, rho);
   
-  edm::Handle<float> rhoNeutral;
+  edm::Handle<double> rhoNeutral;
   evt.getByToken(token_rhoNeutral_, rhoNeutral);
 
   edm::Handle<l1t::PFCandidateCollection> l1PFCands;
