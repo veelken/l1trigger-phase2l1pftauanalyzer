@@ -141,10 +141,12 @@ for useStrips in [ True, False ]:
         modulePF_TallinnL1PFTauIsolationAnalyzer = cms.EDAnalyzer("TallinnL1PFTauIsolationAnalyzer",
           srcL1Taus  = cms.InputTag(moduleNameBase + moduleLabel + "PF"),
           srcGenTaus = cms.InputTag(''),
-          dRmatch = cms.doubel(0.3),                                                            
-          srcRho = cms.InputTag(''),
-          inputFileName_rhoCorr = cms.string("L1Trigger/TallinnL1PFTauAnalyzer/data/rhoCorr.root"),
-          histogramName_rhoCorr = cms.string("RhoCorrAnalyzerPF/neutralPFCandPt_vs_absEta"),                           
+          dRmatch = cms.double(0.3),                                                            
+          srcRho = cms.InputTag('kt6L1PFJetsPF:rho'),
+          #inputFileName_rhoCorr = cms.string("L1Trigger/TallinnL1PFTauAnalyzer/data/rhoCorr.root"),
+          #histogramName_rhoCorr = cms.string("RhoCorrAnalyzerPF/neutralPFCandPt_vs_absEta"),
+          inputFileName_rhoCorr = cms.string(""),
+          histogramName_rhoCorr = cms.string(""),                                                      
           dqmDirectory = cms.string("TallinnL1PFTauIsolationAnalyzer" + moduleLabel + "PF")
         )
         setattr(process, moduleNamePF_TallinnL1PFTauIsolationAnalyzer, modulePF_TallinnL1PFTauIsolationAnalyzer)
@@ -163,10 +165,12 @@ for useStrips in [ True, False ]:
         modulePuppi_TallinnL1PFTauIsolationAnalyzer = cms.EDAnalyzer("TallinnL1PFTauIsolationAnalyzer",
           srcL1Taus = cms.InputTag(moduleNameBase + moduleLabel + "Puppi"),
           srcGenTaus = cms.InputTag(''),
-          dRmatch = cms.doubel(0.3),                                                
-          srcRho = cms.InputTag(''),
-          inputFileName_rhoCorr = cms.string("L1Trigger/TallinnL1PFTauAnalyzer/data/rhoCorr.root"),
-          histogramName_rhoCorr = cms.string("RhoCorrAnalyzerPuppi/neutralPFCandPt_vs_absEta"),                                                         
+          dRmatch = cms.double(0.3),                                                
+          srcRho = cms.InputTag('kt6L1PFJetsPuppi:rho'),
+          #inputFileName_rhoCorr = cms.string("L1Trigger/TallinnL1PFTauAnalyzer/data/rhoCorr.root"),
+          #histogramName_rhoCorr = cms.string("RhoCorrAnalyzerPuppi/neutralPFCandPt_vs_absEta"),
+          inputFileName_rhoCorr = cms.string(""),
+          histogramName_rhoCorr = cms.string(""),                                                                          
           dqmDirectory = cms.string("TallinnL1PFTauIsolationAnalyzer" + moduleLabel + "Puppi")
         )
         setattr(process, moduleNamePuppi_TallinnL1PFTauIsolationAnalyzer, modulePuppi_TallinnL1PFTauIsolationAnalyzer)
@@ -176,7 +180,7 @@ for useStrips in [ True, False ]:
 process.DQMStore = cms.Service("DQMStore")
 
 process.savePlots = cms.EDAnalyzer("DQMSimpleFileSaver",
-    outputFileName = cms.string('TallinnL1PFTauAnalyzer_signal_2019May18.root')
+    outputFileName = cms.string('TallinnL1PFTauAnalyzer_signal_2019May24.root')
 )
 
 process.p = cms.Path(process.analysisSequence + process.savePlots)

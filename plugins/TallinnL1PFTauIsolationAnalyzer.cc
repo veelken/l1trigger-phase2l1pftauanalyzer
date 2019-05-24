@@ -21,7 +21,7 @@ TallinnL1PFTauIsolationAnalyzer::TallinnL1PFTauIsolationAnalyzer(const edm::Para
   src_genTaus_ = cfg.getParameter<edm::InputTag>("srcGenTaus");
   token_genTaus_ = consumes<reco::GenJetCollection>(src_genTaus_);
   src_rho_ = cfg.getParameter<edm::InputTag>("srcRho");
-  token_rho_ = consumes<float>(src_rho_);
+  token_rho_ = consumes<double>(src_rho_);
 
   if ( inputFileName_rhoCorr_ != "" && histogramName_rhoCorr_ != "" )
   {
@@ -113,7 +113,7 @@ void TallinnL1PFTauIsolationAnalyzer::analyze(const edm::Event& evt, const edm::
     evt.getByToken(token_genTaus_, genTaus);
   }
 
-  edm::Handle<float> rho;
+  edm::Handle<double> rho;
   if ( src_rho_.label() != "" ) 
   {
     evt.getByToken(token_rho_, rho);
@@ -144,14 +144,17 @@ void TallinnL1PFTauIsolationAnalyzer::analyze(const edm::Event& evt, const edm::
     if ( src_rho_.label() != "" ) 
     {
       rhoCorr = *rho;
-      int idxBin = histogram_rhoCorr_->FindBin(TMath::Abs(l1Tau->eta()));
-      if ( !(idxBin >= 1 && idxBin <= histogram_rhoCorr_->GetNbinsX()) )
+      if ( histogram_rhoCorr_ ) 
       {
-        std::cerr << "Warning in <TallinnL1PFTauIsolationAnalyzer::analyze>:" 
-	  	  << " Failed to compute rho correction for abs(eta) = " << l1Tau->eta() << " --> skipping event !!" << std::endl;
-        return;
+        int idxBin = histogram_rhoCorr_->FindBin(TMath::Abs(l1Tau->eta()));
+        if ( !(idxBin >= 1 && idxBin <= histogram_rhoCorr_->GetNbinsX()) )
+        {
+	  std::cerr << "Warning in <TallinnL1PFTauIsolationAnalyzer::analyze>:" 
+            	    << " Failed to compute rho correction for abs(eta) = " << l1Tau->eta() << " --> skipping event !!" << std::endl;
+          return;
+        }
+        rhoCorr *= histogram_rhoCorr_->GetBinContent(idxBin);
       }
-      rhoCorr *= histogram_rhoCorr_->GetBinContent(idxBin);
     }
     
     for ( auto isolationPlot : isolationPlots_ ) 

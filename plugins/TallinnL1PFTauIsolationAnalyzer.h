@@ -50,7 +50,7 @@ class TallinnL1PFTauIsolationAnalyzer : public edm::EDAnalyzer
   edm::EDGetTokenT<reco::GenJetCollection> token_genTaus_;
   double dRmatch_;
   edm::InputTag src_rho_;
-  edm::EDGetTokenT<float> token_rho_;
+  edm::EDGetTokenT<double> token_rho_;
 
   std::string inputFileName_rhoCorr_;
   TFile* inputFile_rhoCorr_;
