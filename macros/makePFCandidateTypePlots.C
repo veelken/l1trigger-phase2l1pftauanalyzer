@@ -109,27 +109,6 @@ void showHistograms_stacked(double canvasSizeX, double canvasSizeY,
     return;
   }
 
-  histogram1->SetTitle("");
-  histogram1->SetStats(false);
-  histogram1->SetMinimum(yMin);
-  histogram1->SetMaximum(yMax);
-
-  TAxis* xAxis = histogram1->GetXaxis();
-  xAxis->SetTitle(xAxisTitle.data());
-  xAxis->SetTitleSize(0.045);
-  xAxis->SetTitleOffset(xAxisOffset);  
-  if ( xMax > xMin ) {
-    std::cout << "limiting x-axis range to " << xMin << ".." << xMax << std::endl;
-    xAxis->SetRangeUser(xMin, xMax);
-  }
-
-  TAxis* yAxis = histogram1->GetYaxis();
-  yAxis->SetTitle(yAxisTitle.data());
-  yAxis->SetTitleSize(0.045);
-  yAxis->SetTitleOffset(yAxisOffset);
-
-  histogram1->Draw("axis");
-
   TH1* histogramSum = nullptr;
   if ( doNormalize ) {
     histogramSum = (TH1*)histogram1->Clone("histogramSum");
@@ -140,11 +119,22 @@ void showHistograms_stacked(double canvasSizeX, double canvasSizeY,
     if ( histogram6 ) histogramSum->Add(histogram6);
   }
 
+  if ( xMax > xMin ) {
+    std::cout << "limiting x-axis range to " << xMin << ".." << xMax << std::endl;
+    histogram1->GetXaxis()->SetRangeUser(xMin, xMax);
+    if ( histogram2 ) histogram2->GetXaxis()->SetRangeUser(xMin, xMax);
+    if ( histogram3 ) histogram3->GetXaxis()->SetRangeUser(xMin, xMax);
+    if ( histogram4 ) histogram4->GetXaxis()->SetRangeUser(xMin, xMax);
+    if ( histogram5 ) histogram5->GetXaxis()->SetRangeUser(xMin, xMax);
+    if ( histogram6 ) histogram6->GetXaxis()->SetRangeUser(xMin, xMax);
+  }
+
   THStack* histogramStack = new THStack("histogramStack", "histogramStack");
 
   if ( doNormalize ) {
     histogram1->Divide(histogramSum);
   }
+  histogram1->SetStats(false);
   histogram1->SetFillColor(colors[pfCandType1]);
   histogram1->SetFillStyle(fillStyles[pfCandType1]);
   histogram1->SetLineColor(1);
@@ -152,10 +142,15 @@ void showHistograms_stacked(double canvasSizeX, double canvasSizeY,
   histogram1->SetLineStyle(1);
   histogramStack->Add(histogram1);
 
+  histogramStack->SetTitle("");
+  histogramStack->SetMinimum(yMin);
+  histogramStack->SetMaximum(yMax);
+
   if ( histogram2 ) {
     if ( doNormalize ) {
       histogram2->Divide(histogramSum);
     }
+    histogram2->SetStats(false);
     histogram2->SetFillColor(colors[pfCandType2]);
     histogram2->SetFillStyle(fillStyles[pfCandType2]);
     histogram2->SetLineColor(1);
@@ -168,18 +163,20 @@ void showHistograms_stacked(double canvasSizeX, double canvasSizeY,
     if ( doNormalize ) {
       histogram3->Divide(histogramSum);
     }
+    histogram3->SetStats(false);
     histogram3->SetFillColor(colors[pfCandType3]);
     histogram3->SetFillStyle(fillStyles[pfCandType3]);
     histogram3->SetLineColor(1);
     histogram3->SetLineWidth(1);
     histogram3->SetLineStyle(1);
-    histogramStack->Add(histogram1);
+    histogramStack->Add(histogram3);
   }
 
   if ( histogram4 ) {
     if ( doNormalize ) {
       histogram4->Divide(histogramSum);
     }
+    histogram4->SetStats(false);
     histogram4->SetFillColor(colors[pfCandType4]);
     histogram4->SetFillStyle(fillStyles[pfCandType4]);
     histogram4->SetLineColor(1);
@@ -192,6 +189,7 @@ void showHistograms_stacked(double canvasSizeX, double canvasSizeY,
     if ( doNormalize ) {
       histogram5->Divide(histogramSum);
     }
+    histogram5->SetStats(false);
     histogram5->SetFillColor(colors[pfCandType5]);
     histogram5->SetFillStyle(fillStyles[pfCandType5]);
     histogram5->SetLineColor(1);
@@ -204,6 +202,7 @@ void showHistograms_stacked(double canvasSizeX, double canvasSizeY,
     if ( doNormalize ) {
       histogram6->Divide(histogramSum);
     }
+    histogram6->SetStats(false);
     histogram6->SetFillColor(colors[pfCandType6]);
     histogram6->SetFillStyle(fillStyles[pfCandType6]);
     histogram6->SetLineColor(1);
@@ -212,7 +211,7 @@ void showHistograms_stacked(double canvasSizeX, double canvasSizeY,
     histogramStack->Add(histogram6);
   }
 
-  histogramStack->Draw("same");
+  histogramStack->Draw("hist");
 
   TLegend* legend = 0;
   if ( legendEntries[pfCandType1] != "" ) {
@@ -220,12 +219,12 @@ void showHistograms_stacked(double canvasSizeX, double canvasSizeY,
     legend->SetBorderSize(0);
     legend->SetFillColor(0);
     legend->SetTextSize(legendTextSize);
-    legend->AddEntry(histogram1, legendEntries[pfCandType1].data(), "f");
-    if ( histogram2 ) legend->AddEntry(histogram2, legendEntries[pfCandType2].data(), "f");
-    if ( histogram3 ) legend->AddEntry(histogram3, legendEntries[pfCandType3].data(), "f");
-    if ( histogram4 ) legend->AddEntry(histogram4, legendEntries[pfCandType4].data(), "f");
-    if ( histogram5 ) legend->AddEntry(histogram5, legendEntries[pfCandType5].data(), "f");
     if ( histogram6 ) legend->AddEntry(histogram6, legendEntries[pfCandType6].data(), "f");
+    if ( histogram5 ) legend->AddEntry(histogram5, legendEntries[pfCandType5].data(), "f");
+    if ( histogram4 ) legend->AddEntry(histogram4, legendEntries[pfCandType4].data(), "f");
+    if ( histogram3 ) legend->AddEntry(histogram3, legendEntries[pfCandType3].data(), "f");
+    if ( histogram2 ) legend->AddEntry(histogram2, legendEntries[pfCandType2].data(), "f");
+    legend->AddEntry(histogram1, legendEntries[pfCandType1].data(), "f");
     legend->Draw();
   }
 
@@ -244,7 +243,22 @@ void showHistograms_stacked(double canvasSizeX, double canvasSizeY,
     label->Draw();
   }
 
-  histogram1->Draw("axissame");
+  TAxis* xAxis = histogramStack->GetHistogram()->GetXaxis();
+  xAxis->SetTitle(xAxisTitle.data());
+  xAxis->SetTitleSize(0.045);
+  xAxis->SetTitleColor(1);
+  xAxis->SetTitleOffset(xAxisOffset);  
+
+  TAxis* yAxis = histogramStack->GetHistogram()->GetYaxis();
+  yAxis->SetTitle(yAxisTitle.data());
+  yAxis->SetTitleSize(0.045);
+  yAxis->SetTitleColor(1);
+  yAxis->SetTitleOffset(yAxisOffset);
+
+  histogramStack->GetHistogram()->Draw("axissame");
+
+  gPad->Modified(); 
+  gPad->Update();
 
   canvas->Update();
   std::string outputFileName_plot = "plots/";
@@ -327,11 +341,11 @@ void makePFCandidateTypePlots()
   pfCandTypes.push_back("muon");
 
   std::map<std::string, int> colors; // key = pfCandType
-  colors["chargedHadronPileup"]        = kRed - 4;
-  colors["chargedHadron"]              = kRed;
+  colors["chargedHadronPileup"]        = kRed - 7;
+  colors["chargedHadron"]              = 2;
   colors["photon"]                     = 9;
   colors["neutralHadron"]              = 8;
-  colors["electron"]                   = kCyan;
+  colors["electron"]                   = 7;
   colors["muon"]                       = kCyan + 2;
 
   std::map<std::string, int> fillStyles; // key = pfCandType
@@ -367,8 +381,15 @@ void makePFCandidateTypePlots()
 	  histogram_ptFraction_rebinned = histogram_ptFraction->Rebin(rebin[*observable]);
 	  divideByBinWidth(histogram_ptFraction_rebinned);
 	}
+	histograms_ptFraction_rebinned[*pfCandType] = histogram_ptFraction_rebinned;
       }
 
+      double yMin_unnormalized = 1.99e0;
+      double yMax_unnormalized = 3.99e+2;
+      if ( (*observable) == "pt" ) {
+	yMin_unnormalized = 2.99e-4;
+	yMax_unnormalized = 3.99e+2;
+      }
       std::string outputFileName_unnormalized = Form("makePFCandidateTypePlots_%s_%s_unnormalized.png", pfAlgo->data(), observable->data());
       showHistograms_stacked(1150, 1150,
 			     "chargedHadronPileup", histograms_ptFraction_rebinned["chargedHadronPileup"],
@@ -380,11 +401,11 @@ void makePFCandidateTypePlots()
 			     legendEntries,
 			     false,
 			     colors, fillStyles, 
-			     0.040, 0.17, 0.17, 0.23, 0.27, 
+			     0.035, 0.17, 0.17, 0.42, 0.24, 
 			     labelTextLines, 0.040,
 			     0.70, 0.21, 0.23, 0.06, 
 			     useLogScaleX[*observable], xMin[*observable], xMax[*observable], xAxisTitles[*observable], 1.2, 
-			     true, 1.e-1, 1.99e+2, "#Sigma p_{T} [GeV]", 1.4, 
+			     true, yMin_unnormalized, yMax_unnormalized, "#Sigma p_{T} [GeV]", 1.4, 
 			     outputFileName_unnormalized);
 
       std::map<std::string, TH1*> histograms_energyFraction_rebinned; // key = pfCandType
@@ -398,9 +419,16 @@ void makePFCandidateTypePlots()
 	  histogram_energyFraction_rebinned = histogram_energyFraction->Rebin(rebin[*observable]);
 	  divideByBinWidth(histogram_energyFraction_rebinned);
 	}
+	histograms_energyFraction_rebinned[*pfCandType] = histogram_energyFraction_rebinned;
       }
 
-      std::string outputFileName_normalized = Form("makePFCandidateTypePlots_%s_%s_unnormalized.png", pfAlgo->data(), observable->data());
+      double legendPosX_normalized = 0.17;
+      double legendPosY_normalized = 0.17;
+      if ( (*observable) == "pt" ) {
+	legendPosX_normalized = 0.51;
+	legendPosY_normalized = 0.52;
+      }
+      std::string outputFileName_normalized = Form("makePFCandidateTypePlots_%s_%s_normalized.png", pfAlgo->data(), observable->data());
       showHistograms_stacked(1150, 1150,
 			     "chargedHadronPileup", histograms_energyFraction_rebinned["chargedHadronPileup"], 
 			     "chargedHadron",       histograms_energyFraction_rebinned["chargedHadron"],
@@ -411,7 +439,7 @@ void makePFCandidateTypePlots()
 			     legendEntries,
 			     true,
 			     colors, fillStyles, 
-			     0.040, 0.17, 0.17, 0.23, 0.27, 
+			     0.035, legendPosX_normalized, legendPosY_normalized, 0.42, 0.24, 
 			     labelTextLines, 0.040,
 			     0.70, 0.21, 0.23, 0.06, 
 			     useLogScaleX[*observable], xMin[*observable], xMax[*observable], xAxisTitles[*observable], 1.2, 
