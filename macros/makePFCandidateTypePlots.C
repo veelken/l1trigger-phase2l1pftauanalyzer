@@ -341,7 +341,7 @@ void makePFCandidateTypePlots()
   pfCandTypes.push_back("muon");
 
   std::map<std::string, int> colors; // key = pfCandType
-  colors["chargedHadronPileup"]        = kRed - 7;
+  colors["chargedHadronPileup"]        = kRed - 9;
   colors["chargedHadron"]              = 2;
   colors["photon"]                     = 9;
   colors["neutralHadron"]              = 8;
@@ -349,12 +349,12 @@ void makePFCandidateTypePlots()
   colors["muon"]                       = kCyan + 2;
 
   std::map<std::string, int> fillStyles; // key = pfCandType
-  fillStyles["chargedHadronPileup"]    = 3001;
-  fillStyles["chargedHadron"]          = 3001;
-  fillStyles["photon"]                 = 3001;
-  fillStyles["neutralHadron"]          = 3001;
-  fillStyles["electron"]               = 3001;
-  fillStyles["muon"]                   = 3001;
+  fillStyles["chargedHadronPileup"]    = 1001;
+  fillStyles["chargedHadron"]          = 1001;
+  fillStyles["photon"]                 = 1001;
+  fillStyles["neutralHadron"]          = 1001;
+  fillStyles["electron"]               = 1001;
+  fillStyles["muon"]                   = 1001;
 
   std::map<std::string, std::string> legendEntries; // key = pfCandType
   legendEntries["chargedHadronPileup"] = "Charged PU hadrons";
