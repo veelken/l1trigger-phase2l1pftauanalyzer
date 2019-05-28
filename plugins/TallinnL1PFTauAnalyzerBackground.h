@@ -12,13 +12,13 @@
 #include "DataFormats/TallinnL1PFTaus/interface/TallinnL1PFTau.h"    // l1t::TallinnL1PFTau
 #include "DataFormats/TallinnL1PFTaus/interface/TallinnL1PFTauFwd.h" // l1t::TallinnL1PFTauCollection
 
-#include <TH1.h>
-#include <TH2.h>
+#include <TH1.h>     // TH1
+#include <TH2.h>     // TH2
 #include <TString.h> // TString, Form()
 #include <TMath.h>   // TMath::Abs(), TMath::Nint()
 
-#include <vector>
-#include <string>
+#include <vector>    // std::vector
+#include <string>    // std::string
 #include <algorithm> // std::sort
 
 namespace

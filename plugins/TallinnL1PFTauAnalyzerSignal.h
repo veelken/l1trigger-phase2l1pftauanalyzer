@@ -16,12 +16,12 @@
 #include "DataFormats/JetReco/interface/GenJetCollection.h"          // reco::GenJetCollection
 #include "PhysicsTools/JetMCUtils/interface/JetMCTag.h"              // JetMCTagUtils::genTauDecayMode()
 
-#include <TH1.h>
+#include <TH1.h>     // TH1
 #include <TString.h> // TString, Form()
 #include <TMath.h>   // TMath::Abs(), TMath::Pi()
 
-#include <vector>
-#include <string>
+#include <vector>    // std::vector
+#include <string>    // std::string
 
 class TallinnL1PFTauAnalyzerSignal : public edm::EDAnalyzer 
 {

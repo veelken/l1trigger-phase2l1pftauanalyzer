@@ -15,6 +15,7 @@ TallinnL1PFTauIsolationAnalyzer::TallinnL1PFTauIsolationAnalyzer(const edm::Para
   , inputFile_rhoCorr_(nullptr)
   , histogramName_rhoCorr_(cfg.getParameter<std::string>("histogramName_rhoCorr"))
   , histogram_rhoCorr_(nullptr)
+  , histogram_rhoCorr_yMax_(-1.)
 {
   src_l1Taus_ = cfg.getParameter<edm::InputTag>("srcL1Taus");
   token_l1Taus_ = consumes<l1t::TallinnL1PFTauCollection>(src_l1Taus_);
@@ -28,8 +29,17 @@ TallinnL1PFTauIsolationAnalyzer::TallinnL1PFTauIsolationAnalyzer(const edm::Para
     LocalFileInPath inputFileName_rhoCorr_fip(inputFileName_rhoCorr_);
     inputFile_rhoCorr_ = openFile(inputFileName_rhoCorr_fip);
     TH1* histogram_rhoCorr_temp = loadTH1(inputFile_rhoCorr_, histogramName_rhoCorr_);
-    std::string histogramName_rhoCorr = Form("%s_cloned", histogram_rhoCorr_->GetName());
+    std::string histogramName_rhoCorr = Form("%s_cloned", histogram_rhoCorr_temp->GetName());
     histogram_rhoCorr_ = (TH1*)histogram_rhoCorr_temp->Clone(histogramName_rhoCorr.data());
+    int numBins = histogram_rhoCorr_->GetNbinsX();
+    for ( int idxBin = 1; idxBin <= numBins; ++idxBin )
+    {
+      double binContent = histogram_rhoCorr_->GetBinContent(idxBin);
+      if ( binContent > histogram_rhoCorr_yMax_ ) 
+      {
+	histogram_rhoCorr_yMax_ = binContent;
+      }
+    }
     delete inputFile_rhoCorr_;
     inputFile_rhoCorr_ = nullptr;
   }
@@ -71,8 +81,8 @@ void TallinnL1PFTauIsolationAnalyzer::beginJob()
   {
     for ( auto ptThreshold : ptThresholds )
     {
-      isolationPlots_.push_back(new isolationPlotEntryType(ptThreshold, -1., 0., 1.0, decayMode)); 
-      isolationPlots_.push_back(new isolationPlotEntryType(ptThreshold, -1., 0., 1.4, decayMode));
+      isolationPlots_.push_back(new isolationPlotEntryType(ptThreshold, -1., -1., 1.0, decayMode)); 
+      isolationPlots_.push_back(new isolationPlotEntryType(ptThreshold, -1., -1., 1.4, decayMode));
     }
   }
 
@@ -143,8 +153,9 @@ void TallinnL1PFTauIsolationAnalyzer::analyze(const edm::Event& evt, const edm::
     double rhoCorr = 0.;
     if ( src_rho_.label() != "" ) 
     {
-      rhoCorr = *rho;
-      if ( histogram_rhoCorr_ ) 
+      const double isolationConeArea = TMath::Pi()*0.4*0.4;
+      rhoCorr = isolationConeArea*(*rho);
+      if ( histogram_rhoCorr_ && histogram_rhoCorr_yMax_ > 0. ) 
       {
         int idxBin = histogram_rhoCorr_->FindBin(TMath::Abs(l1Tau->eta()));
         if ( !(idxBin >= 1 && idxBin <= histogram_rhoCorr_->GetNbinsX()) )
@@ -153,8 +164,9 @@ void TallinnL1PFTauIsolationAnalyzer::analyze(const edm::Event& evt, const edm::
             	    << " Failed to compute rho correction for abs(eta) = " << l1Tau->eta() << " --> skipping event !!" << std::endl;
           return;
         }
-        rhoCorr *= histogram_rhoCorr_->GetBinContent(idxBin);
+        rhoCorr *= histogram_rhoCorr_->GetBinContent(idxBin)/histogram_rhoCorr_yMax_;
       }
+      //std::cout << "rho = " << (*rho) << ": rhoCorr = " << rhoCorr << std::endl;
     }
     
     for ( auto isolationPlot : isolationPlots_ ) 

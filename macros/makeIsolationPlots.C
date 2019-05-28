@@ -82,7 +82,7 @@ void showHistograms(double canvasSizeX, double canvasSizeY,
                     TH1* histogram4, const std::string& legendEntry4,
                     TH1* histogram5, const std::string& legendEntry5,
                     TH1* histogram6, const std::string& legendEntry6,
-                    int colors[], int lineStyles[], 
+                    int colors[], int lineStyles[], int lineWidths[], 
                     double legendTextSize, double legendPosX, double legendPosY, double legendSizeX, double legendSizeY, 
                     std::vector<std::string>& labelTextLines, double labelTextSize,
                     double labelPosX, double labelPosY, double labelSizeX, double labelSizeY,
@@ -129,42 +129,42 @@ void showHistograms(double canvasSizeX, double canvasSizeY,
   yAxis->SetTitleOffset(yAxisOffset);
 
   histogram1->SetLineColor(colors[0]);
-  histogram1->SetLineWidth(2);
   histogram1->SetLineStyle(lineStyles[0]);
+  histogram1->SetLineWidth(lineWidths[0]);
   histogram1->Draw("hist");
 
   if ( histogram2 ) {
     histogram2->SetLineColor(colors[1]);
-    histogram2->SetLineWidth(2);
     histogram2->SetLineStyle(lineStyles[1]);
+    histogram2->SetLineWidth(lineWidths[1]);
     histogram2->Draw("histsame");
   }
 
   if ( histogram3 ) {
     histogram3->SetLineColor(colors[2]);
-    histogram3->SetLineWidth(2);
     histogram3->SetLineStyle(lineStyles[2]);
+    histogram3->SetLineWidth(lineWidths[2]);
     histogram3->Draw("histsame");
   }
 
   if ( histogram4 ) {
     histogram4->SetLineColor(colors[3]);
-    histogram4->SetLineWidth(2);
     histogram4->SetLineStyle(lineStyles[3]);
+    histogram4->SetLineWidth(lineWidths[3]);
     histogram4->Draw("histsame");
   }
 
   if ( histogram5 ) {
     histogram5->SetLineColor(colors[4]);
-    histogram5->SetLineWidth(2);
     histogram5->SetLineStyle(lineStyles[4]);
+    histogram5->SetLineWidth(lineWidths[4]);
     histogram5->Draw("histsame");
   }
 
   if ( histogram6 ) {
     histogram6->SetLineColor(colors[5]);
-    histogram6->SetLineWidth(2);
     histogram6->SetLineStyle(lineStyles[5]);
+    histogram6->SetLineWidth(lineWidths[5]);
     histogram6->Draw("histsame");
   }
 
@@ -213,7 +213,9 @@ void showHistograms(double canvasSizeX, double canvasSizeY,
   delete canvas;  
 }
 
-TGraph* compGraph_efficiency(TH1* histogram)
+enum { kGtCut, kLtCut };
+
+TGraph* compGraph_efficiency(TH1* histogram, int mode)
 {
   TAxis* xAxis = histogram->GetXaxis();
   int numPoints = xAxis->GetNbins() + 1;
@@ -230,16 +232,17 @@ TGraph* compGraph_efficiency(TH1* histogram)
       sum += binContent;
     }
     std::string histogramName = histogram->GetName();
-    if ( histogramName.find("nllKinFit") != std::string::npos ) graph_Efficiency->SetPoint(idxPoint, binCenter, sum/integral);
-    else graph_Efficiency->SetPoint(idxPoint, binCenter, 1.0 - (sum/integral));
+    if      ( mode == kGtCut ) graph_Efficiency->SetPoint(idxPoint, binCenter, sum/integral);
+    else if ( mode == kLtCut ) graph_Efficiency->SetPoint(idxPoint, binCenter, 1.0 - (sum/integral));
+    else assert(0);
   }
   return graph_Efficiency;
 }
 
-TGraph* compGraph_rocCurve(TH1* histogram_signal, TH1* histogram_background)
+TGraph* compGraph_rocCurve(TH1* histogram_signal, TH1* histogram_background, int mode)
 {
-  TGraph* graph_signal = compGraph_efficiency(histogram_signal);
-  TGraph* graph_background = compGraph_efficiency(histogram_background);
+  TGraph* graph_signal = compGraph_efficiency(histogram_signal, mode);
+  TGraph* graph_background = compGraph_efficiency(histogram_background, mode);
   int numPoints = graph_signal->GetN();
   assert(graph_background->GetN() == numPoints);
   TGraph* graph_ROCcurve = new TGraph(numPoints);
@@ -265,7 +268,7 @@ void showGraphs(double canvasSizeX, double canvasSizeY,
 		TGraph* graph4, const std::string& legendEntry4,
 		TGraph* graph5, const std::string& legendEntry5,
 		TGraph* graph6, const std::string& legendEntry6,
-		int colors[], int markerStyles[], int lineStyles[], 
+		int colors[], int markerStyles[], int markerSizes[], int lineStyles[], int lineWidths[], 
 		double legendTextSize, double legendPosX, double legendPosY, double legendSizeX, double legendSizeY, 
 		std::vector<std::string>& labelTextLines, double labelTextSize,
 		double labelPosX, double labelPosY, double labelSizeX, double labelSizeY,
@@ -315,60 +318,60 @@ void showGraphs(double canvasSizeX, double canvasSizeY,
   dummyHistogram->Draw("axis");
 
   graph1->SetMarkerColor(colors[0]);
-  graph1->SetMarkerSize(2);
   graph1->SetMarkerStyle(markerStyles[0]);
+  graph1->SetMarkerSize(markerSizes[0]);
   graph1->SetLineColor(colors[0]);
-  graph1->SetLineWidth(2);
   graph1->SetLineStyle(lineStyles[0]);
+  graph1->SetLineWidth(lineWidths[0]);
   graph1->Draw("L");
 
   if ( graph2 ) {
     graph2->SetMarkerColor(colors[1]);
-    graph2->SetMarkerSize(2);
     graph2->SetMarkerStyle(markerStyles[1]);
+    graph2->SetMarkerSize(markerSizes[1]);
     graph2->SetLineColor(colors[1]);
-    graph2->SetLineWidth(2);
     graph2->SetLineStyle(lineStyles[1]);
+    graph2->SetLineWidth(lineWidths[1]);
     graph2->Draw("L");
   }
 
   if ( graph3 ) {
     graph3->SetMarkerColor(colors[2]);
-    graph3->SetMarkerSize(2);
     graph3->SetMarkerStyle(markerStyles[2]);
+    graph3->SetMarkerSize(markerSizes[2]);
     graph3->SetLineColor(colors[2]);
-    graph3->SetLineWidth(2);
     graph3->SetLineStyle(lineStyles[2]);
+    graph3->SetLineWidth(lineWidths[2]);
     graph3->Draw("L");
   }
 
   if ( graph4 ) {
     graph4->SetMarkerColor(colors[3]);
-    graph4->SetMarkerSize(2);
     graph4->SetMarkerStyle(markerStyles[3]);
+    graph4->SetMarkerSize(markerSizes[3]);
     graph4->SetLineColor(colors[3]);
-    graph4->SetLineWidth(2);
     graph4->SetLineStyle(lineStyles[3]);
+    graph4->SetLineWidth(lineWidths[3]);
     graph4->Draw("L");
   }
 
   if ( graph5 ) {
     graph5->SetMarkerColor(colors[4]);
-    graph5->SetMarkerSize(2);
     graph5->SetMarkerStyle(markerStyles[4]);
+    graph5->SetMarkerSize(markerSizes[4]);
     graph5->SetLineColor(colors[4]);
-    graph5->SetLineWidth(2);
     graph5->SetLineStyle(lineStyles[4]);
+    graph5->SetLineWidth(lineWidths[4]);
     graph5->Draw("L");
   }
 
   if ( graph6 ) {
     graph6->SetMarkerColor(colors[5]);
-    graph6->SetMarkerSize(2);
     graph6->SetMarkerStyle(markerStyles[5]);
+    graph6->SetMarkerSize(markerSizes[5]);
     graph6->SetLineColor(colors[5]);
-    graph6->SetLineWidth(2);
     graph6->SetLineStyle(lineStyles[5]);
+    graph6->SetLineWidth(lineWidths[5]);
     graph6->Draw("L");
   }
 
@@ -435,7 +438,7 @@ void showFitFunctions(double canvasSizeX, double canvasSizeY,
 		      TProfile* profile4, TF1* fitFunction4, const std::string& legendEntry4,
 		      TProfile* profile5, TF1* fitFunction5, const std::string& legendEntry5,
 		      TProfile* profile6, TF1* fitFunction6, const std::string& legendEntry6,
-		      int colors[], int markerStyles[], int lineStyles[], 
+		      int colors[], int markerStyles[], int markerSizes[], int lineStyles[], int lineWidths[], 
 		      double legendTextSize, double legendPosX, double legendPosY, double legendSizeX, double legendSizeY, 
 		      std::vector<std::string>& labelTextLines, double labelTextSize,
 		      double labelPosX, double labelPosY, double labelSizeX, double labelSizeY,
@@ -482,90 +485,90 @@ void showFitFunctions(double canvasSizeX, double canvasSizeY,
   yAxis->SetTitleOffset(yAxisOffset);
 
   profile1->SetLineColor(colors[0]);
-  profile1->SetLineWidth(2);
   profile1->SetLineStyle(1);
+  profile1->SetLineWidth(lineWidths[0]);
   profile1->SetMarkerColor(colors[0]);
-  profile1->SetMarkerSize(2);
   profile1->SetMarkerStyle(markerStyles[0]);
+  profile1->SetMarkerSize(markerSizes[0]);
   profile1->Draw("e1p");
 
   fitFunction1->SetLineColor(colors[0]);
-  fitFunction1->SetLineWidth(2);
   fitFunction1->SetLineStyle(lineStyles[0]);
+  fitFunction1->SetLineWidth(lineWidths[0]);
   fitFunction1->Draw("Lsame");
 
   if ( profile2 && fitFunction2 ) {
     profile2->SetLineColor(colors[1]);
-    profile2->SetLineWidth(2);
     profile2->SetLineStyle(1);
+    profile2->SetLineWidth(lineWidths[1]);
     profile2->SetMarkerColor(colors[1]);
-    profile2->SetMarkerSize(2);
     profile2->SetMarkerStyle(markerStyles[1]);
+    profile2->SetMarkerSize(markerSizes[1]);
     profile2->Draw("e1psame");
 
     fitFunction2->SetLineColor(colors[1]);
-    fitFunction2->SetLineWidth(2);
     fitFunction2->SetLineStyle(lineStyles[1]);
+    fitFunction2->SetLineWidth(lineWidths[1]);
     fitFunction2->Draw("Lsame");
   }
 
   if ( profile3 && fitFunction3 ) {
     profile3->SetLineColor(colors[2]);
-    profile3->SetLineWidth(2);
     profile3->SetLineStyle(1);
+    profile3->SetLineWidth(lineWidths[2]);
     profile3->SetMarkerColor(colors[2]);
-    profile3->SetMarkerSize(2);
     profile3->SetMarkerStyle(markerStyles[2]);
+    profile3->SetMarkerSize(markerSizes[2]);
     profile3->Draw("e1psame");
 
     fitFunction3->SetLineColor(colors[2]);
-    fitFunction3->SetLineWidth(2);
     fitFunction3->SetLineStyle(lineStyles[2]);
+    fitFunction3->SetLineWidth(lineWidths[2]);
     fitFunction3->Draw("Lsame");
   }
   
   if ( profile4 && fitFunction4 ) {
     profile4->SetLineColor(colors[3]);
-    profile4->SetLineWidth(2);
     profile4->SetLineStyle(1);
+    profile4->SetLineWidth(lineWidths[3]);
     profile4->SetMarkerColor(colors[3]);
-    profile4->SetMarkerSize(2);
     profile4->SetMarkerStyle(markerStyles[3]);
+    profile4->SetMarkerSize(markerSizes[3]);
     profile4->Draw("e1psame");
 
     fitFunction4->SetLineColor(colors[3]);
-    fitFunction4->SetLineWidth(2);
     fitFunction4->SetLineStyle(lineStyles[3]);
+    fitFunction4->SetLineWidth(lineWidths[3]);
     fitFunction4->Draw("Lsame");
   }
 
   if ( profile5 && fitFunction5 ) {
     profile5->SetLineColor(colors[4]);
-    profile5->SetLineWidth(2);
     profile5->SetLineStyle(1);
+    profile5->SetLineWidth(lineWidths[4]);
     profile5->SetMarkerColor(colors[4]);
-    profile5->SetMarkerSize(2);
     profile5->SetMarkerStyle(markerStyles[4]);
+    profile5->SetMarkerSize(markerSizes[4]);
     profile5->Draw("e1psame");
 
     fitFunction5->SetLineColor(colors[4]);
-    fitFunction5->SetLineWidth(2);
     fitFunction5->SetLineStyle(lineStyles[4]);
+    fitFunction5->SetLineWidth(lineWidths[4]);
     fitFunction5->Draw("Lsame");
   }
   
   if ( profile6 && fitFunction6 ) {
     profile6->SetLineColor(colors[5]);
-    profile6->SetLineWidth(2);
     profile6->SetLineStyle(1);
+    profile6->SetLineWidth(lineWidths[5]);
     profile6->SetMarkerColor(colors[5]);
-    profile6->SetMarkerSize(2);
     profile6->SetMarkerStyle(markerStyles[5]);
+    profile6->SetMarkerSize(markerSizes[5]);
     profile6->Draw("e1psame");
 
     fitFunction6->SetLineColor(colors[5]);
-    fitFunction6->SetLineWidth(2);
     fitFunction6->SetLineStyle(lineStyles[5]);
+    fitFunction6->SetLineWidth(lineWidths[5]);
     fitFunction6->Draw("Lsame");
   }
 
@@ -632,19 +635,28 @@ double compFitRMS(const TH2* histogram, const TF1* fitFunction)
     double binCenterX   = xAxis->GetBinCenter(idxBinX);
     double fitFunctionX = binCenterX;
     double fitFunctionY = fitFunction->Eval(fitFunctionX);
+    double binX_rms2 = 0.;
+    double binX_sum  = 0.;
     for ( int idxBinY = 1; idxBinY <= numBinsY; ++idxBinY )
     {
       double binCenterY = yAxis->GetBinCenter(idxBinY);
       double binContent = histogram->GetBinContent(idxBinX, idxBinY);
-      rms2 += binContent*square(binCenterY - fitFunctionY);
-      sum  += binContent;
+      binX_rms2 += binContent*square(binCenterY - fitFunctionY);
+      binX_sum  += binContent;
     }
+    //std::cout << "binX #" << idxBinX << " (x = " << binCenterX << "): y(fitted) = " << fitFunctionY << ", rms^s = ";
+    //if ( binX_sum > 0. ) std::cout << binX_rms2/binX_sum;
+    //else std::cout << "N/A";
+    //std::cout << std::endl;
+    rms2 += binX_rms2;
+    sum  += binX_sum;
   }
   if ( sum > 0. ) 
   {
     rms2 /= sum;
   }
   double rms = TMath::Sqrt(rms2);
+  //std::cout << "--> returning rms = " << rms << std::endl;
   return rms;
 }
 
@@ -657,18 +669,18 @@ void makeIsolationPlots()
   gROOT->SetBatch(true);
 
   std::string inputFilePath = Form("%s/src/L1Trigger/TallinnL1PFTauAnalyzer/test/", gSystem->Getenv("CMSSW_BASE"));
-  std::string inputFileName_signal = "TallinnL1PFTauAnalyzer_signal_2019May14.root";
+  std::string inputFileName_signal = "TallinnL1PFTauAnalyzer_signal_2019May27v2.root";
   TFile* inputFile_signal = openFile(inputFilePath, inputFileName_signal);
-  std::string inputFileName_background = "TallinnL1PFTauAnalyzer_background_2019May14.root";
+  std::string inputFileName_background = "TallinnL1PFTauAnalyzer_background_2019May27v2.root";
   TFile* inputFile_background = openFile(inputFilePath, inputFileName_background);
 
   std::vector<std::string> pfAlgos;
   pfAlgos.push_back("PF");
-  pfAlgos.push_back("Puppi");
+  //pfAlgos.push_back("Puppi");
 
   std::vector<std::string> absEtaRanges;
   absEtaRanges.push_back("absEtaLt1p00");
-  absEtaRanges.push_back("absEtaLt1p40");
+  //absEtaRanges.push_back("absEtaLt1p40");
 
   std::vector<std::string> ptThresholds;
   ptThresholds.push_back("ptGt20");
@@ -681,11 +693,6 @@ void makeIsolationPlots()
   binning_absEta.push_back("absEta0p60to0p90");
   binning_absEta.push_back("absEta0p90to1p20");
   binning_absEta.push_back("absEta1p20to1p50");
-  //binning_absEta.push_back("absEta1p50to1p80");
-  //binning_absEta.push_back("absEta1p80to2p10");
-  //binning_absEta.push_back("absEta2p10to2p40");
-  //binning_absEta.push_back("absEta2p40to2p70");
-  //binning_absEta.push_back("absEta2p70to3p00");
   
   std::vector<std::string> binning_pt;
   binning_pt.push_back("pt20to30");
@@ -696,48 +703,80 @@ void makeIsolationPlots()
   std::vector<std::string> observables;
   observables.push_back("absChargedIso");
   observables.push_back("absNeutralIso");
+  observables.push_back("absNeutralIso_wDeltaBetaCorr");
+  observables.push_back("absNeutralIso_wRhoCorr");
   observables.push_back("absCombinedIso");
   observables.push_back("absCombinedIso_wDeltaBetaCorr");
   observables.push_back("absCombinedIso_wRhoCorr");
   observables.push_back("relChargedIso");
   observables.push_back("relNeutralIso");
+  observables.push_back("relNeutralIso_wDeltaBetaCorr");
+  observables.push_back("relNeutralIso_wRhoCorr"); 
   observables.push_back("relCombinedIso");
   observables.push_back("relCombinedIso_wDeltaBetaCorr");
   observables.push_back("relCombinedIso_wRhoCorr"); 
   observables.push_back("pt");
 
+  std::map<std::string, int> mode; // key = observable
+  mode["pt"]                                     = kGtCut;
+  mode["absChargedIso"]                          = kLtCut;
+  mode["absNeutralIso"]                          = kLtCut;
+  mode["absNeutralIso_wDeltaBetaCorr"]           = kLtCut;
+  mode["absNeutralIso_wRhoCorr"]                 = kLtCut;
+  mode["absCombinedIso"]                         = kLtCut;
+  mode["absCombinedIso_wDeltaBetaCorr"]          = kLtCut;
+  mode["absCombinedIso_wRhoCorr"]                = kLtCut;
+  mode["relChargedIso"]                          = kLtCut;
+  mode["relNeutralIso"]                          = kLtCut;
+  mode["relNeutralIso_wDeltaBetaCorr"]           = kLtCut;
+  mode["relNeutralIso_wRhoCorr"]                 = kLtCut;
+  mode["relCombinedIso"]                         = kLtCut;
+  mode["relCombinedIso_wDeltaBetaCorr"]          = kLtCut;
+  mode["relCombinedIso_wRhoCorr"]                = kLtCut;
+  mode["sumChargedIsoPileup"]                    = kLtCut;
+
   std::map<std::string, int> rebin; // key = observable
   rebin["pt"]                                    =   5;
   rebin["absChargedIso"]                         =   5;
   rebin["absNeutralIso"]                         =   5;
+  rebin["absNeutralIso_wDeltaBetaCorr"]          =   5;
+  rebin["absNeutralIso_wRhoCorr"]                =   5;
   rebin["absCombinedIso"]                        =   5;
   rebin["absCombinedIso_wDeltaBetaCorr"]         =   5;
   rebin["absCombinedIso_wRhoCorr"]               =   5;
   rebin["relChargedIso"]                         =   2;
   rebin["relNeutralIso"]                         =   2;
+  rebin["relNeutralIso_wDeltaBetaCorr"]          =   2;
+  rebin["relNeutralIso_wRhoCorr"]                =   2;
   rebin["relCombinedIso"]                        =   2;
   rebin["relCombinedIso_wDeltaBetaCorr"]         =   2;
   rebin["relCombinedIso_wRhoCorr"]               =   2;
-  rebin["sumChargedIsoPileup"]                   =   2;
+  rebin["sumChargedIsoPileup"]                   =   5;
 
   std::map<std::string, double> xMin; // key = observable
   xMin["pt"]                                     =   0.;
   xMin["absChargedIso"]                          =   0.;
   xMin["absNeutralIso"]                          =   0.;
+  xMin["absNeutralIso_wDeltaBetaCorr"]           =   0.;
+  xMin["absNeutralIso_wRhoCorr"]                 =   0.;
   xMin["absCombinedIso"]                         =   0.;
   xMin["absCombinedIso_wDeltaBetaCorr"]          =   0.;
   xMin["absCombinedIso_wRhoCorr"]                =   0.;
   xMin["relChargedIso"]                          =   0.;
   xMin["relNeutralIso"]                          =   0.;
+  xMin["relNeutralIso_wDeltaBetaCorr"]           =   0.;  
+  xMin["relNeutralIso_wRhoCorr"]                 =   0.; 
   xMin["relCombinedIso"]                         =   0.;
-  xMin["relCombinedIso_wDeltaBetaCorr"]          =   0.;
-  xMin["relCombinedIso"]                         =   0.; 
+  xMin["relCombinedIso_wDeltaBetaCorr"]          =   0.;  
+  xMin["relCombinedIso_wRhoCorr"]                =   0.; 
   xMin["sumChargedIsoPileup"]                    =   0.; 
 
   std::map<std::string, double> xMax; // key = observable
   xMax["pt"]                                     = 100.;
   xMax["absChargedIso"]                          =  25.;
   xMax["absNeutralIso"]                          =  25.;
+  xMax["absNeutralIso_wDeltaBetaCorr"]           =  25.;
+  xMax["absNeutralIso_wRhoCorr"]                 =  25.;
   xMax["absCombinedIso"]                         =  25.;
   xMax["absCombinedIso_wDeltaBetaCorr"]          =  25.;
   xMax["absCombinedIso_wRhoCorr"]                =  25.;
@@ -752,33 +791,45 @@ void makeIsolationPlots()
   xAxisTitles["pt"]                              = "L1 #tau_{h} p_{T} [GeV]";
   xAxisTitles["absChargedIso"]                   = "L1 #tau I_{ch} [GeV]";
   xAxisTitles["absNeutralIso"]                   = "L1 #tau I_{neu} [GeV]";
+  xAxisTitles["absNeutralIso_wDeltaBetaCorr"]    = "#Delta#beta-corrected L1 #tau I_{neu} [GeV]";
+  xAxisTitles["absNeutralIso_wRhoCorr"]          = "#rho-corrected L1 #tau I_{neu} [GeV]";
   xAxisTitles["absCombinedIso"]                  = "L1 #tau I_{cmb} [GeV]";
   xAxisTitles["absCombinedIso_wDeltaBetaCorr"]   = "#Delta#beta-corrected L1 #tau I_{cmb} [GeV]";
   xAxisTitles["absCombinedIso_wRhoCorr"]         = "#rho-corrected L1 #tau I_{cmb} [GeV]";
   xAxisTitles["relChargedIso"]                   = "L1 #tau I_{ch} / p_{T}";
   xAxisTitles["relNeutralIso"]                   = "L1 #tau I_{neu} / p_{T}";
+  xAxisTitles["relNeutralIso_wDeltaBetaCorr"]    = "#Delta#beta-corrected L1 #tau I_{neu} / p_{T}";
+  xAxisTitles["relNeutralIso_wRhoCorr"]          = "#rho-corrected L1 #tau I_{neu} / p_{T}";
   xAxisTitles["relCombinedIso"]                  = "L1 #tau I_{cmb} / p_{T}";
-  xAxisTitles["relCombinedIso_wDeltaBetaCorr"]   = "L1 #tau I_{cmb} / p_{T}";
-  xAxisTitles["relCombinedIso_wRhoCorr"]         = "L1 #tau I_{cmb} / p_{T}";
+  xAxisTitles["relCombinedIso_wDeltaBetaCorr"]   = "#Delta#beta-corrected L1 #tau I_{cmb} / p_{T}";
+  xAxisTitles["relCombinedIso_wRhoCorr"]         = "#rho-corrected L1 #tau I_{cmb} / p_{T}";
 
   std::map<std::string, std::string> legendEntries; // key = observable
   legendEntries["pt"]                            = "p_{T}";
   legendEntries["absChargedIso"]                 = "I_{ch}";
   legendEntries["absNeutralIso"]                 = "I_{neu}";
+  legendEntries["absNeutralIso_wDeltaBetaCorr"]  = "I_{neu} (#Delta#beta-corr.)";
+  legendEntries["absNeutralIso_wRhoCorr"]        = "I_{neu} (#rho-corr.)";
   legendEntries["absCombinedIso"]                = "I_{cmb}";
   legendEntries["absCombinedIso_wDeltaBetaCorr"] = "I_{cmb} (#Delta#beta-corr.)";
   legendEntries["absCombinedIso_wRhoCorr"]       = "I_{cmb} (#rho-corr.)";
   legendEntries["relChargedIso"]                 = "I_{ch}";
   legendEntries["relNeutralIso"]                 = "I_{neu}";
+  legendEntries["relNeutralIso_wDeltaBetaCorr"]  = "I_{neu}(#Delta#beta-corr.)";
+  legendEntries["relNeutralIso_wRhoCorr"]        = "I_{neu} (#rho-corr.)";
   legendEntries["relCombinedIso"]                = "I_{cmb}";
   legendEntries["relCombinedIso_wDeltaBetaCorr"] = "I_{cmb}(#Delta#beta-corr.)";
   legendEntries["relCombinedIso_wRhoCorr"]       = "I_{cmb} (#rho-corr.)";
 
-  std::string dqmDirectory = "DQMData/TallinnL1PFTauIsolationAnalyzer";
+  std::string dqmDirectory = "DQMData/TallinnL1PFTauIsolationAnalyzerWithStripsWithoutPreselection";
   
-  int colors[6] = { 1, 2, 8, 4, 6, 7 };
-  int lineStyles[6] = { 1, 1, 1, 1, 1, 1 };
-  int markerStyles[6] = { 22, 32, 20, 24, 21, 25 };
+  int colors[6]                 = {  1,  2,  8,  4,  6,  7 };
+  int lineStyles[6]             = {  1,  1,  1,  1,  1,  1 };
+  int lineWidths_histogram[6]   = {  2,  2,  2,  2,  2,  2 };
+  int lineWidths_graph[6]       = {  3,  3,  3,  3,  3,  3 };
+  int lineWidths_fitFunction[6] = {  2,  2,  2,  2,  2,  2 };
+  int markerStyles[6]           = { 22, 32, 20, 24, 21, 25 };
+  int markerSizes[6]            = {  2,  2,  2,  2,  2,  2 };
 
   for ( std::vector<std::string>::const_iterator pfAlgo = pfAlgos.begin();
 	pfAlgo != pfAlgos.end(); ++pfAlgo ) {
@@ -803,7 +854,7 @@ void makeIsolationPlots()
 	  TH1* histogram_background_rebinned = ( rebin[*observable] > 1 ) ? 
 	    histogram_background->Rebin(rebin[*observable]) : histogram_signal;
 
-	  TGraph* graph_roc = compGraph_rocCurve(histogram_signal, histogram_background);
+	  TGraph* graph_roc = compGraph_rocCurve(histogram_signal, histogram_background, mode[*observable]);
 	  graphs_roc[*observable] = graph_roc;
 
 	  std::vector<std::string> labelTextLines = getLabelTextLines(*ptThreshold);
@@ -816,18 +867,19 @@ void makeIsolationPlots()
 			 0, "",
 			 0, "",
 			 0, "",
-			 colors, lineStyles, 
-			 0.050, 0.66, 0.74, 0.23, 0.15, 
+			 colors, lineStyles, lineWidths_histogram,
+			 0.050, 0.68, 0.74, 0.23, 0.17, 
 			 labelTextLines, 0.050,
 			 0.70, 0.62, 0.23, 0.06, 
 			 xMin[*observable], xMax[*observable], xAxisTitles[*observable], 1.2, 
-			 false, 0., 1.09, "Events", 1.4, 
+			 true, 1.e-3, 1.99e0, "Events", 1.4, 
 			 outputFileName_distribution);
 	}
 
 	std::vector<std::string> labelTextLines = getLabelTextLines(*ptThreshold);
 	std::string outputFileName_roc_absIso = Form("makeIsolationPlots_rocCurves_absIso_%s_%s_%s.png", 
 	  pfAlgo->data(), absEtaRange->data(), ptThreshold->data());
+
 	showGraphs(1150, 1150,
 		   graphs_roc["absChargedIso"],                 legendEntries["absChargedIso"],
 		   graphs_roc["absNeutralIso"],                 legendEntries["absNeutralIso"],
@@ -835,11 +887,10 @@ void makeIsolationPlots()
 		   graphs_roc["absCombinedIso_wDeltaBetaCorr"], legendEntries["absCombinedIso_wDeltaBetaCorr"],
 		   graphs_roc["absCombinedIso_wRhoCorr"],       legendEntries["absCombinedIso_wRhoCorr"],
 		   graphs_roc["pt"],                            legendEntries["pt"],
-		   0, "",
-		   colors, markerStyles, lineStyles, 
-		   0.045, 0.18, 0.17, 0.23, 0.26, 
-		   labelTextLines, 0.050,
-		   0.63, 0.65, 0.26, 0.07, 
+		   colors, markerStyles, markerSizes, lineStyles, lineWidths_graph, 
+		   0.040, 0.67, 0.17, 0.23, 0.27, 
+		   labelTextLines, 0.045,
+		   0.18, 0.86, 0.26, 0.05, 
 		   0., 1.09, "Signal Efficiency", 1.2, 
 		   false, 0., 1.09, "Background Rejection", 1.4, 
 		   outputFileName_roc_absIso);
@@ -852,10 +903,10 @@ void makeIsolationPlots()
 		   graphs_roc["relCombinedIso_wDeltaBetaCorr"], legendEntries["relCombinedIso_wDeltaBetaCorr"],
 		   graphs_roc["relCombinedIso_wRhoCorr"],       legendEntries["relCombinedIso_wRhoCorr"],
 		   graphs_roc["pt"],                            legendEntries["pt"],
-		   colors, markerStyles, lineStyles, 
-		   0.045, 0.18, 0.17, 0.23, 0.26, 
-		   labelTextLines, 0.050,
-		   0.63, 0.65, 0.26, 0.07, 
+		   colors, markerStyles, markerSizes, lineStyles, lineWidths_graph, 
+		   0.040, 0.67, 0.17, 0.23, 0.27, 
+		   labelTextLines, 0.045,
+		   0.18, 0.86, 0.26, 0.05, 
 		   0., 1.09, "Signal Efficiency", 1.2, 
 		   false, 0., 1.09, "Background Rejection", 1.4, 
 		   outputFileName_roc_relIso);	
@@ -894,12 +945,12 @@ void makeIsolationPlots()
 		       0, "",
 		       0, "",
 		       0, "",
-		       colors, lineStyles, 
-		       0.050, 0.66, 0.74, 0.23, 0.15, 
-		       labelTextLines, 0.050,
-		       0.70, 0.62, 0.23, 0.06, 
+		       colors, lineStyles, lineWidths_histogram, 
+		       0.050, 0.80, 0.74, 0.08, 0.17, 
+		       labelTextLines, 0.040,
+		       0.18, 0.75, 0.33, 0.17, 
 		       0., 25., "L1 #tau Isolation [GeV]", 1.2, 
-		       false, 0., 1.09, "Events", 1.4, 
+		       true, 1.e-3, 1.99e0, "Events", 1.4, 
 		       outputFileName);
       }
     }
@@ -983,12 +1034,12 @@ void makeIsolationPlots()
 			 0, 0, "",
 			 0, 0, "",
 			 0, 0, "",
-			 colors, markerStyles, lineStyles, 
-			 0.050, 0.66, 0.74, 0.23, 0.15, 
-			 labelTextLines, 0.050,
-			 0.70, 0.62, 0.23, 0.06, 
+			 colors, markerStyles, markerSizes, lineStyles, lineWidths_fitFunction, 
+			 0.050, 0.80, 0.74, 0.08, 0.17, 
+			 labelTextLines, 0.030,
+			 0.18, 0.75, 0.43, 0.17, 
 			 0., 25., "I_{ch}^{PU} or #rho^{corr} [GeV]", 1.2, 
-			 false, 0., 1.09, "I_{neu}", 1.4, 
+			 false, 0., 5.e+1, "I_{neu}", 1.4, 
 			 outputFileName);
 
 	std::cout << (*bin_pt) << " & " << bin_absEta->data() << std::endl;

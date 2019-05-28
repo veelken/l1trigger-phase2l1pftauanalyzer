@@ -1,7 +1,7 @@
 
 import FWCore.ParameterSet.Config as cms
 
-process = cms.Process("analyzeRho")
+process = cms.Process("analyzeL1PFCandidateType")
 
 process.load('Configuration.StandardSequences.Services_cff')
 process.load('SimGeneral.HepPDTESSource.pythiapdt_cfi')
@@ -48,25 +48,27 @@ process.GlobalTag = GlobalTag(process.GlobalTag, '100X_upgrade2023_realistic_v1'
 process.analysisSequence = cms.Sequence()
 
 from L1Trigger.TallinnL1PFTaus.TallinnL1PFTauProducerPF_cff import TallinnL1PFTauProducerPF
-process.analyzeRhoPF = cms.EDAnalyzer("RhoAnalyzer",
-  srcRho = cms.InputTag('kt6L1PFJetsPF:rho'),
-  srcRhoNeutral = cms.InputTag('kt6L1PFJetsNeutralsPF:rho'),
-  dqmDirectory = cms.string("RhoAnalyzerPF"),
+process.analyzeL1PFCandidateTypePF = cms.EDAnalyzer("L1PFCandidateTypeAnalyzer",
+  srcL1PFCands = cms.InputTag('l1pfCandidates:PF'),
+  srcL1Vertices = cms.InputTag("VertexProducer:l1vertextdr"),                                    
+  isolationQualityCuts = TallinnL1PFTauProducerPF.isolationQualityCuts,             
+  dqmDirectory = cms.string("L1PFCandidateTypeAnalyzerPF"),
 )
-process.analysisSequence += process.analyzeRhoPF
+process.analysisSequence += process.analyzeL1PFCandidateTypePF
 
 from L1Trigger.TallinnL1PFTaus.TallinnL1PFTauProducerPuppi_cff import TallinnL1PFTauProducerPuppi
-process.analyzeRhoPuppi = cms.EDAnalyzer("RhoAnalyzer",
-  srcRho = cms.InputTag('kt6L1PFJetsPuppi:rho'),
-  srcRhoNeutral = cms.InputTag('kt6L1PFJetsNeutralsPuppi:rho'),
-  dqmDirectory = cms.string("RhoAnalyzerPuppi"),
+process.analyzeL1PFCandidateTypePuppi = cms.EDAnalyzer("L1PFCandidateTypeAnalyzer",
+  srcL1PFCands = cms.InputTag('l1pfCandidates:Puppi'),
+  srcL1Vertices = cms.InputTag("VertexProducer:l1vertextdr"),                                                      
+  isolationQualityCuts = TallinnL1PFTauProducerPuppi.isolationQualityCuts,                                         
+  dqmDirectory = cms.string("L1PFCandidateTypeAnalyzerPuppi"),
 )
-process.analysisSequence += process.analyzeRhoPuppi
+process.analysisSequence += process.analyzeL1PFCandidateTypePuppi
 
 process.DQMStore = cms.Service("DQMStore")
 
 process.savePlots = cms.EDAnalyzer("DQMSimpleFileSaver",
-    outputFileName = cms.string('RhoAnalyzer_signal_2019May28.root')
+    outputFileName = cms.string('L1PFCandidateTypeAnalyzer_signal_2019May28.root')
 )
 
 process.p = cms.Path(process.analysisSequence + process.savePlots)

@@ -3,7 +3,6 @@
 #include <TCanvas.h>
 #include <TFile.h>
 #include <TH1.h>
-#include <TGraph.h>
 #include <TLegend.h>
 #include <TMath.h>
 #include <TPaveText.h>
@@ -225,24 +224,18 @@ void makeRhoPlots()
   gROOT->SetBatch(true);
 
   std::string inputFilePath = Form("%s/src/L1Trigger/TallinnL1PFTauAnalyzer/test/", gSystem->Getenv("CMSSW_BASE"));
-  std::string inputFileName = "RhoCorrAnalyzer_signal_2019May24.root";
+  std::string inputFileName = "RhoAnalyzer_signal_2019May28.root";
   TFile* inputFile = openFile(inputFilePath, inputFileName);
 
   std::vector<std::string> pfAlgos;
   pfAlgos.push_back("PF");
   pfAlgos.push_back("Puppi");
 
-  //std::vector<std::string> observables;
-  //observables.push_back("rho");
-  //observables.push_back("rhoNeutral");
-  //observables.push_back("neutralPFCandPt_vs_absEta");
-
   std::map<std::string, int> rebin; // key   = observable
-  rebin["rho"]                       = 1;
-  rebin["rhoNeutral"]                = 1;
-  rebin["neutralPFCandPt_vs_absEta"] = 1;
+  rebin["rho"]        = 1;
+  rebin["rhoNeutral"] = 1;
 
-  std::string dqmDirectory = "DQMData/RhoCorrAnalyzer";
+  std::string dqmDirectory = "DQMData/RhoAnalyzer";
   
   int colors[6] = { 1, 2, 8, 4, 6, 7 };
   int lineStyles[6] = { 1, 1, 1, 1, 1, 1 };
@@ -254,14 +247,15 @@ void makeRhoPlots()
 	pfAlgo != pfAlgos.end(); ++pfAlgo ) {
     std::string histogramName_rho = Form("%s%s/%s", dqmDirectory.data(), pfAlgo->data(), "rho"); 
     TH1* histogram_rho = loadHistogram(inputFile, histogramName_rho, true);
-    TH1* histogram_rho_rebinned = ( rebin["rho"] > 1 ) ? 
-      histogram_rho->Rebin(rebin["rho"]) : histogram_rho;
+    TH1* histogram_rho_rebinned = (TH1*)histogram_rho->Clone(Form("%s_rebinned", histogram_rho->GetName()));
+    if ( rebin["rho"] > 1 ) histogram_rho_rebinned->Rebin(rebin["rho"]);
+
     std::string histogramName_rhoNeutral = Form("%s%s/%s", dqmDirectory.data(), pfAlgo->data(), "rhoNeutral"); 
     TH1* histogram_rhoNeutral = loadHistogram(inputFile, histogramName_rhoNeutral, true);
-    TH1* histogram_rhoNeutral_rebinned = ( rebin["rhoNeutral"] > 1 ) ? 
-      histogram_rhoNeutral->Rebin(rebin["rhoNeutral"]) : histogram_rhoNeutral;
+    TH1* histogram_rhoNeutral_rebinned = (TH1*)histogram_rhoNeutral->Clone(Form("%s_rebinned", histogram_rhoNeutral->GetName()));
+    if ( rebin["rhoNeutral"] > 1 ) histogram_rhoNeutral_rebinned->Rebin(rebin["rhoNeutral"]);
 
-    std::string outputFileName_rho = Form("makeRhoPlots_rho_%s.png", pfAlgo->data());
+    std::string outputFileName = Form("makeRhoPlots_rho_%s.png", pfAlgo->data());
     showHistograms(1150, 850,
 		   histogram_rho_rebinned,        "#rho",
 		   histogram_rhoNeutral_rebinned, "#rho_{neu}",
@@ -275,28 +269,10 @@ void makeRhoPlots()
 		   0.70, 0.62, 0.23, 0.06, 
 		   0., 100., "#rho [GeV]", 1.2, 
 		   true, 1.e-4, 1.99, "Events", 1.4, 
-		   outputFileName_rho);
+		   outputFileName);
 
-    std::string histogramName_neutralPFCandPt_vs_absEta = Form("%s%s/%s", dqmDirectory.data(), pfAlgo->data(), "neutralPFCandPt_vs_absEta"); 
-    TH1* histogram_neutralPFCandPt_vs_absEta = loadHistogram(inputFile, histogramName_neutralPFCandPt_vs_absEta, false);
-    TH1* histogram_neutralPFCandPt_vs_absEta_rebinned = ( rebin["neutralPFCandPt_vs_absEta"] > 1 ) ? 
-      histogram_neutralPFCandPt_vs_absEta->Rebin(rebin["neutralPFCandPt_vs_absEta"]) : histogram_neutralPFCandPt_vs_absEta;
-    
-    std::string outputFileName_neutralPFCandPt_vs_absEta = Form("makeRhoPlots_neutralPFCandPt_vs_absEta_%s.png", pfAlgo->data());
-    showHistograms(1150, 850,
-		   histogram_neutralPFCandPt_vs_absEta_rebinned, "",
-		   0, "",
-		   0, "",
-		   0, "",
-		   0, "",
-		   0, "",
-		   colors, lineStyles, 
-		   0.050, 0.62, 0.74, 0.31, 0.18, 
-		   labelTextLines, 0.050,
-		   0.70, 0.62, 0.23, 0.06, 
-		   0., 3., "#eta", 1.2, 
-		   true, 1.e-2, 1.99e+2, "#frac{dE}{d#eta} [GeV]", 1.4, 
-		   outputFileName_neutralPFCandPt_vs_absEta);
+    delete histogram_rho_rebinned;
+    delete histogram_rhoNeutral_rebinned;
   }
 
   delete inputFile;

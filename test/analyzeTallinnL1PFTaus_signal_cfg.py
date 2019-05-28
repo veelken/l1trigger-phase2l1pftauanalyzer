@@ -26,7 +26,7 @@ process.source = cms.Source("PoolSource",
 import os
 import re
 
-inputFilePath = '/hdfs/cms/store/user/sbhowmik/VBFHToTauTau_M125_14TeV_powheg_pythia8_correctedGridpack/PhaseIIMTDTDRAutumn18MiniAOD_20190514_2/190514_143851/0000/'
+inputFilePath = '/hdfs/cms/store/user/sbhowmik/VBFHToTauTau_M125_14TeV_powheg_pythia8_correctedGridpack/PhaseIIMTDTDRAutumn18MiniAOD_20190524/190524_111901/0000/'
 inputFile_regex = r"[a-zA-Z0-9_/:.-]*NTuple_TallinnL1PFTauProducer_[a-zA-Z0-9-_]+.root"
 
 # check if name of inputFile matches regular expression
@@ -38,7 +38,7 @@ for file in files:
         inputFileNames.append(file)
 print "inputFileNames = %s" % inputFileNames 
 
-#process.source.fileNames = cms.untracked.vstring(inputFileNames)
+process.source.fileNames = cms.untracked.vstring(inputFileNames)
 #--------------------------------------------------------------------------------
 
 from Configuration.AlCa.GlobalTag import GlobalTag
@@ -143,10 +143,10 @@ for useStrips in [ True, False ]:
           srcGenTaus = cms.InputTag(''),
           dRmatch = cms.double(0.3),                                                            
           srcRho = cms.InputTag('kt6L1PFJetsPF:rho'),
-          #inputFileName_rhoCorr = cms.string("L1Trigger/TallinnL1PFTauAnalyzer/data/rhoCorr.root"),
-          #histogramName_rhoCorr = cms.string("RhoCorrAnalyzerPF/neutralPFCandPt_vs_absEta"),
-          inputFileName_rhoCorr = cms.string(""),
-          histogramName_rhoCorr = cms.string(""),                                                      
+          inputFileName_rhoCorr = cms.string("L1Trigger/TallinnL1PFTauAnalyzer/data/rhoCorr.root"),
+          histogramName_rhoCorr = cms.string("DQMData/RhoCorrAnalyzerPF/neutralPFCandPt_vs_absEta"),
+          #inputFileName_rhoCorr = cms.string(""),
+          #histogramName_rhoCorr = cms.string(""),                                                      
           dqmDirectory = cms.string("TallinnL1PFTauIsolationAnalyzer" + moduleLabel + "PF")
         )
         setattr(process, moduleNamePF_TallinnL1PFTauIsolationAnalyzer, modulePF_TallinnL1PFTauIsolationAnalyzer)
@@ -167,10 +167,10 @@ for useStrips in [ True, False ]:
           srcGenTaus = cms.InputTag(''),
           dRmatch = cms.double(0.3),                                                
           srcRho = cms.InputTag('kt6L1PFJetsPuppi:rho'),
-          #inputFileName_rhoCorr = cms.string("L1Trigger/TallinnL1PFTauAnalyzer/data/rhoCorr.root"),
-          #histogramName_rhoCorr = cms.string("RhoCorrAnalyzerPuppi/neutralPFCandPt_vs_absEta"),
-          inputFileName_rhoCorr = cms.string(""),
-          histogramName_rhoCorr = cms.string(""),                                                                          
+          inputFileName_rhoCorr = cms.string("L1Trigger/TallinnL1PFTauAnalyzer/data/rhoCorr.root"),
+          histogramName_rhoCorr = cms.string("DQMData/RhoCorrAnalyzerPuppi/neutralPFCandPt_vs_absEta"),
+          #inputFileName_rhoCorr = cms.string(""),
+          #histogramName_rhoCorr = cms.string(""),                                                                          
           dqmDirectory = cms.string("TallinnL1PFTauIsolationAnalyzer" + moduleLabel + "Puppi")
         )
         setattr(process, moduleNamePuppi_TallinnL1PFTauIsolationAnalyzer, modulePuppi_TallinnL1PFTauIsolationAnalyzer)
@@ -180,7 +180,7 @@ for useStrips in [ True, False ]:
 process.DQMStore = cms.Service("DQMStore")
 
 process.savePlots = cms.EDAnalyzer("DQMSimpleFileSaver",
-    outputFileName = cms.string('TallinnL1PFTauAnalyzer_signal_2019May24.root')
+    outputFileName = cms.string('TallinnL1PFTauAnalyzer_signal_2019May27v2.root')
 )
 
 process.p = cms.Path(process.analysisSequence + process.savePlots)

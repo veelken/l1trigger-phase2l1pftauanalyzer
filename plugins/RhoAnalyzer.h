@@ -1,5 +1,5 @@
-#ifndef L1Trigger_TallinnL1PFTauAnalyzer_RhoCorrAnalyzer_h
-#define L1Trigger_TallinnL1PFTauAnalyzer_RhoCorrAnalyzer_h
+#ifndef L1Trigger_TallinnL1PFTauAnalyzer_RhoAnalyzer_h
+#define L1Trigger_TallinnL1PFTauAnalyzer_RhoAnalyzer_h
 
 #include "FWCore/Framework/interface/EDAnalyzer.h"
 #include "FWCore/Framework/interface/Event.h"
@@ -13,17 +13,17 @@
 #include "DataFormats/Phase2L1ParticleFlow/interface/PFCandidate.h"       // l1t::PFCandidate
 #include "DataFormats/Phase2L1ParticleFlow/interface/PFCandidateFwd.h"    // l1t::PFCandidateCollection
 
-#include <TH1.h>
+#include <TH1.h>     // TH1
 #include <TString.h> // TString, Form()
 
-#include <vector>
-#include <string>
+#include <vector>    // std::vector
+#include <string>    // std::string
 
-class RhoCorrAnalyzer : public edm::EDAnalyzer 
+class RhoAnalyzer : public edm::EDAnalyzer 
 {
  public:
-  RhoCorrAnalyzer(const edm::ParameterSet& cfg);
-  ~RhoCorrAnalyzer();
+  RhoAnalyzer(const edm::ParameterSet& cfg);
+  ~RhoAnalyzer();
     
  private:
   void beginJob();
@@ -38,11 +38,6 @@ class RhoCorrAnalyzer : public edm::EDAnalyzer
   edm::InputTag src_rhoNeutral_;
   edm::EDGetTokenT<double> token_rhoNeutral_;
 
-  edm::InputTag src_l1PFCands_;
-  edm::EDGetTokenT<l1t::PFCandidateCollection> token_l1PFCands_;
-
-  std::vector<TallinnL1PFTauQualityCut> isolationQualityCuts_;
-
   std::string dqmDirectory_;
 
   MonitorElement* me_rho_;
@@ -50,12 +45,6 @@ class RhoCorrAnalyzer : public edm::EDAnalyzer
   
   MonitorElement* me_rhoNeutral_;
   TH1* histogram_rhoNeutral_;
-
-  MonitorElement* me_neutralPFCandPt_vs_absEta_;
-  TH1* histogram_neutralPFCandPt_vs_absEta_;
-
-  MonitorElement* me_EventCounter_;
-  TH1* histogram_EventCounter_;
 };
 
 #endif   

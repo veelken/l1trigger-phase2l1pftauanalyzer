@@ -10,20 +10,22 @@
 #include "DQMServices/Core/interface/DQMStore.h" 
 #include "DQMServices/Core/interface/MonitorElement.h"
 
-#include "DataFormats/TallinnL1PFTaus/interface/TallinnL1PFTau.h"         // l1t::TallinnL1PFTau
-#include "DataFormats/TallinnL1PFTaus/interface/TallinnL1PFTauFwd.h"      // l1t::TallinnL1PFTauCollection
-#include "DataFormats/Math/interface/deltaR.h"                            // reco::deltaR
-#include "DataFormats/JetReco/interface/GenJet.h"                         // reco::GenJet
-#include "DataFormats/JetReco/interface/GenJetCollection.h"               // reco::GenJetCollection
-#include "PhysicsTools/JetMCUtils/interface/JetMCTag.h"                   // JetMCTagUtils::genTauDecayMode()
+#include "DataFormats/TallinnL1PFTaus/interface/TallinnL1PFTau.h"             // l1t::TallinnL1PFTau
+#include "DataFormats/TallinnL1PFTaus/interface/TallinnL1PFTauFwd.h"          // l1t::TallinnL1PFTauCollection
+#include "DataFormats/Math/interface/deltaR.h"                                // reco::deltaR
+#include "DataFormats/JetReco/interface/GenJet.h"                             // reco::GenJet
+#include "DataFormats/JetReco/interface/GenJetCollection.h"                   // reco::GenJetCollection
+#include "PhysicsTools/JetMCUtils/interface/JetMCTag.h"                       // JetMCTagUtils::genTauDecayMode()
 
-#include "L1Trigger/TallinnL1PFTaus/interface/LocalFileInPath.h"          // LocalFileInPath
-#include "L1Trigger/TallinnL1PFTaus/interface/TallinnL1PFTauQualityCut.h" // TallinnL1PFTauQualityCut
+#include "L1Trigger/TallinnL1PFTaus/interface/LocalFileInPath.h"              // LocalFileInPath
+#include "L1Trigger/TallinnL1PFTaus/interface/TallinnL1PFTauQualityCut.h"     // TallinnL1PFTauQualityCut
+#include "L1Trigger/TallinnL1PFTauAnalyzer/interface/histogramAuxFunctions.h" // fillWithOverFlow(), fillWithOverFlow2d()
 
 #include <TFile.h>   // TFile
-#include <TH1.h>     // TH1, TH2
+#include <TH1.h>     // TH1
+#include <TH2.h>     // TH2
 #include <TString.h> // TString, Form()
-#include <TMath.h>   // TMath::Abs()
+#include <TMath.h>   // TMath::Abs(), TMath::Pi()
 
 #include <vector>
 #include <string>
@@ -56,6 +58,7 @@ class TallinnL1PFTauIsolationAnalyzer : public edm::EDAnalyzer
   TFile* inputFile_rhoCorr_;
   std::string histogramName_rhoCorr_;
   TH1* histogram_rhoCorr_;
+  double histogram_rhoCorr_yMax_;
 
   std::string dqmDirectory_;
 
@@ -66,14 +69,40 @@ class TallinnL1PFTauIsolationAnalyzer : public edm::EDAnalyzer
       , histogram_absChargedIso_(nullptr)
       , me_absNeutralIso_(nullptr)
       , histogram_absNeutralIso_(nullptr)
+      , me_absNeutralIso_wDeltaBetaCorr_(nullptr)
+      , histogram_absNeutralIso_wDeltaBetaCorr_(nullptr)
+      , me_absNeutralIso_wRhoCorr_(nullptr)
+      , histogram_absNeutralIso_wRhoCorr_(nullptr)
       , me_absCombinedIso_(nullptr)
       , histogram_absCombinedIso_(nullptr)
+      , me_absCombinedIso_wDeltaBetaCorr_(nullptr)
+      , histogram_absCombinedIso_wDeltaBetaCorr_(nullptr)
+      , me_absCombinedIso_wRhoCorr_(nullptr)
+      , histogram_absCombinedIso_wRhoCorr_(nullptr)
       , me_relChargedIso_(nullptr)
       , histogram_relChargedIso_(nullptr)
       , me_relNeutralIso_(nullptr)
       , histogram_relNeutralIso_(nullptr)
+      , me_relNeutralIso_wDeltaBetaCorr_(nullptr)
+      , histogram_relNeutralIso_wDeltaBetaCorr_(nullptr)
+      , me_relNeutralIso_wRhoCorr_(nullptr)
+      , histogram_relNeutralIso_wRhoCorr_(nullptr)
       , me_relCombinedIso_(nullptr)
       , histogram_relCombinedIso_(nullptr)
+      , me_relCombinedIso_wDeltaBetaCorr_(nullptr)
+      , histogram_relCombinedIso_wDeltaBetaCorr_(nullptr)
+      , me_relCombinedIso_wRhoCorr_(nullptr)
+      , histogram_relCombinedIso_wRhoCorr_(nullptr)
+      , me_sumChargedIsoPileup_(nullptr)
+      , histogram_sumChargedIsoPileup_(nullptr) 
+      , me_sumNeutralIso_vs_sumChargedIsoPileup_(nullptr)
+      , histogram_sumNeutralIso_vs_sumChargedIsoPileup_(nullptr) 
+      , me_rhoCorr_(nullptr)
+      , histogram_rhoCorr_(nullptr) 
+      , me_sumNeutralIso_vs_rhoCorr_(nullptr)
+      , histogram_sumNeutralIso_vs_rhoCorr_(nullptr)
+      , me_pt_(nullptr)
+      , histogram_pt_(nullptr)
       , min_pt_(min_pt)
       , max_pt_(max_pt)
       , min_absEta_(min_absEta)
@@ -91,9 +120,9 @@ class TallinnL1PFTauIsolationAnalyzer : public edm::EDAnalyzer
       else if (                      max_absEta_ >          0. ) histogramName_suffix.Append(Form("_absEtaLt%1.2f",                   max_absEta_));
       else throw cms::Exception("isolationPlotEntryType") 
 	     << " Invalid Configuration parameters min_absEta = " << min_absEta_ << " and max_absEta = " << max_absEta_ << "!!\n";
-      if      ( min_pt_     >  0. && max_pt_     > min_pt_     ) histogramName_suffix.Append(Form("_pt%1.2fto%1.2f",     min_pt_,     max_pt_    ));
-      else if ( min_pt_     >  0.                              ) histogramName_suffix.Append(Form("_ptGt%1.2f",          min_pt_                 ));
-      else if (                      max_pt_     >          0. ) histogramName_suffix.Append(Form("_ptLt%1.2f",                       max_pt_    ));
+      if      ( min_pt_     >  0. && max_pt_     > min_pt_     ) histogramName_suffix.Append(Form("_pt%1.0fto%1.0f",     min_pt_,     max_pt_    ));
+      else if ( min_pt_     >  0.                              ) histogramName_suffix.Append(Form("_ptGt%1.0f",          min_pt_                 ));
+      else if (                      max_pt_     >          0. ) histogramName_suffix.Append(Form("_ptLt%1.0f",                       max_pt_    ));
       else throw cms::Exception("isolationPlotEntryType") 
 	     << " Invalid Configuration parameters min_pt = "     << min_pt_     << " and max_pt = "     << max_pt_     << "!!\n";      
       histogramName_suffix = histogramName_suffix.ReplaceAll(".", "p");
@@ -107,6 +136,16 @@ class TallinnL1PFTauIsolationAnalyzer : public edm::EDAnalyzer
       me_absNeutralIso_ = dqmStore.book1D(histogramName_absNeutralIso.Data(), histogramName_absNeutralIso.Data(), 250, 0., 25.);
       histogram_absNeutralIso_ = me_absNeutralIso_->getTH1();
       assert(histogram_absNeutralIso_);
+
+      TString histogramName_absNeutralIso_wDeltaBetaCorr = Form("absNeutralIso_wDeltaBetaCorr_%s", histogramName_suffix.Data());
+      me_absNeutralIso_wDeltaBetaCorr_ = dqmStore.book1D(histogramName_absNeutralIso_wDeltaBetaCorr.Data(), histogramName_absNeutralIso_wDeltaBetaCorr.Data(), 250, 0., 25.);
+      histogram_absNeutralIso_wDeltaBetaCorr_ = me_absNeutralIso_wDeltaBetaCorr_->getTH1();
+      assert(histogram_absNeutralIso_wDeltaBetaCorr_);
+
+      TString histogramName_absNeutralIso_wRhoCorr = Form("absNeutralIso_wRhoCorr_%s", histogramName_suffix.Data());
+      me_absNeutralIso_wRhoCorr_ = dqmStore.book1D(histogramName_absNeutralIso_wRhoCorr.Data(), histogramName_absNeutralIso_wRhoCorr.Data(), 250, 0., 25.);
+      histogram_absNeutralIso_wRhoCorr_ = me_absNeutralIso_wRhoCorr_->getTH1();
+      assert(histogram_absNeutralIso_wRhoCorr_);
 
       TString histogramName_absCombinedIso = Form("absCombinedIso_%s", histogramName_suffix.Data());
       me_absCombinedIso_ = dqmStore.book1D(histogramName_absCombinedIso.Data(), histogramName_absCombinedIso.Data(), 250, 0., 25.);
@@ -133,6 +172,16 @@ class TallinnL1PFTauIsolationAnalyzer : public edm::EDAnalyzer
       histogram_relNeutralIso_ = me_relNeutralIso_->getTH1();
       assert(histogram_relNeutralIso_);
 
+      TString histogramName_relNeutralIso_wDeltaBetaCorr = Form("relNeutralIso_wDeltaBetaCorr_%s", histogramName_suffix.Data());
+      me_relNeutralIso_wDeltaBetaCorr_ = dqmStore.book1D(histogramName_relNeutralIso_wDeltaBetaCorr.Data(), histogramName_relNeutralIso_wDeltaBetaCorr.Data(), 100, 0., 1.);
+      histogram_relNeutralIso_wDeltaBetaCorr_ = me_relNeutralIso_wDeltaBetaCorr_->getTH1();
+      assert(histogram_relNeutralIso_wDeltaBetaCorr_);
+      
+      TString histogramName_relNeutralIso_wRhoCorr = Form("relNeutralIso_wRhoCorr_%s", histogramName_suffix.Data());
+      me_relNeutralIso_wRhoCorr_ = dqmStore.book1D(histogramName_relNeutralIso_wRhoCorr.Data(), histogramName_relNeutralIso_wRhoCorr.Data(), 100, 0., 1.);
+      histogram_relNeutralIso_wRhoCorr_ = me_relNeutralIso_wRhoCorr_->getTH1();
+      assert(histogram_relNeutralIso_wRhoCorr_);
+
       TString histogramName_relCombinedIso = Form("relCombinedIso_%s", histogramName_suffix.Data());
       me_relCombinedIso_ = dqmStore.book1D(histogramName_relCombinedIso.Data(), histogramName_relCombinedIso.Data(), 100, 0., 1.);
       histogram_relCombinedIso_ = me_relCombinedIso_->getTH1();
@@ -158,6 +207,11 @@ class TallinnL1PFTauIsolationAnalyzer : public edm::EDAnalyzer
       histogram_sumNeutralIso_vs_sumChargedIsoPileup_ = dynamic_cast<TH2*>(me_sumNeutralIso_vs_sumChargedIsoPileup_->getTH1());
       assert(histogram_sumNeutralIso_vs_sumChargedIsoPileup_);
 
+      TString histogramName_rhoCorr = Form("rhoCorr_%s", histogramName_suffix.Data());
+      me_rhoCorr_ = dqmStore.book1D(histogramName_rhoCorr.Data(), histogramName_rhoCorr.Data(), 250, 0., 25.);
+      histogram_rhoCorr_ = me_rhoCorr_->getTH1();
+      assert(histogram_rhoCorr_);
+
       TString histogramName_sumNeutralIso_vs_rhoCorr = Form("sumNeutralIso_vs_rhoCorr_%s", histogramName_suffix.Data());
       me_sumNeutralIso_vs_rhoCorr_ = dqmStore.book2D(histogramName_sumNeutralIso_vs_rhoCorr.Data(), histogramName_sumNeutralIso_vs_rhoCorr.Data(), 50, 0., 25., 50, 0., 25.);
       histogram_sumNeutralIso_vs_rhoCorr_ = dynamic_cast<TH2*>(me_sumNeutralIso_vs_rhoCorr_->getTH1());
@@ -174,32 +228,42 @@ class TallinnL1PFTauIsolationAnalyzer : public edm::EDAnalyzer
 	   (TMath::Abs(l1Tau.eta()) > min_absEta_ || min_absEta_ <= 0.) && (TMath::Abs(l1Tau.eta()) < max_absEta_ || max_absEta_ <= 0.) )
       {
 	double sumChargedIso = l1Tau.sumChargedIso();
-	histogram_absChargedIso_->Fill(sumChargedIso, evtWeight);
-	histogram_relChargedIso_->Fill(sumChargedIso/TMath::Max(1., l1Tau.pt()), evtWeight);
+	fillWithOverFlow(histogram_absChargedIso_, sumChargedIso, evtWeight);
+	fillWithOverFlow(histogram_relChargedIso_, sumChargedIso/TMath::Max(1., l1Tau.pt()), evtWeight);
 
 	double sumNeutralIso = l1Tau.sumNeutralIso();
-	histogram_absNeutralIso_->Fill(sumNeutralIso, evtWeight);
-	histogram_relNeutralIso_->Fill(sumNeutralIso/TMath::Max(1., l1Tau.pt()), evtWeight);
+	fillWithOverFlow(histogram_absNeutralIso_, sumNeutralIso, evtWeight);
+	fillWithOverFlow(histogram_relNeutralIso_, sumNeutralIso/TMath::Max(1., l1Tau.pt()), evtWeight);
 
 	double sumCombinedIso = sumChargedIso + sumNeutralIso;
-	histogram_absCombinedIso_->Fill(sumCombinedIso, evtWeight);
-	histogram_relCombinedIso_->Fill(sumCombinedIso/TMath::Max(1., l1Tau.pt()), evtWeight);
-
+	fillWithOverFlow(histogram_absCombinedIso_, sumCombinedIso, evtWeight);
+	fillWithOverFlow(histogram_relCombinedIso_, sumCombinedIso/TMath::Max(1., l1Tau.pt()), evtWeight);
+	
 	double sumChargedIsoPileup = l1Tau.sumChargedIsoPileup();
-	histogram_sumChargedIsoPileup_->Fill(sumChargedIsoPileup, evtWeight);
+	fillWithOverFlow(histogram_sumChargedIsoPileup_, sumChargedIsoPileup, evtWeight);
 
-	double sumCombinedIso_wDeltaBetaCorr = sumChargedIso + TMath::Max(0., sumNeutralIso - 0.5*sumChargedIsoPileup);
-	histogram_absCombinedIso_wDeltaBetaCorr_->Fill(sumCombinedIso_wDeltaBetaCorr, evtWeight);
-	histogram_relCombinedIso_wDeltaBetaCorr_->Fill(sumCombinedIso_wDeltaBetaCorr/TMath::Max(1., l1Tau.pt()), evtWeight);
+	double sumNeutralIso_wDeltaBetaCorr = TMath::Max(0., sumNeutralIso - 0.5*sumChargedIsoPileup);
+	fillWithOverFlow(histogram_absNeutralIso_wDeltaBetaCorr_, sumNeutralIso_wDeltaBetaCorr, evtWeight);
+	fillWithOverFlow(histogram_relNeutralIso_wDeltaBetaCorr_, sumNeutralIso_wDeltaBetaCorr/TMath::Max(1., l1Tau.pt()), evtWeight);
+	
+	double sumNeutralIso_wRhoCorr = TMath::Max(0., sumNeutralIso - rhoCorr);
+	fillWithOverFlow(histogram_absNeutralIso_wRhoCorr_, sumNeutralIso_wRhoCorr, evtWeight);
+	fillWithOverFlow(histogram_relNeutralIso_wRhoCorr_, sumNeutralIso_wRhoCorr/TMath::Max(1., l1Tau.pt()), evtWeight);
 
-	double sumCombinedIso_wRhoCorr = sumChargedIso + TMath::Max(0., sumNeutralIso - l1Tau.rhoCorr());
-	histogram_absCombinedIso_wRhoCorr_->Fill(sumCombinedIso_wRhoCorr, evtWeight);
-	histogram_relCombinedIso_wRhoCorr_->Fill(sumCombinedIso_wRhoCorr/TMath::Max(1., l1Tau.pt()), evtWeight);
+	double sumCombinedIso_wDeltaBetaCorr = sumChargedIso + sumNeutralIso_wDeltaBetaCorr;
+	fillWithOverFlow(histogram_absCombinedIso_wDeltaBetaCorr_, sumCombinedIso_wDeltaBetaCorr, evtWeight);
+	fillWithOverFlow(histogram_relCombinedIso_wDeltaBetaCorr_, sumCombinedIso_wDeltaBetaCorr/TMath::Max(1., l1Tau.pt()), evtWeight);
 
-	histogram_sumNeutralIso_vs_sumChargedIsoPileup_->Fill(sumChargedIsoPileup, sumNeutralIso, evtWeight);
-	histogram_sumNeutralIso_vs_rhoCorr_->Fill(rhoCorr, sumNeutralIso, evtWeight);
+	double sumCombinedIso_wRhoCorr = sumChargedIso + sumNeutralIso_wRhoCorr;
+	fillWithOverFlow(histogram_absCombinedIso_wRhoCorr_, sumCombinedIso_wRhoCorr, evtWeight);
+	fillWithOverFlow(histogram_relCombinedIso_wRhoCorr_, sumCombinedIso_wRhoCorr/TMath::Max(1., l1Tau.pt()), evtWeight);
 
-	histogram_pt_->Fill(l1Tau.pt(), evtWeight);
+	fillWithOverFlow(histogram_rhoCorr_, rhoCorr, evtWeight);
+
+	fillWithOverFlow2d(histogram_sumNeutralIso_vs_sumChargedIsoPileup_, sumChargedIsoPileup, sumNeutralIso, evtWeight);
+	fillWithOverFlow2d(histogram_sumNeutralIso_vs_rhoCorr_, rhoCorr, sumNeutralIso, evtWeight);
+
+	fillWithOverFlow(histogram_pt_, l1Tau.pt(), evtWeight);
       }
     }
     void fillHistograms_woGenMatching(const l1t::TallinnL1PFTau& l1Tau, double rhoCorr, double evtWeight)
@@ -217,6 +281,10 @@ class TallinnL1PFTauIsolationAnalyzer : public edm::EDAnalyzer
     TH1* histogram_absChargedIso_;
     MonitorElement* me_absNeutralIso_;
     TH1* histogram_absNeutralIso_;
+    MonitorElement* me_absNeutralIso_wDeltaBetaCorr_;
+    TH1* histogram_absNeutralIso_wDeltaBetaCorr_;
+    MonitorElement* me_absNeutralIso_wRhoCorr_;
+    TH1* histogram_absNeutralIso_wRhoCorr_;
     MonitorElement* me_absCombinedIso_;
     TH1* histogram_absCombinedIso_;
     MonitorElement* me_absCombinedIso_wDeltaBetaCorr_;
@@ -227,16 +295,22 @@ class TallinnL1PFTauIsolationAnalyzer : public edm::EDAnalyzer
     TH1* histogram_relChargedIso_;
     MonitorElement* me_relNeutralIso_;
     TH1* histogram_relNeutralIso_;
+    MonitorElement* me_relNeutralIso_wDeltaBetaCorr_;
+    TH1* histogram_relNeutralIso_wDeltaBetaCorr_;
+    MonitorElement* me_relNeutralIso_wRhoCorr_;
+    TH1* histogram_relNeutralIso_wRhoCorr_;
     MonitorElement* me_relCombinedIso_;
-    TH1* histogram_relCombinedIso_;
-    MonitorElement* me_sumChargedIsoPileup_;
-    TH1* histogram_sumChargedIsoPileup_;
+    TH1* histogram_relCombinedIso_;   
     MonitorElement* me_relCombinedIso_wDeltaBetaCorr_;
     TH1* histogram_relCombinedIso_wDeltaBetaCorr_;
     MonitorElement* me_relCombinedIso_wRhoCorr_;
     TH1* histogram_relCombinedIso_wRhoCorr_;
+    MonitorElement* me_sumChargedIsoPileup_;
+    TH1* histogram_sumChargedIsoPileup_;    
     MonitorElement* me_sumNeutralIso_vs_sumChargedIsoPileup_;
     TH2* histogram_sumNeutralIso_vs_sumChargedIsoPileup_;    
+    MonitorElement* me_rhoCorr_;
+    TH1* histogram_rhoCorr_;    
     MonitorElement* me_sumNeutralIso_vs_rhoCorr_;
     TH2* histogram_sumNeutralIso_vs_rhoCorr_; 
     MonitorElement* me_pt_;
