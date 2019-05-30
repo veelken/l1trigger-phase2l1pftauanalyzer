@@ -2,8 +2,9 @@
 #include <TAxis.h>
 #include <TCanvas.h>
 #include <TFile.h>
-#include <TGraphAsymmErrors.h>
 #include <TH1.h>
+#include <TGraphAsymmErrors.h>
+#include <TF1.h>
 #include <TLegend.h>
 #include <TMath.h>
 #include <TPaveText.h>
@@ -61,6 +62,117 @@ TGraph* makeEfficiencyGraph(TH1* histogram_numerator, TH1* histogram_denominator
   return graph_efficiency;
 }
 
+/**
+ * @brief Integral of Crystal Ball function for fitting trigger efficiency turn-on curves (code from Pascal Paganini)
+ * @param m: pT of reconstructed hadronic tau candidates;
+ *           the other parameters refer to the shape of the Crystal Ball function, cf. Section 6.2.3 of AN-2016/027
+ * @return efficiency for passing trigger, per hadronic tau leg
+ */
+
+double
+integralCrystalBall(double m,
+                    double m0,
+                    double sigma,
+                    double alpha,
+                    double n,
+                    double norm)
+{
+  //std::cout << "<integralCrystalBall>:" << std::endl;
+  //std::cout << " m     = " << m << std::endl;
+  //std::cout << " m0    = " << m0 << std::endl;
+  //std::cout << " sigma = " << sigma << std::endl;
+  //std::cout << " alpha = " << alpha << std::endl;
+  //std::cout << " n     = " << n << std::endl;
+  //std::cout << " norm  = " << norm << std::endl;
+
+  const double sqrtPiOver2 = 1.2533141373;
+  const double sqrt2 = 1.4142135624;
+
+  const double sig = std::fabs(static_cast<double>(sigma));
+
+  double t = (m - m0) / sig;
+  if ( alpha < 0 )
+  {
+    t = -t;
+  }
+
+  const double absAlpha = std::fabs(alpha / sig);
+  const double a = std::pow(n / absAlpha, n) * std::exp(-0.5 * absAlpha * absAlpha);
+  const double b = absAlpha - n / absAlpha;
+
+  if ( a >= std::numeric_limits<double>::max() )
+  {
+    return -1.;
+  }
+
+  double ApproxErf;
+  double arg = absAlpha / sqrt2;
+  if      ( arg >  5. ) ApproxErf =  1;
+  else if ( arg < -5. ) ApproxErf = -1;
+  else                  ApproxErf = std::erf(arg);
+
+  const double leftArea  = (1 + ApproxErf) * sqrtPiOver2;
+  const double rightArea = (a / std::pow(absAlpha - b, n - 1)) / (n - 1);
+  const double area = leftArea + rightArea;
+
+  double retVal = 0.;
+  if ( t <= absAlpha )
+  {
+    arg = t / sqrt2;
+    if     (arg >  5.) ApproxErf =  1;
+    else if(arg < -5.) ApproxErf = -1;
+    else               ApproxErf = std::erf(arg);
+    retVal = norm * (1 + ApproxErf) * sqrtPiOver2 / area;
+  }
+  else
+  {
+    retVal = norm * (leftArea +  a * (1 / std::pow(t-b, n - 1) - 1 / std::pow(absAlpha - b, n - 1)) / (1 - n)) / area;
+  }
+
+  //std:: cout << "--> returning " << retVal << std::endl;
+  return retVal;
+}
+
+Double_t integralCrystalBall_fcn(Double_t* x, Double_t* par)
+{
+  return integralCrystalBall(x[0], par[0], par[1], par[2], par[3], par[4]);
+}
+
+TF1* makeEfficiencyFit(TGraph* graph, const std::string& fitFunctionName, double xMin, double xMax)
+{
+  TF1* fitFunction = 0;
+
+  int numPoints = graph->GetN();
+  if ( numPoints >= 2 )
+  {
+    TGraph* graph_inverse = new TGraph(numPoints);
+    for ( int idxPoint = 0; idxPoint < numPoints; ++idxPoint ) { 
+      double x, y;
+      graph->GetPoint(idxPoint, x, y);
+      graph_inverse->SetPoint(idxPoint, y, x);
+      //std::cout << "graph_inverse: x  = " << y << ", y = " << x << std::endl;
+    }
+    double m0 = graph_inverse->Eval(0.5);
+    if ( m0 < 20. ) m0 = 20.;
+
+    fitFunction = new TF1("fitFunction1", integralCrystalBall_fcn, xMin, xMax, 5);
+    fitFunction->SetParameter(0, m0);
+    fitFunction->SetParameter(1, 5.);
+    fitFunction->SetParameter(2, 0.1);
+    fitFunction->SetParameter(3, 2.);
+    fitFunction->SetParameter(4, 1.);
+    graph->Fit(fitFunction);
+
+    fitFunction->SetLineColor(graph->GetLineColor());
+    fitFunction->SetLineWidth(graph->GetLineWidth());
+    fitFunction->SetLineStyle(graph->GetLineStyle());
+  
+    delete graph_inverse;
+  }
+
+  return fitFunction;
+}
+
 void showGraphs(double canvasSizeX, double canvasSizeY,
 		TGraph* graph1, const std::string& legendEntry1,
 		TGraph* graph2, const std::string& legendEntry2,
@@ -68,6 +180,7 @@ void showGraphs(double canvasSizeX, double canvasSizeY,
 		TGraph* graph4, const std::string& legendEntry4,
 		TGraph* graph5, const std::string& legendEntry5,
 		TGraph* graph6, const std::string& legendEntry6,
+		bool addFitFunctions,
 		int colors[], int markerStyles[], int lineStyles[], 
 		double legendTextSize, double legendPosX, double legendPosY, double legendSizeX, double legendSizeY, 
 		std::vector<std::string>& labelTextLines, double labelTextSize,
@@ -124,7 +237,15 @@ void showGraphs(double canvasSizeX, double canvasSizeY,
   graph1->SetLineWidth(2);
   graph1->SetLineStyle(lineStyles[0]);
   graph1->Draw("P");
+  TF1* fitFunction1 = 0;
+  if ( addFitFunctions )
+  {
+    fitFunction1 = makeEfficiencyFit(graph1, "fitFunction1", xMin, xMax);
+    fitFunction1->Draw();
+    graph1->Draw("P");
+  }
 
+  TF1* fitFunction2 = 0;
   if ( graph2 ) {
     graph2->SetMarkerColor(colors[1]);
     graph2->SetMarkerSize(2);
@@ -133,8 +254,16 @@ void showGraphs(double canvasSizeX, double canvasSizeY,
     graph2->SetLineWidth(2);
     graph2->SetLineStyle(lineStyles[1]);
     graph2->Draw("P");
+    TF1* fitFunction2 = 0;
+    if ( addFitFunctions )
+    {
+      fitFunction2 = makeEfficiencyFit(graph2, "fitFunction2", xMin, xMax);
+      fitFunction2->Draw();
+      graph2->Draw("P");
+    }
   }
 
+  TF1* fitFunction3 = 0;
   if ( graph3 ) {
     graph3->SetMarkerColor(colors[2]);
     graph3->SetMarkerSize(2);
@@ -143,8 +272,16 @@ void showGraphs(double canvasSizeX, double canvasSizeY,
     graph3->SetLineWidth(2);
     graph3->SetLineStyle(lineStyles[2]);
     graph3->Draw("P");
+    TF1* fitFunction3 = 0;
+    if ( addFitFunctions )
+    {
+      fitFunction3 = makeEfficiencyFit(graph3, "fitFunction3", xMin, xMax);
+      fitFunction3->Draw();
+      graph3->Draw("P");
+    }
   }
 
+  TF1* fitFunction4 = 0;
   if ( graph4 ) {
     graph4->SetMarkerColor(colors[3]);
     graph4->SetMarkerSize(2);
@@ -153,8 +290,16 @@ void showGraphs(double canvasSizeX, double canvasSizeY,
     graph4->SetLineWidth(2);
     graph4->SetLineStyle(lineStyles[3]);
     graph4->Draw("P");
+    TF1* fitFunction4 = 0;
+    if ( addFitFunctions )
+    {
+      fitFunction4 = makeEfficiencyFit(graph4, "fitFunction4", xMin, xMax);
+      fitFunction4->Draw();
+      graph4->Draw("P");
+    }
   }
 
+  TF1* fitFunction5 = 0;
   if ( graph5 ) {
     graph5->SetMarkerColor(colors[4]);
     graph5->SetMarkerSize(2);
@@ -163,8 +308,16 @@ void showGraphs(double canvasSizeX, double canvasSizeY,
     graph5->SetLineWidth(2);
     graph5->SetLineStyle(lineStyles[4]);
     graph5->Draw("P");
+    TF1* fitFunction5 = 0;
+    if ( addFitFunctions )
+    {
+      fitFunction5 = makeEfficiencyFit(graph5, "fitFunction5", xMin, xMax);
+      fitFunction5->Draw();
+      graph5->Draw("P");
+    }
   }
 
+  TF1* fitFunction6 = 0;
   if ( graph6 ) {
     graph6->SetMarkerColor(colors[5]);
     graph6->SetMarkerSize(2);
@@ -173,6 +326,13 @@ void showGraphs(double canvasSizeX, double canvasSizeY,
     graph6->SetLineWidth(2);
     graph6->SetLineStyle(lineStyles[5]);
     graph6->Draw("P");
+    TF1* fitFunction6 = 0;
+    if ( addFitFunctions )
+    {
+      fitFunction6 = makeEfficiencyFit(graph6, "fitFunction6", xMin, xMax);
+      fitFunction6->Draw();
+      graph6->Draw("P");
+    }
   }
 
   TLegend* legend = 0;
@@ -215,10 +375,16 @@ void showGraphs(double canvasSizeX, double canvasSizeY,
   canvas->Print(std::string(outputFileName_plot).append(".png").data());
   canvas->Print(std::string(outputFileName_plot).append(".pdf").data());
   
+  delete dummyHistogram;
+  delete fitFunction1;
+  delete fitFunction2;
+  delete fitFunction3;
+  delete fitFunction4;
+  delete fitFunction5;
+  delete fitFunction6;
   delete label;
   delete legend;
   delete canvas;  
-  delete dummyHistogram;
 }
 
 std::vector<std::string> getLabelTextLines(const std::string& ptThreshold)
@@ -240,7 +406,7 @@ void makeEfficiencyPlots()
   gROOT->SetBatch(true);
 
   std::string inputFilePath = Form("%s/src/L1Trigger/TallinnL1PFTauAnalyzer/test/", gSystem->Getenv("CMSSW_BASE"));
-  std::string inputFileName = "TallinnL1PFTauAnalyzer_signal_2019May14.root";
+  std::string inputFileName = "TallinnL1PFTauAnalyzer_signal_2019May29v2.root";
   std::string inputFileName_full = inputFilePath;
   if ( inputFileName_full.find_last_of("/") != (inputFileName_full.size() - 1) ) inputFileName_full.append("/");
   inputFileName_full.append(inputFileName);
@@ -278,7 +444,9 @@ void makeEfficiencyPlots()
 
   std::vector<std::string> ptThresholds;
   ptThresholds.push_back("ptGt20");
+  ptThresholds.push_back("ptGt25");
   ptThresholds.push_back("ptGt30");
+  ptThresholds.push_back("ptGt35");
   ptThresholds.push_back("ptGt40");
 
   std::vector<std::string> isolationWPs;
@@ -296,8 +464,10 @@ void makeEfficiencyPlots()
   xMax["eta"] =  +3.0;
 
   std::map<std::string, std::string> xAxisTitles; // key = observable
-  xAxisTitles["pt"] = "True #tau_{h} p_{T} [GeV]";
-  xAxisTitles["eta"] = "True #tau_{h} #eta";
+  //xAxisTitles["pt"] = "True #tau_{h} p_{T} [GeV]";
+  //xAxisTitles["eta"] = "True #tau_{h} #eta";
+  xAxisTitles["pt"] = "Offline #tau_{h} p_{T} [GeV]";
+  xAxisTitles["eta"] = "Offline #tau_{h} #eta";
 
   std::map<std::string, std::string> legendEntries_vs_isolationWPs; // key = isolationWP
   legendEntries_vs_isolationWPs["relChargedIsoLt0p40"] = "I_{ch} < 0.40*p_{T}";
@@ -322,7 +492,7 @@ void makeEfficiencyPlots()
   for ( std::vector<std::string>::const_iterator pfAlgo = pfAlgos.begin();
 	pfAlgo != pfAlgos.end(); ++pfAlgo ) {
     for ( std::vector<std::string>::const_iterator observable = observables.begin();
-	observable != observables.end(); ++observable ) {
+	observable != observables.end(); ++observable ) {      
       for ( std::vector<std::string>::const_iterator absEtaRange = absEtaRanges.begin();
 	    absEtaRange != absEtaRanges.end(); ++absEtaRange ) {
         for ( std::vector<std::string>::const_iterator ptThreshold = ptThresholds.begin();
@@ -330,16 +500,25 @@ void makeEfficiencyPlots()
           std::map<std::string, TGraph*> graphs_efficiency_vs_isolationWPs; // key = isolationWP
           for ( std::vector<std::string>::const_iterator isolationWP = isolationWPs.begin();
 	        isolationWP != isolationWPs.end(); ++isolationWP ) {
-            std::string histogramName_numerator = Form("%s%s/effL1PFTau_vs_%s_numerator_all_%s_%s_%s", 
+            //std::string histogramName_numerator = Form("%s%s_wrtGenHadTaus/effL1PFTau_vs_%s_numerator_all_%s_%s_%s", 
+            //  dqmDirectory.data(), pfAlgo->data(), observable->data(), absEtaRange->data(), ptThreshold->data(), isolationWP->data());
+	    std::string histogramName_numerator = Form("%s%s_wrtOfflineTaus/effL1PFTau_vs_%s_numerator_all_%s_%s_%s", 
               dqmDirectory.data(), pfAlgo->data(), observable->data(), absEtaRange->data(), ptThreshold->data(), isolationWP->data());
             TH1* histogram_numerator = loadHistogram(inputFile, histogramName_numerator);
-	    std::string histogramName_denominator = Form("%s%s/effL1PFTau_vs_%s_denominator_all_%s_%s_%s", 
+	    //std::string histogramName_denominator = Form("%s%s_wrtGenHadTaus/effL1PFTau_vs_%s_denominator_all_%s_%s_%s", 
+            //  dqmDirectory.data(), pfAlgo->data(), observable->data(), absEtaRange->data(), ptThreshold->data(), isolationWP->data());
+	    std::string histogramName_denominator = Form("%s%s_wrtOfflineTaus/effL1PFTau_vs_%s_denominator_all_%s_%s_%s", 
               dqmDirectory.data(), pfAlgo->data(), observable->data(), absEtaRange->data(), ptThreshold->data(), isolationWP->data());
             TH1* histogram_denominator = loadHistogram(inputFile, histogramName_denominator);
 	    TGraph* graph_efficiency = makeEfficiencyGraph(histogram_numerator, histogram_denominator);
 	    graphs_efficiency_vs_isolationWPs[*isolationWP] = graph_efficiency;
           }
 
+	  bool addFitFunctions = false;
+	  if ( (*observable) == "pt" ) 
+	  {
+	    addFitFunctions = true;
+	  }
 	  std::vector<std::string> labelTextLines = getLabelTextLines(*ptThreshold);
           std::string outputFileName_efficiency_vs_isolationWPs = Form("makeEfficiencyPlots_%s_vs_%s_%s_%s.png", 
             pfAlgo->data(), observable->data(), absEtaRange->data(), ptThreshold->data());
@@ -350,10 +529,11 @@ void makeEfficiencyPlots()
 		     graphs_efficiency_vs_isolationWPs["relChargedIsoLt0p05"], legendEntries_vs_isolationWPs["relChargedIsoLt0p05"],
 		     0, "",
 		     0, "",
+		     addFitFunctions,
 		     colors, markerStyles, lineStyles, 
-		     0.045, 0.18, 0.17, 0.23, 0.26, 
-		     labelTextLines, 0.050,
-		     0.63, 0.65, 0.26, 0.07, 
+		     0.045, 0.68, 0.17, 0.23, 0.26, 
+		     labelTextLines, 0.045,
+		     0.17, 0.85, 0.26, 0.05, 
 		     xMin[*observable], xMax[*observable], xAxisTitles[*observable], 1.2, 
 		     false, 0., 1.09, "Efficiency", 1.4, 
 		     outputFileName_efficiency_vs_isolationWPs);
@@ -368,30 +548,40 @@ void makeEfficiencyPlots()
 	    std::map<std::string, TGraph*> graphs_efficiency_vs_decayModes; // key = decayMode
 	    for ( std::vector<std::string>::const_iterator decayMode = decayModes.begin();
 		  decayMode != decayModes.end(); ++decayMode ) {
-  	      std::string histogramName_numerator = Form("%s%s/effL1PFTau_vs_%s_numerator_%s_%s_%s_%s", 
+  	      //std::string histogramName_numerator = Form("%s%s_wrtGenHadTaus/effL1PFTau_vs_%s_numerator_%s_%s_%s_%s", 
+	      //  dqmDirectory.data(), pfAlgo->data(), observable->data(), decayMode->data(), absEtaRange->data(), ptThreshold->data(), isolationWP->data());
+	      std::string histogramName_numerator = Form("%s%s_wrtOfflineTaus/effL1PFTau_vs_%s_numerator_%s_%s_%s_%s", 
 	        dqmDirectory.data(), pfAlgo->data(), observable->data(), decayMode->data(), absEtaRange->data(), ptThreshold->data(), isolationWP->data());
               TH1* histogram_numerator = loadHistogram(inputFile, histogramName_numerator);
-	      std::string histogramName_denominator = Form("%s%s/effL1PFTau_vs_%s_denominator_%s_%s_%s_%s", 
+	      //std::string histogramName_denominator = Form("%s%s_wrtGenHadTaus/effL1PFTau_vs_%s_denominator_%s_%s_%s_%s", 
+              //  dqmDirectory.data(), pfAlgo->data(), observable->data(), decayMode->data(), absEtaRange->data(), ptThreshold->data(), isolationWP->data());
+	      std::string histogramName_denominator = Form("%s%s_wrtOfflineTaus/effL1PFTau_vs_%s_denominator_%s_%s_%s_%s", 
                 dqmDirectory.data(), pfAlgo->data(), observable->data(), decayMode->data(), absEtaRange->data(), ptThreshold->data(), isolationWP->data());
               TH1* histogram_denominator = loadHistogram(inputFile, histogramName_denominator);
 	      TGraph* graph_efficiency = makeEfficiencyGraph(histogram_numerator, histogram_denominator);
 	      graphs_efficiency_vs_decayModes[*decayMode] = graph_efficiency;
             }
 	  
+	    bool addFitFunctions = false;
+	    if ( (*observable) == "pt" ) 
+	    {
+	      addFitFunctions = true;
+	    }
 	    std::vector<std::string> labelTextLines = getLabelTextLines(*ptThreshold);
 	    std::string outputFileName_efficiency_vs_decayModes = Form("makeEfficiencyPlots_%s_vs_%s_%s_%s_%s.png", 
               pfAlgo->data(), observable->data(), absEtaRange->data(), ptThreshold->data(), isolationWP->data());
 	    showGraphs(1150, 850,
-		       graphs_efficiency_vs_decayModes["oneProng0Pi0"], legendEntries_vs_decayModes["oneProng0Pi0"],
-		       graphs_efficiency_vs_decayModes["oneProng1Pi0"], legendEntries_vs_decayModes["oneProng1Pi0"],
-		       graphs_efficiency_vs_decayModes["oneProng2Pi0"], legendEntries_vs_decayModes["oneProng2Pi0"],
+		       graphs_efficiency_vs_decayModes["oneProng0Pi0"],   legendEntries_vs_decayModes["oneProng0Pi0"],
+		       graphs_efficiency_vs_decayModes["oneProng1Pi0"],   legendEntries_vs_decayModes["oneProng1Pi0"],
+		       graphs_efficiency_vs_decayModes["oneProng2Pi0"],   legendEntries_vs_decayModes["oneProng2Pi0"],
 		       graphs_efficiency_vs_decayModes["threeProng0Pi0"], legendEntries_vs_decayModes["threeProng0Pi0"],
 		       graphs_efficiency_vs_decayModes["threeProng1Pi0"], legendEntries_vs_decayModes["threeProng1Pi0"],
-		       graphs_efficiency_vs_decayModes["threeProng1Pi0"], legendEntries_vs_decayModes["threeProng1Pi0"],
+		       0, "",
+		       addFitFunctions,
 		       colors, markerStyles, lineStyles, 
-		       0.045, 0.18, 0.17, 0.23, 0.26, 
-		       labelTextLines, 0.050,
-		       0.63, 0.65, 0.26, 0.07, 
+		       0.045, 0.68, 0.17, 0.23, 0.26, 
+		       labelTextLines, 0.045,
+		       0.17, 0.85, 0.26, 0.05, 
 		       xMin[*observable], xMax[*observable], xAxisTitles[*observable], 1.2, 
 		       false, 0., 1.09, "Efficiency", 1.4, 
 		       outputFileName_efficiency_vs_decayModes);

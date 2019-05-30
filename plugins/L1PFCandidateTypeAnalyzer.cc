@@ -21,6 +21,12 @@ L1PFCandidateTypeAnalyzer::L1PFCandidateTypeAnalyzer(const edm::ParameterSet& cf
     tokenL1Vertices_ = consumes<l1t::VertexCollection>(srcL1Vertices_);
   }
 
+  srcPileupSummaryInfo_ = cfg.getParameter<edm::InputTag>("srcPileupSummaryInfo");
+  if ( srcPileupSummaryInfo_.label() != "" ) 
+  {
+    tokenPileupSummaryInfo_ = consumes<PileupSummaryInfoCollection>(srcPileupSummaryInfo_);
+  }
+
   edm::ParameterSet cfg_isolationQualityCuts = cfg.getParameter<edm::ParameterSet>("isolationQualityCuts");
   isolationQualityCuts_dzCut_disabled_        = readL1PFTauQualityCuts(cfg_isolationQualityCuts, "disabled",        false);
   isolationQualityCuts_dzCut_enabled_primary_ = readL1PFTauQualityCuts(cfg_isolationQualityCuts, "enabled_primary", false);
@@ -79,33 +85,47 @@ void L1PFCandidateTypeAnalyzer::analyze(const edm::Event& evt, const edm::EventS
     }
   }
 
+  int numPileup = -1;
+  if ( srcPileupSummaryInfo_.label() != "" ) 
+  {
+    edm::Handle<PileupSummaryInfoCollection> pileupSummaryInfos;
+    evt.getByToken(tokenPileupSummaryInfo_, pileupSummaryInfos);
+    for ( PileupSummaryInfoCollection::const_iterator pileupSummaryInfo = pileupSummaryInfos->begin(); pileupSummaryInfo != pileupSummaryInfos->end(); ++pileupSummaryInfo ) 
+    {
+      if ( pileupSummaryInfo->getBunchCrossing() == 0 ) 
+      {
+	numPileup = pileupSummaryInfo->getPU_NumInteractions();
+      }
+    }
+  }
+
   const double evtWeight = 1.;
   
   for ( l1t::PFCandidateCollection::const_iterator l1PFCand = l1PFCands->begin(); l1PFCand != l1PFCands->end(); ++l1PFCand )
   {
     if ( l1PFCand->id() == l1t::PFCandidate::ChargedHadron && isSelected(isolationQualityCuts_dzCut_enabled_primary_, *l1PFCand, primaryVertex_z) )
     {
-      pfChargedHadronPlots_->fillHistograms(*l1PFCand, evtWeight);
+      pfChargedHadronPlots_->fillHistograms(*l1PFCand, numPileup, evtWeight);
     }
     if ( l1PFCand->id() == l1t::PFCandidate::ChargedHadron && isSelected(isolationQualityCuts_dzCut_enabled_pileup_, *l1PFCand, primaryVertex_z) )
     {
-      pfChargedHadronPileupPlots_->fillHistograms(*l1PFCand, evtWeight);
+      pfChargedHadronPileupPlots_->fillHistograms(*l1PFCand, numPileup, evtWeight);
     }
     if ( l1PFCand->id() == l1t::PFCandidate::Electron && isSelected(isolationQualityCuts_dzCut_disabled_, *l1PFCand, primaryVertex_z) )
     {
-      pfElectronPlots_->fillHistograms(*l1PFCand, evtWeight);
+      pfElectronPlots_->fillHistograms(*l1PFCand, numPileup, evtWeight);
     }
     if ( l1PFCand->id() == l1t::PFCandidate::NeutralHadron && isSelected(isolationQualityCuts_dzCut_disabled_, *l1PFCand, primaryVertex_z) )
     {
-      pfNeutralHadronPlots_->fillHistograms(*l1PFCand, evtWeight);
+      pfNeutralHadronPlots_->fillHistograms(*l1PFCand, numPileup, evtWeight);
     }
     if ( l1PFCand->id() == l1t::PFCandidate::Photon && isSelected(isolationQualityCuts_dzCut_disabled_, *l1PFCand, primaryVertex_z) )
     {
-      pfPhotonPlots_->fillHistograms(*l1PFCand, evtWeight);
+      pfPhotonPlots_->fillHistograms(*l1PFCand, numPileup, evtWeight);
     }
     if ( l1PFCand->id() == l1t::PFCandidate::Muon && isSelected(isolationQualityCuts_dzCut_disabled_, *l1PFCand, primaryVertex_z) )
     {
-      pfMuonPlots_->fillHistograms(*l1PFCand, evtWeight);
+      pfMuonPlots_->fillHistograms(*l1PFCand, numPileup, evtWeight);
     }
   }
 

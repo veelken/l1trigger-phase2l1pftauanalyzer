@@ -211,7 +211,7 @@ void makeRatePlots()
   gROOT->SetBatch(true);
 
   std::string inputFilePath = Form("%s/src/L1Trigger/TallinnL1PFTauAnalyzer/test/", gSystem->Getenv("CMSSW_BASE"));
-  std::string inputFileName = "TallinnL1PFTauAnalyzer_background_2019May14.root";
+  std::string inputFileName = "TallinnL1PFTauAnalyzer_background_2019May27v2.root";
   std::string inputFileName_full = inputFilePath;
   if ( inputFileName_full.find_last_of("/") != (inputFileName_full.size() - 1) ) inputFileName_full.append("/");
   inputFileName_full.append(inputFileName);
@@ -262,7 +262,7 @@ void makeRatePlots()
       std::map<std::string, TH1*> histograms_rateDoubleTau; // key = isolationWP
       for ( std::vector<std::string>::const_iterator isolationWP = isolationWPs.begin();
 	    isolationWP != isolationWPs.end(); ++isolationWP ) {
-        std::string histogram2dName = Form("%s%s/numL1PFTaus_vs_L1PFTauPt_%s_%s", 
+        std::string histogram2dName = Form("%s%s/numL1PFTaus_vs_ptThreshold_%s_%s", 
           dqmDirectory.data(), pfAlgo->data(), absEtaRange->data(), isolationWP->data());
         TH2* histogram2d = loadHistogram2d(inputFile, histogram2dName);
 
@@ -282,7 +282,7 @@ void makeRatePlots()
 		     0, "",
 		     0, "",
 		     colors, lineStyles, 
-		     0.045, 0.18, 0.17, 0.23, 0.26, 
+		     0.045, 0.65, 0.70, 0.23, 0.21,
 		     labelTextLines, 0.050,
 		     0.63, 0.65, 0.26, 0.07, 
 		     -1., -1., "L1 #tau p_{T} Threshold [GeV]", 1.2, 
@@ -299,7 +299,7 @@ void makeRatePlots()
 		     0, "",
 		     0, "",
 		     colors, lineStyles, 
-		     0.045, 0.18, 0.17, 0.23, 0.26, 
+		     0.045, 0.65, 0.70, 0.23, 0.21,
 		     labelTextLines, 0.050,
 		     0.63, 0.65, 0.26, 0.07, 
 		     -1., -1., "L1 #tau p_{T} Threshold [GeV]", 1.2, 

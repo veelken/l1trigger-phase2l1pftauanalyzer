@@ -50,25 +50,51 @@ process.analysisSequence = cms.Sequence()
 from L1Trigger.TallinnL1PFTaus.TallinnL1PFTauProducerPF_cff import TallinnL1PFTauProducerPF
 process.analyzeL1PFCandidateTypePF = cms.EDAnalyzer("L1PFCandidateTypeAnalyzer",
   srcL1PFCands = cms.InputTag('l1pfCandidates:PF'),
-  srcL1Vertices = cms.InputTag("VertexProducer:l1vertextdr"),                                    
+  srcL1Vertices = cms.InputTag('VertexProducer:l1vertextdr'),
+  #srcPileupSummaryInfo = cms.InputTag('slimmedAddPileupInfo'),
+  srcPileupSummaryInfo = cms.InputTag(''),              
   isolationQualityCuts = TallinnL1PFTauProducerPF.isolationQualityCuts,             
   dqmDirectory = cms.string("L1PFCandidateTypeAnalyzerPF"),
 )
 process.analysisSequence += process.analyzeL1PFCandidateTypePF
 
+process.analyzeOfflinePFCandidateTypePF = cms.EDAnalyzer("PackedCandidateTypeAnalyzer",
+  srcPackedCands = cms.InputTag('packedPFCandidates'),
+  srcOfflineVertices = cms.InputTag('offlineSlimmedPrimaryVertices'),
+  #srcPileupSummaryInfo = cms.InputTag('slimmedAddPileupInfo'),
+  srcPileupSummaryInfo = cms.InputTag(''),              
+  isolationQualityCuts = TallinnL1PFTauProducerPF.isolationQualityCuts,
+  applyPuppiWeights = cms.bool(False),
+  dqmDirectory = cms.string("PackedCandidateTypeAnalyzerPF"),
+)
+process.analysisSequence += process.analyzeOfflinePFCandidateTypePF
+
 from L1Trigger.TallinnL1PFTaus.TallinnL1PFTauProducerPuppi_cff import TallinnL1PFTauProducerPuppi
 process.analyzeL1PFCandidateTypePuppi = cms.EDAnalyzer("L1PFCandidateTypeAnalyzer",
   srcL1PFCands = cms.InputTag('l1pfCandidates:Puppi'),
-  srcL1Vertices = cms.InputTag("VertexProducer:l1vertextdr"),                                                      
+  srcL1Vertices = cms.InputTag('VertexProducer:l1vertextdr'),
+  #srcPileupSummaryInfo = cms.InputTag('slimmedAddPileupInfo'),
+  srcPileupSummaryInfo = cms.InputTag(''),                                                       
   isolationQualityCuts = TallinnL1PFTauProducerPuppi.isolationQualityCuts,                                         
   dqmDirectory = cms.string("L1PFCandidateTypeAnalyzerPuppi"),
 )
 process.analysisSequence += process.analyzeL1PFCandidateTypePuppi
 
+process.analyzeOfflinePFCandidateTypePuppi = cms.EDAnalyzer("PackedCandidateTypeAnalyzer",
+  srcPackedCands = cms.InputTag('packedPFCandidates'),
+  srcOfflineVertices = cms.InputTag('offlineSlimmedPrimaryVertices'),
+  #srcPileupSummaryInfo = cms.InputTag('slimmedAddPileupInfo'),
+  srcPileupSummaryInfo = cms.InputTag(''),              
+  isolationQualityCuts = TallinnL1PFTauProducerPuppi.isolationQualityCuts,
+  applyPuppiWeights = cms.bool(True),
+  dqmDirectory = cms.string("PackedCandidateTypeAnalyzerPuppi"),
+)
+process.analysisSequence += process.analyzeOfflinePFCandidateTypePuppi
+
 process.DQMStore = cms.Service("DQMStore")
 
 process.savePlots = cms.EDAnalyzer("DQMSimpleFileSaver",
-    outputFileName = cms.string('L1PFCandidateTypeAnalyzer_signal_2019May28.root')
+    outputFileName = cms.string('L1PFCandidateTypeAnalyzer_signal_2019May29v2.root')
 )
 
 process.p = cms.Path(process.analysisSequence + process.savePlots)

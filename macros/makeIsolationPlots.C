@@ -676,11 +676,11 @@ void makeIsolationPlots()
 
   std::vector<std::string> pfAlgos;
   pfAlgos.push_back("PF");
-  //pfAlgos.push_back("Puppi");
+  pfAlgos.push_back("Puppi");
 
   std::vector<std::string> absEtaRanges;
   absEtaRanges.push_back("absEtaLt1p00");
-  //absEtaRanges.push_back("absEtaLt1p40");
+  absEtaRanges.push_back("absEtaLt1p40");
 
   std::vector<std::string> ptThresholds;
   ptThresholds.push_back("ptGt20");

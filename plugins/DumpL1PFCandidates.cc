@@ -46,6 +46,15 @@ void DumpL1PFCandidates::analyze(const edm::Event& evt, const edm::EventSetup& e
       std::cout << " (PUPPI weight = " << l1PFCand.puppiWeight() << ")";
     }
     std::cout << std::endl;
+    if ( l1PFCand.pfTrack().isNonnull() )
+    {
+      std::cout << " PFTrack: pT = " << l1PFCand.pfTrack()->pt() << ", eta = " << l1PFCand.pfTrack()->eta() << ", phi = " << l1PFCand.pfTrack()->phi() << std::endl;
+    }
+    if ( l1PFCand.pfCluster().isNonnull() )
+    {
+      std::cout << " PFCluster: pT = " << l1PFCand.pfCluster()->pt() << ", eta = " << l1PFCand.pfCluster()->eta() << ", phi = " << l1PFCand.pfCluster()->phi() 
+		<< " (isEM = " << l1PFCand.pfCluster()->isEM() << ", H/E = " << l1PFCand.pfCluster()->hOverE() << ")" << std::endl;
+    }
   }
 }
 

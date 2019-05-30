@@ -93,16 +93,16 @@ void showHistograms_stacked(double canvasSizeX, double canvasSizeY,
   canvas->SetFillColor(10);
   canvas->SetBorderSize(2);
   
-  canvas->SetTopMargin(0.05);
-  canvas->SetLeftMargin(0.14);
-  canvas->SetBottomMargin(0.14);
-  canvas->SetRightMargin(0.05);
+  canvas->SetTopMargin(0.03);
+  canvas->SetLeftMargin(0.13);
+  canvas->SetBottomMargin(0.13);
+  canvas->SetRightMargin(0.03);
 
   canvas->SetLogx(useLogScaleX);
   canvas->SetLogy(useLogScaleY);
   
-  canvas->SetGridx(1);
-  canvas->SetGridy(1);
+  //canvas->SetGridx(1);
+  //canvas->SetGridy(1);
 
   if ( !histogram1 ) {
     std::cerr << "<showHistograms>: histogram1 = NULL --> skipping !!" << std::endl;
@@ -299,7 +299,7 @@ void makePFCandidateTypePlots()
   gROOT->SetBatch(true);
 
   std::string inputFilePath = Form("%s/src/L1Trigger/TallinnL1PFTauAnalyzer/test/", gSystem->Getenv("CMSSW_BASE"));
-  std::string inputFileName = "L1PFCandidateTypeAnalyzer_signal_2019May28.root";
+  std::string inputFileName = "L1PFCandidateTypeAnalyzer_signal_2019May29.root";
   TFile* inputFile = openFile(inputFilePath, inputFileName);
 
   std::vector<std::string> pfAlgos;
@@ -330,8 +330,12 @@ void makePFCandidateTypePlots()
   xAxisTitles["pt"]                    = "p_{T} [GeV]";
   xAxisTitles["eta"]                   = "#eta";
 
-  std::string dqmDirectory = "DQMData/L1PFCandidateTypeAnalyzer";
-  
+  enum { kL1, kOffline };
+
+  std::map<int, std::string> dqmDirectories; // key = kL1 or kOffline
+  dqmDirectories[kL1]                  = "DQMData/L1PFCandidateTypeAnalyzer";
+  dqmDirectories[kOffline]             = "DQMData/PackedCandidateTypeAnalyzer";
+
   std::vector<std::string> pfCandTypes;
   pfCandTypes.push_back("chargedHadronPileup");
   pfCandTypes.push_back("chargedHadron");
@@ -341,8 +345,8 @@ void makePFCandidateTypePlots()
   pfCandTypes.push_back("muon");
 
   std::map<std::string, int> colors; // key = pfCandType
-  colors["chargedHadronPileup"]        = kRed - 9;
-  colors["chargedHadron"]              = 2;
+  colors["chargedHadronPileup"]        = 2;
+  colors["chargedHadron"]              = kRed - 9;
   colors["photon"]                     = 9;
   colors["neutralHadron"]              = 8;
   colors["electron"]                   = 7;
@@ -366,85 +370,104 @@ void makePFCandidateTypePlots()
 
   std::vector<std::string> labelTextLines;
 
-  for ( std::vector<std::string>::const_iterator pfAlgo = pfAlgos.begin();
-	pfAlgo != pfAlgos.end(); ++pfAlgo ) {
-    for ( std::vector<std::string>::const_iterator observable = observables.begin();
-	  observable != observables.end(); ++observable ) {
-      std::map<std::string, TH1*> histograms_ptFraction_rebinned; // key = pfCandType
-      for ( std::vector<std::string>::const_iterator pfCandType = pfCandTypes.begin();
-	    pfCandType != pfCandTypes.end(); ++pfCandType ) {
-	std::string histogramName_ptFraction = Form("%s%s/%sPtFraction_vs_%s", dqmDirectory.data(), pfAlgo->data(), pfCandType->data(), observable->data());
-	TH1* histogram_ptFraction = loadHistogram(inputFile, histogramName_ptFraction);
-	TH1* histogram_ptFraction_rebinned = (TH1*)histogram_ptFraction->Clone(Form("%s_rebinned", histogram_ptFraction->GetName()));
-	if ( rebin[*observable] > 1 ) {
-	  multiplyByBinWidth(histogram_ptFraction_rebinned);
-	  histogram_ptFraction_rebinned = histogram_ptFraction->Rebin(rebin[*observable]);
-	  divideByBinWidth(histogram_ptFraction_rebinned);
+  for ( int idxL1_or_offline = kL1; idxL1_or_offline <= kOffline; ++idxL1_or_offline ) {
+    std::string labelL1_or_offline;
+    if      ( idxL1_or_offline == kL1      ) labelL1_or_offline = "l1";
+    else if ( idxL1_or_offline == kOffline ) labelL1_or_offline = "offline";
+    else assert(0);
+    for ( std::vector<std::string>::const_iterator pfAlgo = pfAlgos.begin();
+	  pfAlgo != pfAlgos.end(); ++pfAlgo ) {
+      for ( std::vector<std::string>::const_iterator observable = observables.begin();
+	    observable != observables.end(); ++observable ) {
+        std::map<std::string, TH1*> histograms_ptFraction_rebinned; // key = pfCandType
+        for ( std::vector<std::string>::const_iterator pfCandType = pfCandTypes.begin();
+	      pfCandType != pfCandTypes.end(); ++pfCandType ) {
+  	  std::string histogramName_ptFraction = Form("%s%s/%sPtFraction_vs_%s", dqmDirectories[idxL1_or_offline].data(), pfAlgo->data(), pfCandType->data(), observable->data());
+	  TH1* histogram_ptFraction = loadHistogram(inputFile, histogramName_ptFraction);
+	  TH1* histogram_ptFraction_rebinned = (TH1*)histogram_ptFraction->Clone(Form("%s_rebinned", histogram_ptFraction->GetName()));
+	  if ( rebin[*observable] > 1 ) {
+	    multiplyByBinWidth(histogram_ptFraction_rebinned);
+	    histogram_ptFraction_rebinned = histogram_ptFraction->Rebin(rebin[*observable]);
+	    divideByBinWidth(histogram_ptFraction_rebinned);
+   	  }
+	  histograms_ptFraction_rebinned[*pfCandType] = histogram_ptFraction_rebinned;
+        }
+
+	double yMin_unnormalized;
+	double yMax_unnormalized;
+	if ( idxL1_or_offline == kL1 ) {
+	  if ( (*observable) == "pt" ) {
+	    yMin_unnormalized = 2.99e-4;
+	    yMax_unnormalized = 3.99e+2;
+	  } else {
+	    yMin_unnormalized = 1.99e0;
+	    yMax_unnormalized = 3.99e+2;
+	  }
+	} else {
+	  if ( (*observable) == "pt" ) {
+	    yMin_unnormalized = 1.e-5;
+	    yMax_unnormalized = 1.99e+3;
+	  } else {
+	    yMin_unnormalized = 1.e+1;
+	    yMax_unnormalized = 1.99e+3;
+	  }
 	}
-	histograms_ptFraction_rebinned[*pfCandType] = histogram_ptFraction_rebinned;
-      }
+        std::string outputFileName_unnormalized = Form("makePFCandidateTypePlots_%s%s_%s_unnormalized.png", labelL1_or_offline.data(), pfAlgo->data(), observable->data());
+        showHistograms_stacked(1150, 1150,
+			       "chargedHadronPileup", histograms_ptFraction_rebinned["chargedHadronPileup"],
+			       "chargedHadron",       histograms_ptFraction_rebinned["chargedHadron"], 
+			       "photon",              histograms_ptFraction_rebinned["photon"], 
+			       "neutralHadron",       histograms_ptFraction_rebinned["neutralHadron"],
+			       "electron",            histograms_ptFraction_rebinned["electron"], 
+			       "muon",                histograms_ptFraction_rebinned["muon"], 
+			       legendEntries,
+			       false,
+			       colors, fillStyles, 
+			       0.035, 0.17, 0.17, 0.42, 0.24, 
+			       labelTextLines, 0.040,
+			       0.70, 0.21, 0.23, 0.06, 
+			       useLogScaleX[*observable], xMin[*observable], xMax[*observable], xAxisTitles[*observable], 1.3, 
+			       true, yMin_unnormalized, yMax_unnormalized, "#Sigma p_{T} [GeV]", 1.4, 
+			       outputFileName_unnormalized);
 
-      double yMin_unnormalized = 1.99e0;
-      double yMax_unnormalized = 3.99e+2;
-      if ( (*observable) == "pt" ) {
-	yMin_unnormalized = 2.99e-4;
-	yMax_unnormalized = 3.99e+2;
-      }
-      std::string outputFileName_unnormalized = Form("makePFCandidateTypePlots_%s_%s_unnormalized.png", pfAlgo->data(), observable->data());
-      showHistograms_stacked(1150, 1150,
-			     "chargedHadronPileup", histograms_ptFraction_rebinned["chargedHadronPileup"],
-			     "chargedHadron",       histograms_ptFraction_rebinned["chargedHadron"], 
-			     "photon",              histograms_ptFraction_rebinned["photon"], 
-			     "neutralHadron",       histograms_ptFraction_rebinned["neutralHadron"],
-			     "electron",            histograms_ptFraction_rebinned["electron"], 
-			     "muon",                histograms_ptFraction_rebinned["muon"], 
-			     legendEntries,
-			     false,
-			     colors, fillStyles, 
-			     0.035, 0.17, 0.17, 0.42, 0.24, 
-			     labelTextLines, 0.040,
-			     0.70, 0.21, 0.23, 0.06, 
-			     useLogScaleX[*observable], xMin[*observable], xMax[*observable], xAxisTitles[*observable], 1.2, 
-			     true, yMin_unnormalized, yMax_unnormalized, "#Sigma p_{T} [GeV]", 1.4, 
-			     outputFileName_unnormalized);
-
-      std::map<std::string, TH1*> histograms_energyFraction_rebinned; // key = pfCandType
-      for ( std::vector<std::string>::const_iterator pfCandType = pfCandTypes.begin();
-	    pfCandType != pfCandTypes.end(); ++pfCandType ) {
-	std::string histogramName_energyFraction = Form("%s%s/%sPtFraction_vs_%s", dqmDirectory.data(), pfAlgo->data(), pfCandType->data(), observable->data());
-	TH1* histogram_energyFraction = loadHistogram(inputFile, histogramName_energyFraction);
-	TH1* histogram_energyFraction_rebinned = (TH1*)histogram_energyFraction->Clone(Form("%s_rebinned", histogram_energyFraction->GetName()));
-	if ( rebin[*observable] > 1 ) {
-	  multiplyByBinWidth(histogram_energyFraction_rebinned);
-	  histogram_energyFraction_rebinned = histogram_energyFraction->Rebin(rebin[*observable]);
-	  divideByBinWidth(histogram_energyFraction_rebinned);
+        std::map<std::string, TH1*> histograms_energyFraction_rebinned; // key = pfCandType
+        for ( std::vector<std::string>::const_iterator pfCandType = pfCandTypes.begin();
+	      pfCandType != pfCandTypes.end(); ++pfCandType ) {
+	  std::string histogramName_energyFraction = Form("%s%s/%sPtFraction_vs_%s", dqmDirectories[idxL1_or_offline].data(), pfAlgo->data(), pfCandType->data(), observable->data());
+	  TH1* histogram_energyFraction = loadHistogram(inputFile, histogramName_energyFraction);
+	  TH1* histogram_energyFraction_rebinned = (TH1*)histogram_energyFraction->Clone(Form("%s_rebinned", histogram_energyFraction->GetName()));
+	  if ( rebin[*observable] > 1 ) {
+	    multiplyByBinWidth(histogram_energyFraction_rebinned);
+	    histogram_energyFraction_rebinned = histogram_energyFraction->Rebin(rebin[*observable]);
+	    divideByBinWidth(histogram_energyFraction_rebinned);
+	  }
+	  histograms_energyFraction_rebinned[*pfCandType] = histogram_energyFraction_rebinned;
 	}
-	histograms_energyFraction_rebinned[*pfCandType] = histogram_energyFraction_rebinned;
-      }
 
-      double legendPosX_normalized = 0.17;
-      double legendPosY_normalized = 0.17;
-      if ( (*observable) == "pt" ) {
-	legendPosX_normalized = 0.51;
-	legendPosY_normalized = 0.52;
-      }
-      std::string outputFileName_normalized = Form("makePFCandidateTypePlots_%s_%s_normalized.png", pfAlgo->data(), observable->data());
-      showHistograms_stacked(1150, 1150,
-			     "chargedHadronPileup", histograms_energyFraction_rebinned["chargedHadronPileup"], 
-			     "chargedHadron",       histograms_energyFraction_rebinned["chargedHadron"],
-			     "photon",              histograms_energyFraction_rebinned["photon"],       
-			     "neutralHadron",       histograms_energyFraction_rebinned["neutralHadron"],
-			     "electron",            histograms_energyFraction_rebinned["electron"],
-			     "muon",                histograms_energyFraction_rebinned["muon"],
-			     legendEntries,
-			     true,
-			     colors, fillStyles, 
-			     0.035, legendPosX_normalized, legendPosY_normalized, 0.42, 0.24, 
-			     labelTextLines, 0.040,
-			     0.70, 0.21, 0.23, 0.06, 
-			     useLogScaleX[*observable], xMin[*observable], xMax[*observable], xAxisTitles[*observable], 1.2, 
-			     false, 0., 1., "Energy fraction", 1.4, 
-			     outputFileName_normalized);
+        double legendPosX_normalized = 0.17;
+        double legendPosY_normalized = 0.17;
+        if ( (*observable) == "pt" ) {
+    	  legendPosX_normalized = 0.51;
+	  legendPosY_normalized = 0.52;
+        }
+        std::string outputFileName_normalized = Form("makePFCandidateTypePlots_%s%s_%s_normalized.png", labelL1_or_offline.data(), pfAlgo->data(), observable->data());
+        showHistograms_stacked(1150, 1150,
+			       "chargedHadronPileup", histograms_energyFraction_rebinned["chargedHadronPileup"], 
+			       "chargedHadron",       histograms_energyFraction_rebinned["chargedHadron"],
+			       "photon",              histograms_energyFraction_rebinned["photon"],       
+			       "neutralHadron",       histograms_energyFraction_rebinned["neutralHadron"],
+			       "electron",            histograms_energyFraction_rebinned["electron"],
+			       "muon",                histograms_energyFraction_rebinned["muon"],
+			       legendEntries,
+			       true,
+			       colors, fillStyles, 
+			       0.035, legendPosX_normalized, legendPosY_normalized, 0.42, 0.24, 
+			       labelTextLines, 0.040,
+			       0.70, 0.21, 0.23, 0.06, 
+			       useLogScaleX[*observable], xMin[*observable], xMax[*observable], xAxisTitles[*observable], 1.3, 
+			       false, 0., 1., "Energy fraction", 1.4, 
+			       outputFileName_normalized);
+      } 
     }
   }
 

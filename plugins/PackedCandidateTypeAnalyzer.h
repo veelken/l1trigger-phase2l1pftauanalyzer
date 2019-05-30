@@ -1,5 +1,5 @@
-#ifndef L1Trigger_TallinnL1PFTauAnalyzer_L1PFCandidateTypeAnalyzer_h
-#define L1Trigger_TallinnL1PFTauAnalyzer_L1PFCandidateTypeAnalyzer_h
+#ifndef L1Trigger_TallinnL1PFTauAnalyzer_PackedCandidateTypeAnalyzer_h
+#define L1Trigger_TallinnL1PFTauAnalyzer_PackedCandidateTypeAnalyzer_h
 
 #include "FWCore/Framework/interface/EDAnalyzer.h"
 #include "FWCore/Framework/interface/Event.h"
@@ -10,10 +10,9 @@
 #include "DQMServices/Core/interface/MonitorElement.h"
 
 #include "L1Trigger/TallinnL1PFTaus/interface/TallinnL1PFTauQualityCut.h"     // TallinnL1PFTauQualityCut
-#include "DataFormats/Phase2L1ParticleFlow/interface/PFCandidate.h"           // l1t::PFCandidate
-#include "DataFormats/Phase2L1ParticleFlow/interface/PFCandidateFwd.h"        // l1t::PFCandidateCollection
-#include "DataFormats/L1TVertex/interface/Vertex.h"                           // l1t::Vertex
-#include "DataFormats/L1TVertex/interface/VertexFwd.h"                        // l1t::VertexCollection
+#include "DataFormats/PatCandidates/interface/PackedCandidate.h"              // pat::PackedCandidate, pat::PackedCandidateCollection
+#include "DataFormats/VertexReco/interface/Vertex.h"                          // reco::Vertex
+#include "DataFormats/VertexReco/interface/VertexFwd.h"                       // reco::VertexCollection
 #include "SimDataFormats/PileupSummaryInfo/interface/PileupSummaryInfo.h"     // PileupSummaryInfo
 
 #include "L1Trigger/TallinnL1PFTauAnalyzer/interface/histogramAuxFunctions.h" // divideByBinWidth
@@ -24,11 +23,11 @@
 #include <vector>    // std::vector
 #include <string>    // std::string
 
-class L1PFCandidateTypeAnalyzer : public edm::EDAnalyzer 
+class PackedCandidateTypeAnalyzer : public edm::EDAnalyzer 
 {
  public:
-  L1PFCandidateTypeAnalyzer(const edm::ParameterSet& cfg);
-  ~L1PFCandidateTypeAnalyzer();
+  PackedCandidateTypeAnalyzer(const edm::ParameterSet& cfg);
+  ~PackedCandidateTypeAnalyzer();
     
  private:
   void beginJob();
@@ -37,11 +36,11 @@ class L1PFCandidateTypeAnalyzer : public edm::EDAnalyzer
 
   std::string moduleLabel_;
 
-  edm::InputTag src_l1PFCands_;
-  edm::EDGetTokenT<l1t::PFCandidateCollection> token_l1PFCands_;
+  edm::InputTag src_packedCands_;
+  edm::EDGetTokenT<pat::PackedCandidateCollection> token_packedCands_;
   
-  edm::InputTag srcL1Vertices_;
-  edm::EDGetTokenT<l1t::VertexCollection> tokenL1Vertices_;
+  edm::InputTag srcOfflineVertices_;
+  edm::EDGetTokenT<reco::VertexCollection> tokenOfflineVertices_;
 
   typedef std::vector<PileupSummaryInfo> PileupSummaryInfoCollection;
   edm::InputTag srcPileupSummaryInfo_;
@@ -51,12 +50,15 @@ class L1PFCandidateTypeAnalyzer : public edm::EDAnalyzer
   std::vector<TallinnL1PFTauQualityCut> isolationQualityCuts_dzCut_enabled_primary_;
   std::vector<TallinnL1PFTauQualityCut> isolationQualityCuts_dzCut_enabled_pileup_;
 
+  bool applyPuppiWeights_;
+
   std::string dqmDirectory_;
 
   struct pfCandTypePlotEntryType
   {
-    pfCandTypePlotEntryType(const std::string& label)
+    pfCandTypePlotEntryType(const std::string& label, bool applyPuppiWeights)
       : label_(label)
+      , applyPuppiWeights_(applyPuppiWeights)
       , me_energyFraction_vs_eta_(nullptr)
       , histogram_energyFraction_vs_eta_(nullptr)
       , me_ptFraction_vs_eta_(nullptr)
@@ -153,18 +155,24 @@ class L1PFCandidateTypeAnalyzer : public edm::EDAnalyzer
       histogram_ptFraction_vs_numPileup_ = me_ptFraction_vs_numPileup_->getTH1();
       assert(histogram_ptFraction_vs_numPileup_);
     }
-    void fillHistograms(const l1t::PFCandidate& l1PFCand, int numPileup, double evtWeight)
+    void fillHistograms(const pat::PackedCandidate& packedCand, int numPileup, double evtWeight)
     {
-      double weight_energyFraction = l1PFCand.energy()*evtWeight;
-      double weight_ptFraction = l1PFCand.pt()*evtWeight;
-      histogram_energyFraction_vs_eta_->Fill(l1PFCand.eta(), weight_energyFraction);
-      histogram_ptFraction_vs_eta_->Fill(l1PFCand.eta(), weight_ptFraction);
-      histogram_energyFraction_vs_eta_fine_binning_->Fill(l1PFCand.eta(), weight_energyFraction);
-      histogram_ptFraction_vs_eta_fine_binning_->Fill(l1PFCand.eta(), weight_ptFraction);
-      histogram_energyFraction_vs_absEta_->Fill(TMath::Abs(l1PFCand.eta()), weight_energyFraction);
-      histogram_ptFraction_vs_absEta_->Fill(TMath::Abs(l1PFCand.eta()), weight_ptFraction);
-      histogram_energyFraction_vs_pt_->Fill(l1PFCand.pt(), weight_energyFraction);
-      histogram_ptFraction_vs_pt_->Fill(l1PFCand.pt(), weight_ptFraction);
+      double weight_energyFraction = packedCand.energy()*evtWeight;
+      double weight_ptFraction = packedCand.pt()*evtWeight;
+      if ( applyPuppiWeights_ ) 
+      {
+	double packedCand_puppiWeight = packedCand.puppiWeight();
+	weight_energyFraction *= packedCand_puppiWeight;
+	weight_ptFraction *= packedCand_puppiWeight;
+      }
+      histogram_energyFraction_vs_eta_->Fill(packedCand.eta(), weight_energyFraction);
+      histogram_ptFraction_vs_eta_->Fill(packedCand.eta(), weight_ptFraction);
+      histogram_energyFraction_vs_eta_fine_binning_->Fill(packedCand.eta(), weight_energyFraction);
+      histogram_ptFraction_vs_eta_fine_binning_->Fill(packedCand.eta(), weight_ptFraction);
+      histogram_energyFraction_vs_absEta_->Fill(TMath::Abs(packedCand.eta()), weight_energyFraction);
+      histogram_ptFraction_vs_absEta_->Fill(TMath::Abs(packedCand.eta()), weight_ptFraction);
+      histogram_energyFraction_vs_pt_->Fill(packedCand.pt(), weight_energyFraction);
+      histogram_ptFraction_vs_pt_->Fill(packedCand.pt(), weight_ptFraction);
       if ( numPileup >= 0 ) 
       {
 	histogram_energyFraction_vs_numPileup_->Fill(numPileup, weight_energyFraction);
@@ -196,6 +204,7 @@ class L1PFCandidateTypeAnalyzer : public edm::EDAnalyzer
       }
     }
     std::string label_;
+    bool applyPuppiWeights_;
     MonitorElement* me_energyFraction_vs_eta_;
     TH1* histogram_energyFraction_vs_eta_;
     MonitorElement* me_ptFraction_vs_eta_;

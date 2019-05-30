@@ -1,6 +1,7 @@
 #include "L1Trigger/TallinnL1PFTauAnalyzer/plugins/TallinnL1PFTauAnalyzerSignal.h"
 
 #include "FWCore/ServiceRegistry/interface/Service.h"
+#include "FWCore/Utilities/interface/Exception.h"
 #include "DataFormats/Common/interface/Handle.h"
 
 #include <TMath.h>
@@ -14,7 +15,22 @@ TallinnL1PFTauAnalyzerSignal::TallinnL1PFTauAnalyzerSignal(const edm::ParameterS
   srcNumerator_ = cfg.getParameter<edm::InputTag>("srcNumerator");
   tokenNumerator_ = consumes<l1t::TallinnL1PFTauCollection>(srcNumerator_ );
   srcDenominator_ = cfg.getParameter<edm::InputTag>("srcDenominator");
-  tokenDenominator_ = consumes<reco::GenJetCollection>(srcDenominator_);
+  std::string typeDenominator_string = cfg.getParameter<std::string>("typeDenominator");
+  if ( typeDenominator_string == "gen"     ) 
+  {
+    typeDenominator_ = kGen;
+    tokenDenominator_gen_ = consumes<reco::GenJetCollection>(srcDenominator_);
+  }
+  else if ( typeDenominator_string == "offline" ) 
+  {
+    typeDenominator_ = kOffline;
+    tokenDenominator_offline_ = consumes<pat::TauCollection>(srcDenominator_);
+  }
+  else
+  {
+    throw cms::Exception("TallinnL1PFTauAnalyzerSignal") 
+      << " Invalid Configuration parameter 'typeDenominator' = " << typeDenominator_string << " !!\n";;
+  }
 
   dqmDirectory_ = cfg.getParameter<std::string>("dqmDirectory");
 }
@@ -38,7 +54,7 @@ void TallinnL1PFTauAnalyzerSignal::beginJob()
   dqmStore.setCurrentFolder(dqmDirectory_.data());
 
   std::vector<std::string> decayModes = { "oneProng0Pi0", "oneProng1Pi0", "oneProng2Pi0", "threeProng0Pi0", "threeProng1Pi0", "all" };
-  std::vector<double> ptThresholds = { 20., 30., 40. };
+  std::vector<double> ptThresholds = { 20., 25., 30., 35., 40. };
   for ( auto decayMode : decayModes )
   {
     for ( auto ptThreshold : ptThresholds )
@@ -66,14 +82,28 @@ void TallinnL1PFTauAnalyzerSignal::analyze(const edm::Event& evt, const edm::Eve
   edm::Handle<l1t::TallinnL1PFTauCollection> numeratorTaus;
   evt.getByToken(tokenNumerator_, numeratorTaus);
   
-  edm::Handle<reco::GenJetCollection> denominatorTaus;
-  evt.getByToken(tokenDenominator_, denominatorTaus);
-  
   const double evtWeight = 1.;
 
-  for ( auto efficiencyPlot : efficiencyPlots_ ) 
-  {    
-    efficiencyPlot->fillHistograms(*numeratorTaus, *denominatorTaus, evtWeight);
+  if ( typeDenominator_ == kGen )
+  {
+    edm::Handle<reco::GenJetCollection> denominatorTaus_gen;
+    evt.getByToken(tokenDenominator_gen_, denominatorTaus_gen);
+
+    for ( auto efficiencyPlot : efficiencyPlots_ ) 
+    {    
+      efficiencyPlot->fillHistograms(*numeratorTaus, *denominatorTaus_gen, evtWeight);
+    }
+  }
+
+  if ( typeDenominator_ == kOffline )
+  {
+    edm::Handle<pat::TauCollection> denominatorTaus_offline;
+    evt.getByToken(tokenDenominator_offline_, denominatorTaus_offline);
+
+    for ( auto efficiencyPlot : efficiencyPlots_ ) 
+    {    
+      efficiencyPlot->fillHistograms(*numeratorTaus, *denominatorTaus_offline, evtWeight);
+    }
   }
 }
 

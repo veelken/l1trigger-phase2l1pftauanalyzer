@@ -128,14 +128,25 @@ for useStrips in [ True, False ]:
         else:
             raise ValueError("Invalid Combination of 'useStrips' and 'applyPreselection' Configuration parameters !!")
 
-        moduleNamePF_TallinnL1PFTauAnalyzerSignal = "analyzeTallinnL1PFTaus" + moduleLabel + "PF"
-        modulePF_TallinnL1PFTauAnalyzerSignal = cms.EDAnalyzer("TallinnL1PFTauAnalyzerSignal",
+        moduleNamePF_TallinnL1PFTauAnalyzerSignalWrtGenHadTaus = "analyzeTallinnL1PFTaus" + moduleLabel + "PFWrtGenHadTaus"
+        modulePF_TallinnL1PFTauAnalyzerSignalWrtGenHadTaus = cms.EDAnalyzer("TallinnL1PFTauAnalyzerSignal",
           srcNumerator = cms.InputTag(moduleNameBase + moduleLabel + "PF"),
-          srcDenominator = cms.InputTag('offlineMatchedGenHadTaus'),                                               
-          dqmDirectory = cms.string("TallinnL1PFTauAnalyzerSignal" + moduleLabel + "PF")
+          srcDenominator = cms.InputTag('offlineMatchedGenHadTaus'),
+          typeDenominator = cms.string("gen"),                                                                            
+          dqmDirectory = cms.string("TallinnL1PFTauAnalyzerSignal" + moduleLabel + "PF_wrtGenHadTaus")
         )
-        setattr(process, moduleNamePF_TallinnL1PFTauAnalyzerSignal, modulePF_TallinnL1PFTauAnalyzerSignal)
-        process.analysisSequence += getattr(process, moduleNamePF_TallinnL1PFTauAnalyzerSignal)
+        setattr(process, moduleNamePF_TallinnL1PFTauAnalyzerSignalWrtGenHadTaus, modulePF_TallinnL1PFTauAnalyzerSignalWrtGenHadTaus)
+        process.analysisSequence += getattr(process, moduleNamePF_TallinnL1PFTauAnalyzerSignalWrtGenHadTaus)
+
+        moduleNamePF_TallinnL1PFTauAnalyzerSignalWrtOfflineTaus = "analyzeTallinnL1PFTaus" + moduleLabel + "PFWrtOfflineTaus"
+        modulePF_TallinnL1PFTauAnalyzerSignalWrtOfflineTaus = cms.EDAnalyzer("TallinnL1PFTauAnalyzerSignal",
+          srcNumerator = cms.InputTag(moduleNameBase + moduleLabel + "PF"),
+          srcDenominator = cms.InputTag('selectedOfflinePFTaus'),
+          typeDenominator = cms.string("offline"),                                                                   
+          dqmDirectory = cms.string("TallinnL1PFTauAnalyzerSignal" + moduleLabel + "PF_wrtOfflineTaus")
+        )
+        setattr(process, moduleNamePF_TallinnL1PFTauAnalyzerSignalWrtOfflineTaus, modulePF_TallinnL1PFTauAnalyzerSignalWrtOfflineTaus)
+        process.analysisSequence += getattr(process, moduleNamePF_TallinnL1PFTauAnalyzerSignalWrtOfflineTaus)
 
         moduleNamePF_TallinnL1PFTauIsolationAnalyzer = "analyzeTallinL1PFTauIsolation" + moduleLabel + "PF"
         modulePF_TallinnL1PFTauIsolationAnalyzer = cms.EDAnalyzer("TallinnL1PFTauIsolationAnalyzer",
@@ -152,14 +163,25 @@ for useStrips in [ True, False ]:
         setattr(process, moduleNamePF_TallinnL1PFTauIsolationAnalyzer, modulePF_TallinnL1PFTauIsolationAnalyzer)
         process.analysisSequence += getattr(process, moduleNamePF_TallinnL1PFTauIsolationAnalyzer)
 
-        moduleNamePuppi_TallinnL1PFTauAnalyzerSignal = "analyzeTallinnL1PFTaus" + moduleLabel + "Puppi"
-        modulePuppi_TallinnL1PFTauAnalyzerSignal = cms.EDAnalyzer("TallinnL1PFTauAnalyzerSignal",
+        moduleNamePuppi_TallinnL1PFTauAnalyzerSignalWrtGenHadTaus = "analyzeTallinnL1PFTaus" + moduleLabel + "PuppiWrtGenHadTaus"
+        modulePuppi_TallinnL1PFTauAnalyzerSignalWrtGenHadTaus = cms.EDAnalyzer("TallinnL1PFTauAnalyzerSignal",
           srcNumerator = cms.InputTag(moduleNameBase + moduleLabel + "Puppi"),
-          srcDenominator = cms.InputTag('offlineMatchedGenHadTaus'),        
-          dqmDirectory = cms.string("TallinnL1PFTauAnalyzerSignal" + moduleLabel + "Puppi")
+          srcDenominator = cms.InputTag('offlineMatchedGenHadTaus'),
+          typeDenominator = cms.string("gen"),                                                                            
+          dqmDirectory = cms.string("TallinnL1PFTauAnalyzerSignal" + moduleLabel + "Puppi_wrtGenHadTaus")
         )
-        setattr(process, moduleNamePuppi_TallinnL1PFTauAnalyzerSignal, modulePuppi_TallinnL1PFTauAnalyzerSignal)
-        process.analysisSequence += getattr(process, moduleNamePuppi_TallinnL1PFTauAnalyzerSignal)
+        setattr(process, moduleNamePuppi_TallinnL1PFTauAnalyzerSignalWrtGenHadTaus, modulePuppi_TallinnL1PFTauAnalyzerSignalWrtGenHadTaus)
+        process.analysisSequence += getattr(process, moduleNamePuppi_TallinnL1PFTauAnalyzerSignalWrtGenHadTaus)
+
+        moduleNamePuppi_TallinnL1PFTauAnalyzerSignalWrtOfflineTaus = "analyzeTallinnL1PFTaus" + moduleLabel + "PuppiWrtOfflineTaus"
+        modulePuppi_TallinnL1PFTauAnalyzerSignalWrtOfflineTaus = cms.EDAnalyzer("TallinnL1PFTauAnalyzerSignal",
+          srcNumerator = cms.InputTag(moduleNameBase + moduleLabel + "Puppi"),
+          srcDenominator = cms.InputTag('selectedOfflinePFTaus'),
+          typeDenominator = cms.string("offline"),                                                                   
+          dqmDirectory = cms.string("TallinnL1PFTauAnalyzerSignal" + moduleLabel + "Puppi_wrtOfflineTaus")
+        )
+        setattr(process, moduleNamePuppi_TallinnL1PFTauAnalyzerSignalWrtOfflineTaus, modulePuppi_TallinnL1PFTauAnalyzerSignalWrtOfflineTaus)
+        process.analysisSequence += getattr(process, moduleNamePuppi_TallinnL1PFTauAnalyzerSignalWrtOfflineTaus)
 
         moduleNamePuppi_TallinnL1PFTauIsolationAnalyzer = "analyzeTallinL1PFTauIsolation" + moduleLabel + "Puppi"
         modulePuppi_TallinnL1PFTauIsolationAnalyzer = cms.EDAnalyzer("TallinnL1PFTauIsolationAnalyzer",
@@ -180,7 +202,7 @@ for useStrips in [ True, False ]:
 process.DQMStore = cms.Service("DQMStore")
 
 process.savePlots = cms.EDAnalyzer("DQMSimpleFileSaver",
-    outputFileName = cms.string('TallinnL1PFTauAnalyzer_signal_2019May27v2.root')
+    outputFileName = cms.string('TallinnL1PFTauAnalyzer_signal_2019May29v2.root')
 )
 
 process.p = cms.Path(process.analysisSequence + process.savePlots)

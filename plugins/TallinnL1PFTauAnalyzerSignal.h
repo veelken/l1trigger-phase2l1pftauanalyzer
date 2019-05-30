@@ -14,7 +14,9 @@
 #include "DataFormats/Math/interface/deltaR.h"                       // reco::deltaR
 #include "DataFormats/JetReco/interface/GenJet.h"                    // reco::GenJet
 #include "DataFormats/JetReco/interface/GenJetCollection.h"          // reco::GenJetCollection
+#include "DataFormats/PatCandidates/interface/Tau.h"                 // pat::Tau, pat::TauCollection
 #include "PhysicsTools/JetMCUtils/interface/JetMCTag.h"              // JetMCTagUtils::genTauDecayMode()
+#include "DataFormats/TauReco/interface/PFTau.h"                     // reco::PFTau::kOneProng0PiZero, reco::PFTau::kOneProng1PiZero,...
 
 #include <TH1.h>     // TH1
 #include <TString.h> // TString, Form()
@@ -42,7 +44,10 @@ class TallinnL1PFTauAnalyzerSignal : public edm::EDAnalyzer
   edm::InputTag srcNumerator_;
   edm::EDGetTokenT<l1t::TallinnL1PFTauCollection> tokenNumerator_;
   edm::InputTag srcDenominator_;
-  edm::EDGetTokenT<reco::GenJetCollection> tokenDenominator_;
+  enum { kGen, kOffline };
+  int typeDenominator_;
+  edm::EDGetTokenT<reco::GenJetCollection> tokenDenominator_gen_;
+  edm::EDGetTokenT<pat::TauCollection> tokenDenominator_offline_;
 
   std::string dqmDirectory_;
 
@@ -117,7 +122,51 @@ class TallinnL1PFTauAnalyzerSignal : public edm::EDAnalyzer
 	bool isMatched = false;
 	for ( auto numeratorTau : numeratorTaus )
 	{
-  	  if ( (max_relChargedIso_ < 0. || numeratorTau.sumChargedIso() <= (max_relChargedIso_*numeratorTau.pt())) &&
+  	  if ( (ptThreshold_       < 0. || numeratorTau.pt()            >=  ptThreshold_                         ) &&
+	       (                           numeratorTau.leadChargedPFCand().isNonnull()                          && 
+					   numeratorTau.leadChargedPFCand()->pfTrack().isNonnull()               ) &&
+               (max_relChargedIso_ < 0. || numeratorTau.sumChargedIso() <= (max_relChargedIso_*numeratorTau.pt())) &&
+	       (max_absChargedIso_ < 0. || numeratorTau.sumChargedIso() <=  max_absChargedIso_                   ) )
+	  {
+	    double dR = reco::deltaR(denominatorTau.eta(), denominatorTau.phi(), numeratorTau.eta(), numeratorTau.phi());
+	    if ( dR < dRmatch_ ) isMatched = true;
+	  }
+	}
+
+	if ( TMath::Abs(denominatorTau.eta()) < max_absEta_ ) 
+	{
+	  histogram_pt_denominator_->Fill(denominatorTau.pt(), evtWeight);
+	  if ( isMatched ) histogram_pt_numerator_->Fill(denominatorTau.pt(), evtWeight);
+	}
+	if ( denominatorTau.pt() > min_pt_ ) 
+	{
+	  histogram_eta_denominator_->Fill(denominatorTau.eta(), evtWeight);
+	  if ( isMatched ) histogram_eta_numerator_->Fill(denominatorTau.eta(), evtWeight);
+	}
+	if ( denominatorTau.pt() > min_pt_ && TMath::Abs(denominatorTau.eta()) < max_absEta_ ) 
+	{
+	  histogram_phi_denominator_->Fill(denominatorTau.phi(), evtWeight);
+	  if ( isMatched ) histogram_phi_numerator_->Fill(denominatorTau.phi(), evtWeight);
+	}
+      }
+    }
+    void fillHistograms(const l1t::TallinnL1PFTauCollection& numeratorTaus, const pat::TauCollection& denominatorTaus, double evtWeight)
+    {
+      for ( auto denominatorTau : denominatorTaus )
+      {
+	if ( (decayMode_ == "oneProng0Pi0"   && denominatorTau.decayMode() != reco::PFTau::kOneProng0PiZero)   ||
+	     (decayMode_ == "oneProng1Pi0"   && denominatorTau.decayMode() != reco::PFTau::kOneProng1PiZero)   ||
+	     (decayMode_ == "oneProng1Pi0"   && denominatorTau.decayMode() != reco::PFTau::kOneProng2PiZero)   ||
+	     (decayMode_ == "threeProng0Pi0" && denominatorTau.decayMode() != reco::PFTau::kThreeProng0PiZero) ||
+	     (decayMode_ == "threeProng1Pi0" && denominatorTau.decayMode() != reco::PFTau::kThreeProng1PiZero) ) continue;	       
+
+	bool isMatched = false;
+	for ( auto numeratorTau : numeratorTaus )
+	{
+  	  if ( (ptThreshold_       < 0. || numeratorTau.pt()            >=  ptThreshold_                         ) &&
+	       (                           numeratorTau.leadChargedPFCand().isNonnull()                          && 
+					   numeratorTau.leadChargedPFCand()->pfTrack().isNonnull()               ) &&
+               (max_relChargedIso_ < 0. || numeratorTau.sumChargedIso() <= (max_relChargedIso_*numeratorTau.pt())) &&
 	       (max_absChargedIso_ < 0. || numeratorTau.sumChargedIso() <=  max_absChargedIso_                   ) )
 	  {
 	    double dR = reco::deltaR(denominatorTau.eta(), denominatorTau.phi(), numeratorTau.eta(), numeratorTau.phi());
