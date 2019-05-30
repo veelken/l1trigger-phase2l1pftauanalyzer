@@ -112,19 +112,17 @@ class TallinnL1PFTauAnalyzerBackground : public edm::EDAnalyzer
     void fillHistograms(const l1t::TallinnL1PFTauCollection& l1PFTaus, double evtWeight)
     {
       std::vector<const l1t::TallinnL1PFTau*> l1PFTaus_passingAbsEta;
-      int idx = 0;
-      for ( l1t::TallinnL1PFTauCollection::const_iterator l1PFTau = l1PFTaus.begin(); l1PFTau != l1PFTaus.end(); ++l1PFTau ) 
+      for ( l1t::TallinnL1PFTauCollection::const_iterator l1PFTau = l1PFTaus.begin(); 
+	    l1PFTau != l1PFTaus.end(); ++l1PFTau ) 
       {
-	std::cout << "TallinL1PFTau #" << idx << ":" << (*l1PFTau);
-	++idx;
 	if ( (max_absEta_        < 0. || TMath::Abs(l1PFTau->eta()) <=  max_absEta_                      ) &&
 	     (max_relChargedIso_ < 0. || l1PFTau->sumChargedIso()   <= (max_relChargedIso_*l1PFTau->pt())) &&
 	     (max_absChargedIso_ < 0. || l1PFTau->sumChargedIso()   <=  max_absChargedIso_               ) )
 	{
-	  std::cout << " passinggAbsEta cuts." << std::endl;
 	  l1PFTaus_passingAbsEta.push_back(&(*l1PFTau));
 	}
       }
+
       // CV: sort L1PFTaus passing abs(eta) cut by decreasing pT
       std::sort(l1PFTaus_passingAbsEta.begin(), l1PFTaus_passingAbsEta.end(), isHigherPt);
 
@@ -154,42 +152,35 @@ class TallinnL1PFTauAnalyzerBackground : public edm::EDAnalyzer
       for ( int idxBin = 1; idxBin <= numBinsX; ++idxBin )
       {
 	double ptThreshold = xAxis->GetBinCenter(idxBin);
-	std::cout << "ptThreshold = " << ptThreshold << std::endl;
+
 	int max_numL1PFTaus_passingPt = 0;
-        if ( !max_numL1PFTaus_passingPt_isZero ) {
-	int idx_zVtxRef = 0;
-	for ( std::vector<const l1t::TallinnL1PFTau*>::const_iterator l1PFTau_zVtxRef = l1PFTaus_passingAbsEta.begin(); 
-	      l1PFTau_zVtxRef != l1PFTaus_passingAbsEta.end(); ++l1PFTau_zVtxRef ) {
-	  std::cout << "zVtxRef TallinL1PFTau #" << idx_zVtxRef << ":" << std::endl;
-	  int numL1PFTaus_passingPt = 0;
-	  int idx_test = 0;
-	  for ( std::vector<const l1t::TallinnL1PFTau*>::const_iterator l1PFTau_test = l1PFTaus_passingAbsEta.begin(); 
-		l1PFTau_test != l1PFTaus_passingAbsEta.end(); ++l1PFTau_test ) {
-	    if ( (*l1PFTau_test)->pt() > ptThreshold )
-	    {
-	      if ( (*l1PFTau_zVtxRef)->leadChargedPFCand().isNonnull() && (*l1PFTau_zVtxRef)->leadChargedPFCand()->pfTrack().isNonnull() &&
-	           (*l1PFTau_test)->leadChargedPFCand().isNonnull() && (*l1PFTau_test)->leadChargedPFCand()->pfTrack().isNonnull() )
+        if ( !max_numL1PFTaus_passingPt_isZero ) 
+        {
+	  for ( std::vector<const l1t::TallinnL1PFTau*>::const_iterator l1PFTau_zVtxRef = l1PFTaus_passingAbsEta.begin(); 
+	        l1PFTau_zVtxRef != l1PFTaus_passingAbsEta.end(); ++l1PFTau_zVtxRef ) {
+	    int numL1PFTaus_passingPt = 0;
+	    for ( std::vector<const l1t::TallinnL1PFTau*>::const_iterator l1PFTau_toMatch = l1PFTaus_passingAbsEta.begin(); 
+		  l1PFTau_toMatch != l1PFTaus_passingAbsEta.end(); ++l1PFTau_toMatch ) {
+	      if ( (*l1PFTau_toMatch)->pt() > ptThreshold )
 	      {
-		double dz = TMath::Abs((*l1PFTau_zVtxRef)->leadChargedPFCand()->pfTrack()->vertex().z() - (*l1PFTau_test)->leadChargedPFCand()->pfTrack()->vertex().z());
-		std::cout << "idx_test = " << idx_test << ": dz = " << dz << std::endl;
-		if ( dz < max_dz_ ) 
-	        {
-		  std::cout << " matching test TallinL1PFTau #" << idx_test << std::endl;
-		  ++numL1PFTaus_passingPt;
-		}
+	        if ( (*l1PFTau_zVtxRef)->leadChargedPFCand().isNonnull() && (*l1PFTau_zVtxRef)->leadChargedPFCand()->pfTrack().isNonnull() &&
+	             (*l1PFTau_toMatch)->leadChargedPFCand().isNonnull() && (*l1PFTau_toMatch)->leadChargedPFCand()->pfTrack().isNonnull() )
+  	        {
+		  double dz = TMath::Abs((*l1PFTau_zVtxRef)->leadChargedPFCand()->pfTrack()->vertex().z() - (*l1PFTau_toMatch)->leadChargedPFCand()->pfTrack()->vertex().z());
+		  if ( dz < max_dz_ ) 
+	          {
+		    ++numL1PFTaus_passingPt;
+		  }
+	        }
 	      }
 	    }
-	    ++idx_test;
+	    if ( numL1PFTaus_passingPt > max_numL1PFTaus_passingPt ) 
+	    {
+              max_numL1PFTaus_passingPt = numL1PFTaus_passingPt;
+            }
 	  }
-	  std::cout << "--> numL1PFTaus_passingPt = " << numL1PFTaus_passingPt << std::endl;
-	  if ( numL1PFTaus_passingPt > max_numL1PFTaus_passingPt ) 
-	  {
-            max_numL1PFTaus_passingPt = numL1PFTaus_passingPt;
-          }
-	  ++idx_zVtxRef;
 	}
-	}
-	std::cout << "ptThreshold = " << ptThreshold << ": max_numL1PFTaus_passingPt = " << max_numL1PFTaus_passingPt << std::endl;
+
 	if ( (ptThreshold < 20. && max_numL1PFTaus_passingPt < numL1PFTausPtGt20) ||
 	     (ptThreshold < 25. && max_numL1PFTaus_passingPt < numL1PFTausPtGt25) ||
 	     (ptThreshold < 30. && max_numL1PFTaus_passingPt < numL1PFTausPtGt30) ||

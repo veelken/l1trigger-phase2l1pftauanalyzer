@@ -46,7 +46,7 @@ for inputFilePath in inputFilePaths:
             inputFileNames.append(file)
 print "inputFileNames = %s" % inputFileNames 
 
-#process.source.fileNames = cms.untracked.vstring(inputFileNames)
+process.source.fileNames = cms.untracked.vstring(inputFileNames)
 #--------------------------------------------------------------------------------
 
 from Configuration.AlCa.GlobalTag import GlobalTag
