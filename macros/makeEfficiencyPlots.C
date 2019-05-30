@@ -150,18 +150,17 @@ TF1* makeEfficiencyFit(TGraph* graph, const std::string& fitFunctionName, double
       double x, y;
       graph->GetPoint(idxPoint, x, y);
       graph_inverse->SetPoint(idxPoint, y, x);
-      //std::cout << "graph_inverse: x  = " << y << ", y = " << x << std::endl;
     }
     double m0 = graph_inverse->Eval(0.5);
     if ( m0 < 20. ) m0 = 20.;
 
-    fitFunction = new TF1("fitFunction1", integralCrystalBall_fcn, xMin, xMax, 5);
+    fitFunction = new TF1(fitFunctionName.data(), integralCrystalBall_fcn, xMin, xMax, 5);
     fitFunction->SetParameter(0, m0);
     fitFunction->SetParameter(1, 5.);
     fitFunction->SetParameter(2, 0.1);
     fitFunction->SetParameter(3, 2.);
     fitFunction->SetParameter(4, 1.);
-    graph->Fit(fitFunction);
+    graph->Fit(fitFunction, "QN");
 
     fitFunction->SetLineColor(graph->GetLineColor());
     fitFunction->SetLineWidth(graph->GetLineWidth());
@@ -169,7 +168,7 @@ TF1* makeEfficiencyFit(TGraph* graph, const std::string& fitFunctionName, double
   
     delete graph_inverse;
   }
-
+  
   return fitFunction;
 }
 
@@ -229,7 +228,7 @@ void showGraphs(double canvasSizeX, double canvasSizeY,
   yAxis->SetTitleOffset(yAxisOffset);
 
   dummyHistogram->Draw("axis");
-
+  
   graph1->SetMarkerColor(colors[0]);
   graph1->SetMarkerSize(2);
   graph1->SetMarkerStyle(markerStyles[0]);
@@ -241,8 +240,12 @@ void showGraphs(double canvasSizeX, double canvasSizeY,
   if ( addFitFunctions )
   {
     fitFunction1 = makeEfficiencyFit(graph1, "fitFunction1", xMin, xMax);
-    fitFunction1->Draw();
-    graph1->Draw("P");
+    if ( fitFunction1 )
+    {
+      fitFunction1->SetLineColor(colors[0]);
+      fitFunction1->Draw("Lsame");
+      graph1->Draw("P");
+    }
   }
 
   TF1* fitFunction2 = 0;
@@ -254,12 +257,15 @@ void showGraphs(double canvasSizeX, double canvasSizeY,
     graph2->SetLineWidth(2);
     graph2->SetLineStyle(lineStyles[1]);
     graph2->Draw("P");
-    TF1* fitFunction2 = 0;
     if ( addFitFunctions )
     {
       fitFunction2 = makeEfficiencyFit(graph2, "fitFunction2", xMin, xMax);
-      fitFunction2->Draw();
-      graph2->Draw("P");
+      if ( fitFunction2 )
+      {
+	fitFunction2->SetLineColor(colors[1]);
+        fitFunction2->Draw("Lsame");
+        graph2->Draw("P");
+      }
     }
   }
 
@@ -272,12 +278,15 @@ void showGraphs(double canvasSizeX, double canvasSizeY,
     graph3->SetLineWidth(2);
     graph3->SetLineStyle(lineStyles[2]);
     graph3->Draw("P");
-    TF1* fitFunction3 = 0;
     if ( addFitFunctions )
     {
       fitFunction3 = makeEfficiencyFit(graph3, "fitFunction3", xMin, xMax);
-      fitFunction3->Draw();
-      graph3->Draw("P");
+      if ( fitFunction3 )
+      {
+	fitFunction3->SetLineColor(colors[2]);
+        fitFunction3->Draw("Lsame");
+        graph3->Draw("P");
+      }
     }
   }
 
@@ -290,12 +299,15 @@ void showGraphs(double canvasSizeX, double canvasSizeY,
     graph4->SetLineWidth(2);
     graph4->SetLineStyle(lineStyles[3]);
     graph4->Draw("P");
-    TF1* fitFunction4 = 0;
     if ( addFitFunctions )
     {
       fitFunction4 = makeEfficiencyFit(graph4, "fitFunction4", xMin, xMax);
-      fitFunction4->Draw();
-      graph4->Draw("P");
+      if ( fitFunction4 )
+      {
+	fitFunction4->SetLineColor(colors[3]);
+	fitFunction4->Draw("Lsame");
+	graph4->Draw("P");
+      }
     }
   }
 
@@ -308,12 +320,15 @@ void showGraphs(double canvasSizeX, double canvasSizeY,
     graph5->SetLineWidth(2);
     graph5->SetLineStyle(lineStyles[4]);
     graph5->Draw("P");
-    TF1* fitFunction5 = 0;
     if ( addFitFunctions )
     {
       fitFunction5 = makeEfficiencyFit(graph5, "fitFunction5", xMin, xMax);
-      fitFunction5->Draw();
-      graph5->Draw("P");
+      if ( fitFunction5 )
+      {
+	fitFunction5->SetLineColor(colors[4]);
+	fitFunction5->Draw("Lsame");
+	graph5->Draw("P");
+      }
     }
   }
 
@@ -326,12 +341,15 @@ void showGraphs(double canvasSizeX, double canvasSizeY,
     graph6->SetLineWidth(2);
     graph6->SetLineStyle(lineStyles[5]);
     graph6->Draw("P");
-    TF1* fitFunction6 = 0;
     if ( addFitFunctions )
     {
       fitFunction6 = makeEfficiencyFit(graph6, "fitFunction6", xMin, xMax);
-      fitFunction6->Draw();
-      graph6->Draw("P");
+      if ( fitFunction6 )
+      {
+	fitFunction6->SetLineColor(colors[5]);
+	fitFunction6->Draw("Lsame");
+	graph6->Draw("P");
+      }
     }
   }
 
@@ -537,7 +555,7 @@ void makeEfficiencyPlots()
 		     xMin[*observable], xMax[*observable], xAxisTitles[*observable], 1.2, 
 		     false, 0., 1.09, "Efficiency", 1.4, 
 		     outputFileName_efficiency_vs_isolationWPs);
-	
+
   	  for ( std::map<std::string, TGraph*>::const_iterator it = graphs_efficiency_vs_isolationWPs.begin(); it != graphs_efficiency_vs_isolationWPs.end(); ++it )
           {
   	    delete it->second;
@@ -562,11 +580,6 @@ void makeEfficiencyPlots()
 	      graphs_efficiency_vs_decayModes[*decayMode] = graph_efficiency;
             }
 	  
-	    bool addFitFunctions = false;
-	    if ( (*observable) == "pt" ) 
-	    {
-	      addFitFunctions = true;
-	    }
 	    std::vector<std::string> labelTextLines = getLabelTextLines(*ptThreshold);
 	    std::string outputFileName_efficiency_vs_decayModes = Form("makeEfficiencyPlots_%s_vs_%s_%s_%s_%s.png", 
               pfAlgo->data(), observable->data(), absEtaRange->data(), ptThreshold->data(), isolationWP->data());
@@ -577,7 +590,7 @@ void makeEfficiencyPlots()
 		       graphs_efficiency_vs_decayModes["threeProng0Pi0"], legendEntries_vs_decayModes["threeProng0Pi0"],
 		       graphs_efficiency_vs_decayModes["threeProng1Pi0"], legendEntries_vs_decayModes["threeProng1Pi0"],
 		       0, "",
-		       addFitFunctions,
+		       false,
 		       colors, markerStyles, lineStyles, 
 		       0.045, 0.68, 0.17, 0.23, 0.26, 
 		       labelTextLines, 0.045,
@@ -585,7 +598,7 @@ void makeEfficiencyPlots()
 		       xMin[*observable], xMax[*observable], xAxisTitles[*observable], 1.2, 
 		       false, 0., 1.09, "Efficiency", 1.4, 
 		       outputFileName_efficiency_vs_decayModes);
-	
+
   	    for ( std::map<std::string, TGraph*>::const_iterator it = graphs_efficiency_vs_decayModes.begin(); it != graphs_efficiency_vs_decayModes.end(); ++it )
 	    {
 	      delete it->second;
