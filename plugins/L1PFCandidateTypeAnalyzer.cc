@@ -32,12 +32,12 @@ L1PFCandidateTypeAnalyzer::L1PFCandidateTypeAnalyzer(const edm::ParameterSet& cf
   isolationQualityCuts_dzCut_enabled_primary_ = readL1PFTauQualityCuts(cfg_isolationQualityCuts, "enabled_primary", false);
   isolationQualityCuts_dzCut_enabled_pileup_  = readL1PFTauQualityCuts(cfg_isolationQualityCuts, "enabled_pileup",  false);
 
-  pfChargedHadronPlots_       = new pfCandTypePlotEntryType("chargedHadron");
-  pfChargedHadronPileupPlots_ = new pfCandTypePlotEntryType("chargedHadronPileup");
-  pfElectronPlots_            = new pfCandTypePlotEntryType("electron");
-  pfNeutralHadronPlots_       = new pfCandTypePlotEntryType("neutralHadron");
-  pfPhotonPlots_              = new pfCandTypePlotEntryType("photon");
-  pfMuonPlots_                = new pfCandTypePlotEntryType("muon");
+  pfChargedHadronPlots_       = new pfCandTypePlotEntryType(-1., 1.4, "chargedHadron");
+  pfChargedHadronPileupPlots_ = new pfCandTypePlotEntryType(-1., 1.4, "chargedHadronPileup");
+  pfElectronPlots_            = new pfCandTypePlotEntryType(-1., 1.4, "electron");
+  pfNeutralHadronPlots_       = new pfCandTypePlotEntryType(-1., 1.4, "neutralHadron");
+  pfPhotonPlots_              = new pfCandTypePlotEntryType(-1., 1.4, "photon");
+  pfMuonPlots_                = new pfCandTypePlotEntryType(-1., 1.4, "muon");
 
   dqmDirectory_ = cfg.getParameter<std::string>("dqmDirectory");
 }
@@ -70,6 +70,8 @@ void L1PFCandidateTypeAnalyzer::beginJob()
     
 void L1PFCandidateTypeAnalyzer::analyze(const edm::Event& evt, const edm::EventSetup& es)
 {
+  //std::cout << "<L1PFCandidateTypeAnalyzer::analyze>:" << std::endl;
+
   edm::Handle<l1t::PFCandidateCollection> l1PFCands;
   evt.getByToken(token_l1PFCands_, l1PFCands);
 
@@ -84,6 +86,7 @@ void L1PFCandidateTypeAnalyzer::analyze(const edm::Event& evt, const edm::EventS
       primaryVertex_z = primaryVertex->z0();
     }
   }
+  //std::cout << "primaryVertex_z = " << primaryVertex_z << std::endl;
 
   int numPileup = -1;
   if ( srcPileupSummaryInfo_.label() != "" ) 
@@ -101,8 +104,20 @@ void L1PFCandidateTypeAnalyzer::analyze(const edm::Event& evt, const edm::EventS
 
   const double evtWeight = 1.;
   
+  //int idxL1PFCand = 0;
   for ( l1t::PFCandidateCollection::const_iterator l1PFCand = l1PFCands->begin(); l1PFCand != l1PFCands->end(); ++l1PFCand )
   {
+    //std::string type_string;
+    //if      ( l1PFCand->id() == l1t::PFCandidate::ChargedHadron ) type_string = "PFChargedHadron";
+    //else if ( l1PFCand->id() == l1t::PFCandidate::Electron      ) type_string = "PFElectron";
+    //else if ( l1PFCand->id() == l1t::PFCandidate::NeutralHadron ) type_string = "PFNeutralHadron";
+    //else if ( l1PFCand->id() == l1t::PFCandidate::Photon        ) type_string = "PFPhoton";
+    //else if ( l1PFCand->id() == l1t::PFCandidate::Muon          ) type_string = "PFMuon";
+    //else                                                          type_string = "N/A";
+    //std::cout << "L1PFCandidate #" << idxL1PFCand << " (type = " << type_string << "):" 
+    //	        << " pT = " << l1PFCand->pt() << ", eta = " << l1PFCand->eta() << ", phi = " << l1PFCand->phi() << ","
+    //	        << " isSelected (dZcut disabled) = " << isSelected(isolationQualityCuts_dzCut_disabled_, *l1PFCand, primaryVertex_z) << std::endl;
+    //++idxL1PFCand;
     if ( l1PFCand->id() == l1t::PFCandidate::ChargedHadron && isSelected(isolationQualityCuts_dzCut_enabled_primary_, *l1PFCand, primaryVertex_z) )
     {
       pfChargedHadronPlots_->fillHistograms(*l1PFCand, numPileup, evtWeight);

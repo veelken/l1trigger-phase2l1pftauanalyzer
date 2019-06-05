@@ -55,8 +55,10 @@ class L1PFCandidateTypeAnalyzer : public edm::EDAnalyzer
 
   struct pfCandTypePlotEntryType
   {
-    pfCandTypePlotEntryType(const std::string& label)
+    pfCandTypePlotEntryType(double min_pt, double max_absEta, const std::string& label)
       : label_(label)
+      , min_pt_(min_pt)
+      , max_absEta_(max_absEta)
       , me_energyFraction_vs_eta_(nullptr)
       , histogram_energyFraction_vs_eta_(nullptr)
       , me_ptFraction_vs_eta_(nullptr)
@@ -157,15 +159,21 @@ class L1PFCandidateTypeAnalyzer : public edm::EDAnalyzer
     {
       double weight_energyFraction = l1PFCand.energy()*evtWeight;
       double weight_ptFraction = l1PFCand.pt()*evtWeight;
-      histogram_energyFraction_vs_eta_->Fill(l1PFCand.eta(), weight_energyFraction);
-      histogram_ptFraction_vs_eta_->Fill(l1PFCand.eta(), weight_ptFraction);
-      histogram_energyFraction_vs_eta_fine_binning_->Fill(l1PFCand.eta(), weight_energyFraction);
-      histogram_ptFraction_vs_eta_fine_binning_->Fill(l1PFCand.eta(), weight_ptFraction);
-      histogram_energyFraction_vs_absEta_->Fill(TMath::Abs(l1PFCand.eta()), weight_energyFraction);
-      histogram_ptFraction_vs_absEta_->Fill(TMath::Abs(l1PFCand.eta()), weight_ptFraction);
-      histogram_energyFraction_vs_pt_->Fill(l1PFCand.pt(), weight_energyFraction);
-      histogram_ptFraction_vs_pt_->Fill(l1PFCand.pt(), weight_ptFraction);
-      if ( numPileup >= 0 ) 
+      if ( l1PFCand.pt() > min_pt_ ) 
+      {
+	histogram_energyFraction_vs_eta_->Fill(l1PFCand.eta(), weight_energyFraction);
+	histogram_ptFraction_vs_eta_->Fill(l1PFCand.eta(), weight_ptFraction);
+	histogram_energyFraction_vs_eta_fine_binning_->Fill(l1PFCand.eta(), weight_energyFraction);
+	histogram_ptFraction_vs_eta_fine_binning_->Fill(l1PFCand.eta(), weight_ptFraction);
+	histogram_energyFraction_vs_absEta_->Fill(TMath::Abs(l1PFCand.eta()), weight_energyFraction);
+	histogram_ptFraction_vs_absEta_->Fill(TMath::Abs(l1PFCand.eta()), weight_ptFraction);
+      }
+      if ( TMath::Abs(l1PFCand.eta()) < max_absEta_ ) 
+      {
+	histogram_energyFraction_vs_pt_->Fill(l1PFCand.pt(), weight_energyFraction);
+	histogram_ptFraction_vs_pt_->Fill(l1PFCand.pt(), weight_ptFraction);
+      }
+      if ( l1PFCand.pt() > min_pt_ && TMath::Abs(l1PFCand.eta()) < max_absEta_ && numPileup >= 0 ) 
       {
 	histogram_energyFraction_vs_numPileup_->Fill(numPileup, weight_energyFraction);
 	histogram_ptFraction_vs_numPileup_->Fill(numPileup, weight_ptFraction);
@@ -196,6 +204,8 @@ class L1PFCandidateTypeAnalyzer : public edm::EDAnalyzer
       }
     }
     std::string label_;
+    double min_pt_;
+    double max_absEta_;
     MonitorElement* me_energyFraction_vs_eta_;
     TH1* histogram_energyFraction_vs_eta_;
     MonitorElement* me_ptFraction_vs_eta_;
