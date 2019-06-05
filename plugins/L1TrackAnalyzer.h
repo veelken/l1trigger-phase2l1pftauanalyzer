@@ -273,12 +273,12 @@ class L1TrackAnalyzer : public edm::EDAnalyzer
       //std::cout << "<efficiencyPlotEntryType::fillHistograms (evtWeight = " << evtWeight << ")>:" << std::endl;
 
       double minDeltaR = 1.e+3;
-      for ( auto match1 : cleanedGenChargedHadronToTrackMatches )
-      {
-        for ( auto match2 : cleanedGenChargedHadronToTrackMatches )
-        {
-	  double dR = deltaR(match1->genChargedHadron_eta(), match1->genChargedHadron_phi(), match2->genChargedHadron_eta(), match2->genChargedHadron_phi());
-	  if ( dR < minDeltaR ) minDeltaR = dR;
+      for ( typename std::vector<const T*>::const_iterator match1 = cleanedGenChargedHadronToTrackMatches.begin();
+	    match1 != cleanedGenChargedHadronToTrackMatches.end(); ++match1 ) {
+	for ( typename std::vector<const T*>::const_iterator match2 = match1 + 1;
+	      match2 != cleanedGenChargedHadronToTrackMatches.end(); ++match2 ) {
+	  double dR = deltaR((*match1)->genChargedHadron_eta(), (*match1)->genChargedHadron_phi(), (*match2)->genChargedHadron_eta(), (*match2)->genChargedHadron_phi());
+	  if ( dR > 0. && dR < minDeltaR ) minDeltaR = dR;
         }
       }
 
