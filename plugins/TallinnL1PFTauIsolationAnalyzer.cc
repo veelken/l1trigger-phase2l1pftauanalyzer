@@ -3,7 +3,7 @@
 #include "FWCore/ServiceRegistry/interface/Service.h"
 #include "DataFormats/Common/interface/Handle.h"
 
-#include "L1Trigger/TallinnL1PFTaus/interface/lutAuxFunctions.h"
+#include "L1Trigger/TallinnL1PFTaus/interface/lutAuxFunctions.h" // openFile(), loadTH1()
 
 #include <iostream>
 #include <iomanip>
@@ -76,7 +76,7 @@ void TallinnL1PFTauIsolationAnalyzer::beginJob()
   {
     decayModes = { "all" };
   }
-  std::vector<double> ptThresholds = { 20., 30., 40. };
+  std::vector<double> ptThresholds = { 20., 25., 30., 35., 40. };
   for ( auto decayMode : decayModes )
   {
     for ( auto ptThreshold : ptThresholds )

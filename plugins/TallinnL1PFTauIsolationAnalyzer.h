@@ -101,8 +101,10 @@ class TallinnL1PFTauIsolationAnalyzer : public edm::EDAnalyzer
       , histogram_rhoCorr_(nullptr) 
       , me_sumNeutralIso_vs_rhoCorr_(nullptr)
       , histogram_sumNeutralIso_vs_rhoCorr_(nullptr)
-      , me_pt_(nullptr)
-      , histogram_pt_(nullptr)
+      , me_tauPt_(nullptr)
+      , histogram_tauPt_(nullptr)
+      , me_leadTrackPt_(nullptr)
+      , histogram_leadTrackPt_(nullptr)
       , min_pt_(min_pt)
       , max_pt_(max_pt)
       , min_absEta_(min_absEta)
@@ -217,10 +219,15 @@ class TallinnL1PFTauIsolationAnalyzer : public edm::EDAnalyzer
       histogram_sumNeutralIso_vs_rhoCorr_ = dynamic_cast<TH2*>(me_sumNeutralIso_vs_rhoCorr_->getTH1());
       assert(histogram_sumNeutralIso_vs_rhoCorr_);
 
-      TString histogramName_pt = Form("pt_%s", histogramName_suffix.Data());
-      me_pt_ = dqmStore.book1D(histogramName_pt.Data(), histogramName_pt.Data(), 250, 0., 250.);
-      histogram_pt_ = me_pt_->getTH1();
-      assert(histogram_pt_);
+      TString histogramName_tauPt = Form("tauPt_%s", histogramName_suffix.Data());
+      me_tauPt_ = dqmStore.book1D(histogramName_tauPt.Data(), histogramName_tauPt.Data(), 250, 0., 250.);
+      histogram_tauPt_ = me_tauPt_->getTH1();
+      assert(histogram_tauPt_);
+
+      TString histogramName_leadTrackPt = Form("leadTrackPt_%s", histogramName_suffix.Data());
+      me_leadTrackPt_ = dqmStore.book1D(histogramName_leadTrackPt.Data(), histogramName_leadTrackPt.Data(), 250, 0., 250.);
+      histogram_leadTrackPt_ = me_leadTrackPt_->getTH1();
+      assert(histogram_leadTrackPt_);
     }
     void fillHistograms(const l1t::TallinnL1PFTau& l1Tau, double rhoCorr, double evtWeight)
     {
@@ -263,7 +270,13 @@ class TallinnL1PFTauIsolationAnalyzer : public edm::EDAnalyzer
 	fillWithOverFlow2d(histogram_sumNeutralIso_vs_sumChargedIsoPileup_, sumChargedIsoPileup, sumNeutralIso, evtWeight);
 	fillWithOverFlow2d(histogram_sumNeutralIso_vs_rhoCorr_, rhoCorr, sumNeutralIso, evtWeight);
 
-	fillWithOverFlow(histogram_pt_, l1Tau.pt(), evtWeight);
+	fillWithOverFlow(histogram_tauPt_, l1Tau.pt(), evtWeight);
+	double leadTrackPt = -1.;
+	if ( l1Tau.leadChargedPFCand().isNonnull() && l1Tau.leadChargedPFCand()->pfTrack().isNonnull() ) 
+	{
+	  leadTrackPt = l1Tau.leadChargedPFCand()->pfTrack()->pt(); 
+	}
+	fillWithOverFlow(histogram_leadTrackPt_, leadTrackPt, evtWeight);
       }
     }
     void fillHistograms_woGenMatching(const l1t::TallinnL1PFTau& l1Tau, double rhoCorr, double evtWeight)
@@ -313,8 +326,10 @@ class TallinnL1PFTauIsolationAnalyzer : public edm::EDAnalyzer
     TH1* histogram_rhoCorr_;    
     MonitorElement* me_sumNeutralIso_vs_rhoCorr_;
     TH2* histogram_sumNeutralIso_vs_rhoCorr_; 
-    MonitorElement* me_pt_;
-    TH1* histogram_pt_;    
+    MonitorElement* me_tauPt_;
+    TH1* histogram_tauPt_;    
+    MonitorElement* me_leadTrackPt_;
+    TH1* histogram_leadTrackPt_;    
     double min_pt_;
     double max_pt_;
     double min_absEta_;
