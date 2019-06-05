@@ -254,11 +254,11 @@ class L1TrackAnalyzer : public edm::EDAnalyzer
       assert(histogram_phi_denominator_);
 
       TString histogramName_minDeltaR_numerator = Form("eff%s_vs_minDeltaR_numerator%s", recTrack_type_capitalized_.data(), histogramName_suffix.Data());
-      me_minDeltaR_numerator_ = dqmStore.book1D(histogramName_minDeltaR_numerator.Data(), histogramName_minDeltaR_numerator.Data(), 100, 0., 0.100);
+      me_minDeltaR_numerator_ = dqmStore.book1D(histogramName_minDeltaR_numerator.Data(), histogramName_minDeltaR_numerator.Data(), 200, 0., 0.05);
       histogram_minDeltaR_numerator_ = me_minDeltaR_numerator_->getTH1();
       assert(histogram_minDeltaR_numerator_);
       TString histogramName_minDeltaR_denominator = Form("eff%s_vs_minDeltaR_denominator%s", recTrack_type_capitalized_.data(), histogramName_suffix.Data());
-      me_minDeltaR_denominator_ = dqmStore.book1D(histogramName_minDeltaR_denominator.Data(), histogramName_minDeltaR_denominator.Data(), 100, 0., 0.100);
+      me_minDeltaR_denominator_ = dqmStore.book1D(histogramName_minDeltaR_denominator.Data(), histogramName_minDeltaR_denominator.Data(), 200, 0., 0.05);
       histogram_minDeltaR_denominator_ = me_minDeltaR_denominator_->getTH1();
       assert(histogram_minDeltaR_denominator_);
 

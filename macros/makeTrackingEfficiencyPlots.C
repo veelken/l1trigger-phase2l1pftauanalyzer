@@ -271,7 +271,7 @@ void makeTrackingEfficiencyPlots()
   xMax["pt"]        = 100.;
   xMax["eta"]       =  +3.0;
   xMax["phi"]       =  +TMath::Pi();
-  xMax["minDeltaR"] =  0.1;
+  xMax["minDeltaR"] =  0.03;
 
   std::map<std::string, std::string> xAxisTitles; // key = observable
   xAxisTitles["pt"]        = "p_{T} [GeV]";
@@ -358,6 +358,12 @@ void makeTrackingEfficiencyPlots()
 	TGraph* graph_offlinePFlow = graphs_efficiency["offlinePFCandTrack"][*recTrack_option][*observable][*absEtaRange]["all"];
 	assert(graph_offlinePFlow);
 	
+	double legendPosX = 0.68;
+        double legendPosY = 0.17;
+        if ( (*observable) == "minDeltaR" ) {
+    	  legendPosX = 0.18;
+	  legendPosY = 0.17;
+        }
 	std::vector<std::string> labelTextLines;
 	std::string outputFileName = Form("makeTrackingEfficiencyPlots_vs_algo_and_%s_%s_%s.png", 
           observable->data(), recTrack_option->data(), absEtaRange->data());
@@ -369,7 +375,7 @@ void makeTrackingEfficiencyPlots()
 		   0, "",
 		   0, "",
 		   colors, markerStyles, lineStyles, 
-		   0.045, 0.68, 0.17, 0.25, 0.26, 
+		   0.045, legendPosX, legendPosY, 0.25, 0.26, 
 		   labelTextLines, 0.050,
 		   0.63, 0.65, 0.26, 0.07, 
 		   xMin[*observable], xMax[*observable], xAxisTitles[*observable], 1.2, 
@@ -391,6 +397,12 @@ void makeTrackingEfficiencyPlots()
 	TGraph* graph_wQualityCuts = graphs_efficiency[*recTrack_type]["wQualityCuts"][*observable][*absEtaRange]["all"];
 	assert(graph_wQualityCuts);
 	
+	double legendPosX = 0.68;
+        double legendPosY = 0.17;
+        if ( (*observable) == "minDeltaR" ) {
+    	  legendPosX = 0.18;
+	  legendPosY = 0.17;
+        }
 	std::vector<std::string> labelTextLines;
 	std::string outputFileName = Form("makeTrackingEfficiencyPlots_vs_recTrackOption_and_%s_%s_%s.png", 
           observable->data(), recTrack_type->data(), absEtaRange->data());
@@ -402,7 +414,7 @@ void makeTrackingEfficiencyPlots()
 		   0, "",
 		   0, "",
 		   colors, markerStyles, lineStyles, 
-		   0.045, 0.68, 0.17, 0.25, 0.26, 
+		   0.045, legendPosX, legendPosY, 0.32, 0.13, 
 		   labelTextLines, 0.050,
 		   0.63, 0.65, 0.26, 0.07, 
 		   xMin[*observable], xMax[*observable], xAxisTitles[*observable], 1.2, 
