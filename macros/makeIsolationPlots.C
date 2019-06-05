@@ -218,22 +218,22 @@ enum { kGtCut, kLtCut };
 TGraph* compGraph_efficiency(TH1* histogram, int mode)
 {
   TAxis* xAxis = histogram->GetXaxis();
-  int numPoints = xAxis->GetNbins() + 1;
+  int numBins = xAxis->GetNbins();
+  int numPoints = numBins + 1;
   TGraph* graph_Efficiency = new TGraph(numPoints);
-  graph_Efficiency->SetPoint(0, 0., 1.0);
-  double integral = histogram->Integral(1, histogram->GetNbinsX());
+  double integral = histogram->Integral(1, numBins);
   double sum = 0.;
   for ( int idxPoint = 0; idxPoint <= numPoints; ++idxPoint ) {
     double binCenter = 0.;
-    if ( idxPoint >= 1 ) {      
+    if ( idxPoint >= 1 && idxPoint <= numBins ) {      
       int idxBin = idxPoint;
       binCenter = xAxis->GetBinCenter(idxBin);
       double binContent = histogram->GetBinContent(idxBin);
       sum += binContent;
     }
     std::string histogramName = histogram->GetName();
-    if      ( mode == kGtCut ) graph_Efficiency->SetPoint(idxPoint, binCenter, sum/integral);
-    else if ( mode == kLtCut ) graph_Efficiency->SetPoint(idxPoint, binCenter, 1.0 - (sum/integral));
+    if      ( mode == kGtCut ) graph_Efficiency->SetPoint(idxPoint, binCenter, 1.0 - (sum/integral));
+    else if ( mode == kLtCut ) graph_Efficiency->SetPoint(idxPoint, binCenter, sum/integral);
     else assert(0);
   }
   return graph_Efficiency;
@@ -254,8 +254,8 @@ TGraph* compGraph_rocCurve(TH1* histogram_signal, TH1* histogram_background, int
     graph_background->GetPoint(idxPoint, x_background, y_background);
     assert(TMath::Abs(x_signal - x_background) < 1.e-4);
     double x_ROCcurve = y_signal;
-    //double y_ROCcurve = 1.0 - y_background;
-    double y_ROCcurve = y_background;
+    double y_ROCcurve = 1.0 - y_background;
+    //double y_ROCcurve = y_background;
     graph_ROCcurve->SetPoint(idxPoint, x_ROCcurve, y_ROCcurve);
   }
   return graph_ROCcurve;
@@ -425,7 +425,9 @@ std::vector<std::string> getLabelTextLines(const std::string& ptThreshold)
 {
   std::vector<std::string> labelTextLines;
   if ( ptThreshold == "ptGt20" ) labelTextLines.push_back("p_{T} > 20 GeV");
+  if ( ptThreshold == "ptGt25" ) labelTextLines.push_back("p_{T} > 25 GeV");
   if ( ptThreshold == "ptGt30" ) labelTextLines.push_back("p_{T} > 30 GeV");
+  if ( ptThreshold == "ptGt35" ) labelTextLines.push_back("p_{T} > 35 GeV");
   if ( ptThreshold == "ptGt40" ) labelTextLines.push_back("p_{T} > 40 GeV");
   else assert(0);
   return labelTextLines;
@@ -669,9 +671,9 @@ void makeIsolationPlots()
   gROOT->SetBatch(true);
 
   std::string inputFilePath = Form("%s/src/L1Trigger/TallinnL1PFTauAnalyzer/test/", gSystem->Getenv("CMSSW_BASE"));
-  std::string inputFileName_signal = "TallinnL1PFTauAnalyzer_signal_2019May27v2.root";
+  std::string inputFileName_signal = "TallinnL1PFTauAnalyzer_signal_2019May31.root";
   TFile* inputFile_signal = openFile(inputFilePath, inputFileName_signal);
-  std::string inputFileName_background = "TallinnL1PFTauAnalyzer_background_2019May27v2.root";
+  std::string inputFileName_background = "TallinnL1PFTauAnalyzer_background_2019May31.root";
   TFile* inputFile_background = openFile(inputFilePath, inputFileName_background);
 
   std::vector<std::string> pfAlgos;
@@ -684,7 +686,9 @@ void makeIsolationPlots()
 
   std::vector<std::string> ptThresholds;
   ptThresholds.push_back("ptGt20");
+  //ptThresholds.push_back("ptGt25");
   ptThresholds.push_back("ptGt30");
+  //ptThresholds.push_back("ptGt35");
   ptThresholds.push_back("ptGt40");
 
   std::vector<std::string> binning_absEta;
@@ -715,10 +719,12 @@ void makeIsolationPlots()
   observables.push_back("relCombinedIso");
   observables.push_back("relCombinedIso_wDeltaBetaCorr");
   observables.push_back("relCombinedIso_wRhoCorr"); 
-  observables.push_back("pt");
+  observables.push_back("tauPt");
+  observables.push_back("leadTrackPt");
 
   std::map<std::string, int> mode; // key = observable
-  mode["pt"]                                     = kGtCut;
+  mode["tauPt"]                                  = kGtCut;
+  mode["leadTrackPt"]                            = kGtCut;
   mode["absChargedIso"]                          = kLtCut;
   mode["absNeutralIso"]                          = kLtCut;
   mode["absNeutralIso_wDeltaBetaCorr"]           = kLtCut;
@@ -736,7 +742,8 @@ void makeIsolationPlots()
   mode["sumChargedIsoPileup"]                    = kLtCut;
 
   std::map<std::string, int> rebin; // key = observable
-  rebin["pt"]                                    =   5;
+  rebin["tauPt"]                                 =   5;
+  rebin["leadTrackPt"]                           =   5;
   rebin["absChargedIso"]                         =   5;
   rebin["absNeutralIso"]                         =   5;
   rebin["absNeutralIso_wDeltaBetaCorr"]          =   5;
@@ -754,7 +761,8 @@ void makeIsolationPlots()
   rebin["sumChargedIsoPileup"]                   =   5;
 
   std::map<std::string, double> xMin; // key = observable
-  xMin["pt"]                                     =   0.;
+  xMin["tauPt"]                                  =   0.;
+  xMin["leadTrackPt"]                            =   0.;
   xMin["absChargedIso"]                          =   0.;
   xMin["absNeutralIso"]                          =   0.;
   xMin["absNeutralIso_wDeltaBetaCorr"]           =   0.;
@@ -772,7 +780,8 @@ void makeIsolationPlots()
   xMin["sumChargedIsoPileup"]                    =   0.; 
 
   std::map<std::string, double> xMax; // key = observable
-  xMax["pt"]                                     = 100.;
+  xMax["tauPt"]                                  = 100.;
+  xMax["leadTrackPt"]                            = 100.;
   xMax["absChargedIso"]                          =  25.;
   xMax["absNeutralIso"]                          =  25.;
   xMax["absNeutralIso_wDeltaBetaCorr"]           =  25.;
@@ -788,7 +797,8 @@ void makeIsolationPlots()
   xMax["sumChargedIsoPileup"]                    =  25.;
   
   std::map<std::string, std::string> xAxisTitles; // key = observable
-  xAxisTitles["pt"]                              = "L1 #tau_{h} p_{T} [GeV]";
+  xAxisTitles["tauPt"]                           = "L1 #tau_{h} p_{T} [GeV]";
+  xAxisTitles["leadTrackPt"]                     = "L1 lead. track p_{T} [GeV]";
   xAxisTitles["absChargedIso"]                   = "L1 #tau I_{ch} [GeV]";
   xAxisTitles["absNeutralIso"]                   = "L1 #tau I_{neu} [GeV]";
   xAxisTitles["absNeutralIso_wDeltaBetaCorr"]    = "#Delta#beta-corrected L1 #tau I_{neu} [GeV]";
@@ -805,7 +815,8 @@ void makeIsolationPlots()
   xAxisTitles["relCombinedIso_wRhoCorr"]         = "#rho-corrected L1 #tau I_{cmb} / p_{T}";
 
   std::map<std::string, std::string> legendEntries; // key = observable
-  legendEntries["pt"]                            = "p_{T}";
+  legendEntries["tauPt"]                         = "#tau_{h} p_{T}";
+  legendEntries["leadTrackPt"]                   = "lead. track p_{T}";
   legendEntries["absChargedIso"]                 = "I_{ch}";
   legendEntries["absNeutralIso"]                 = "I_{neu}";
   legendEntries["absNeutralIso_wDeltaBetaCorr"]  = "I_{neu} (#Delta#beta-corr.)";
@@ -823,13 +834,14 @@ void makeIsolationPlots()
 
   std::string dqmDirectory = "DQMData/TallinnL1PFTauIsolationAnalyzerWithStripsWithoutPreselection";
   
-  int colors[6]                 = {  1,  2,  8,  4,  6,  7 };
-  int lineStyles[6]             = {  1,  1,  1,  1,  1,  1 };
-  int lineWidths_histogram[6]   = {  2,  2,  2,  2,  2,  2 };
-  int lineWidths_graph[6]       = {  3,  3,  3,  3,  3,  3 };
-  int lineWidths_fitFunction[6] = {  2,  2,  2,  2,  2,  2 };
-  int markerStyles[6]           = { 22, 32, 20, 24, 21, 25 };
-  int markerSizes[6]            = {  2,  2,  2,  2,  2,  2 };
+  int colors[6]                      = {  1,  2,  8,  4,  6,  7 };
+  int colors_signal_vs_background[6] = {  2,  1,  8,  4,  6,  7 };
+  int lineStyles[6]                  = {  1,  1,  1,  1,  1,  1 };
+  int lineWidths_histogram[6]        = {  2,  2,  2,  2,  2,  2 };
+  int lineWidths_graph[6]            = {  3,  3,  3,  3,  3,  3 };
+  int lineWidths_fitFunction[6]      = {  2,  2,  2,  2,  2,  2 };
+  int markerStyles[6]                = { 22, 32, 20, 24, 21, 25 };
+  int markerSizes[6]                 = {  2,  2,  2,  2,  2,  2 };
 
   for ( std::vector<std::string>::const_iterator pfAlgo = pfAlgos.begin();
 	pfAlgo != pfAlgos.end(); ++pfAlgo ) {
@@ -867,7 +879,7 @@ void makeIsolationPlots()
 			 0, "",
 			 0, "",
 			 0, "",
-			 colors, lineStyles, lineWidths_histogram,
+			 colors_signal_vs_background, lineStyles, lineWidths_histogram,
 			 0.050, 0.68, 0.74, 0.23, 0.17, 
 			 labelTextLines, 0.050,
 			 0.70, 0.62, 0.23, 0.06, 
@@ -886,11 +898,12 @@ void makeIsolationPlots()
 		   graphs_roc["absCombinedIso"],                legendEntries["absCombinedIso"],
 		   graphs_roc["absCombinedIso_wDeltaBetaCorr"], legendEntries["absCombinedIso_wDeltaBetaCorr"],
 		   graphs_roc["absCombinedIso_wRhoCorr"],       legendEntries["absCombinedIso_wRhoCorr"],
-		   graphs_roc["pt"],                            legendEntries["pt"],
+		   graphs_roc["tauPt"],                         legendEntries["tauPt"],
+		   //graphs_roc["leadTrackPt"],                   legendEntries["leadTrackPt"],
 		   colors, markerStyles, markerSizes, lineStyles, lineWidths_graph, 
-		   0.040, 0.67, 0.17, 0.23, 0.27, 
+		   0.040, 0.18, 0.17, 0.23, 0.27, 
 		   labelTextLines, 0.045,
-		   0.18, 0.86, 0.26, 0.05, 
+		   0.67, 0.86, 0.26, 0.05, 
 		   0., 1.09, "Signal Efficiency", 1.2, 
 		   false, 0., 1.09, "Background Rejection", 1.4, 
 		   outputFileName_roc_absIso);
@@ -902,11 +915,12 @@ void makeIsolationPlots()
 		   graphs_roc["relCombinedIso"],                legendEntries["relCombinedIso"],
 		   graphs_roc["relCombinedIso_wDeltaBetaCorr"], legendEntries["relCombinedIso_wDeltaBetaCorr"],
 		   graphs_roc["relCombinedIso_wRhoCorr"],       legendEntries["relCombinedIso_wRhoCorr"],
-		   graphs_roc["pt"],                            legendEntries["pt"],
+		   graphs_roc["tauPt"],                         legendEntries["tauPt"],
+		   //graphs_roc["leadTrackPt"],                   legendEntries["leadTrackPt"],
 		   colors, markerStyles, markerSizes, lineStyles, lineWidths_graph, 
-		   0.040, 0.67, 0.17, 0.23, 0.27, 
+		   0.040, 0.18, 0.17, 0.23, 0.27, 
 		   labelTextLines, 0.045,
-		   0.18, 0.86, 0.26, 0.05, 
+		   0.67, 0.86, 0.26, 0.05, 
 		   0., 1.09, "Signal Efficiency", 1.2, 
 		   false, 0., 1.09, "Background Rejection", 1.4, 
 		   outputFileName_roc_relIso);	

@@ -202,7 +202,7 @@ for useStrips in [ True, False ]:
 process.DQMStore = cms.Service("DQMStore")
 
 process.savePlots = cms.EDAnalyzer("DQMSimpleFileSaver",
-    outputFileName = cms.string('TallinnL1PFTauAnalyzer_signal_2019May29v2.root')
+    outputFileName = cms.string('TallinnL1PFTauAnalyzer_signal_2019May31v2.root')
 )
 
 process.p = cms.Path(process.analysisSequence + process.savePlots)

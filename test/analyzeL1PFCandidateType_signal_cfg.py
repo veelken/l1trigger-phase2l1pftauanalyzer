@@ -18,7 +18,11 @@ process.source = cms.Source("PoolSource",
     fileNames = cms.untracked.vstring(
         'file:/home/veelken/CMSSW_10_5_0_pre1/src/L1Trigger/TallinnL1PFTaus/test/NTuple_TallinnL1PFTauProducer.root'
         #'file:/afs/cern.ch/user/v/veelken/cmssw/CMSSW_10_5_0_pre1/src/L1Trigger/TallinnL1PFTaus/test/NTuple_TallinnL1PFTauProducer.root'
-    )
+    ),
+    ##eventsToProcess = cms.untracked.VEventRange(
+    ##    '1:364:36318',
+    ##    '1:364:36315',                                
+    ##)                         
 )
 
 #--------------------------------------------------------------------------------
@@ -94,7 +98,7 @@ process.analysisSequence += process.analyzeOfflinePFCandidateTypePuppi
 process.DQMStore = cms.Service("DQMStore")
 
 process.savePlots = cms.EDAnalyzer("DQMSimpleFileSaver",
-    outputFileName = cms.string('L1PFCandidateTypeAnalyzer_signal_2019May29v2.root')
+    outputFileName = cms.string('L1PFCandidateTypeAnalyzer_signal_2019May31.root')
 )
 
 process.p = cms.Path(process.analysisSequence + process.savePlots)

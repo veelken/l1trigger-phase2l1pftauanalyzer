@@ -299,7 +299,7 @@ void makePFCandidateTypePlots()
   gROOT->SetBatch(true);
 
   std::string inputFilePath = Form("%s/src/L1Trigger/TallinnL1PFTauAnalyzer/test/", gSystem->Getenv("CMSSW_BASE"));
-  std::string inputFileName = "L1PFCandidateTypeAnalyzer_signal_2019May29.root";
+  std::string inputFileName = "L1PFCandidateTypeAnalyzer_signal_2019May31.root";
   TFile* inputFile = openFile(inputFilePath, inputFileName);
 
   std::vector<std::string> pfAlgos;
@@ -447,8 +447,8 @@ void makePFCandidateTypePlots()
         double legendPosX_normalized = 0.17;
         double legendPosY_normalized = 0.17;
         if ( (*observable) == "pt" ) {
-    	  legendPosX_normalized = 0.51;
-	  legendPosY_normalized = 0.52;
+    	  legendPosX_normalized = 0.53;
+	  legendPosY_normalized = 0.17;
         }
         std::string outputFileName_normalized = Form("makePFCandidateTypePlots_%s%s_%s_normalized.png", labelL1_or_offline.data(), pfAlgo->data(), observable->data());
         showHistograms_stacked(1150, 1150,
