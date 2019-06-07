@@ -11,8 +11,8 @@
 TallinnL1PFTauAnalyzerBackground::TallinnL1PFTauAnalyzerBackground(const edm::ParameterSet& cfg)
   : moduleLabel_(cfg.getParameter<std::string>("@module_label"))
 {
-  srcTallinnL1PFTaus_ = cfg.getParameter<edm::InputTag>("srcTallinnL1PFTaus");
-  tokenTallinnL1PFTaus_ = consumes<l1t::TallinnL1PFTauCollection>(srcTallinnL1PFTaus_);
+  srcL1PFTaus_ = cfg.getParameter<edm::InputTag>("srcL1PFTaus");
+  tokenL1PFTaus_ = consumes<l1t::TallinnL1PFTauCollection>(srcL1PFTaus_);
 
   dqmDirectory_ = cfg.getParameter<std::string>("dqmDirectory");
 }
@@ -54,7 +54,7 @@ void TallinnL1PFTauAnalyzerBackground::beginJob()
 void TallinnL1PFTauAnalyzerBackground::analyze(const edm::Event& evt, const edm::EventSetup& es)
 {
   edm::Handle<l1t::TallinnL1PFTauCollection> l1PFTaus;
-  evt.getByToken(tokenTallinnL1PFTaus_, l1PFTaus);
+  evt.getByToken(tokenL1PFTaus_, l1PFTaus);
   
   const double evtWeight = 1.;
 

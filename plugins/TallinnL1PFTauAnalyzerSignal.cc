@@ -13,10 +13,10 @@ TallinnL1PFTauAnalyzerSignal::TallinnL1PFTauAnalyzerSignal(const edm::ParameterS
   : moduleLabel_(cfg.getParameter<std::string>("@module_label"))
 {
   srcNumerator_ = cfg.getParameter<edm::InputTag>("srcNumerator");
-  tokenNumerator_ = consumes<l1t::TallinnL1PFTauCollection>(srcNumerator_ );
+  tokenNumerator_ = consumes<l1t::TallinnL1PFTauCollection>(srcNumerator_);
   srcDenominator_ = cfg.getParameter<edm::InputTag>("srcDenominator");
   std::string typeDenominator_string = cfg.getParameter<std::string>("typeDenominator");
-  if ( typeDenominator_string == "gen"     ) 
+  if ( typeDenominator_string == "gen" ) 
   {
     typeDenominator_ = kGen;
     tokenDenominator_gen_ = consumes<reco::GenJetCollection>(srcDenominator_);

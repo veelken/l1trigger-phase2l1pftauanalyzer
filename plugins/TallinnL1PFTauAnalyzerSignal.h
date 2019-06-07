@@ -203,7 +203,7 @@ class TallinnL1PFTauAnalyzerSignal : public edm::EDAnalyzer
     TH1* histogram_phi_numerator_;
     MonitorElement* me_phi_denominator_;
     TH1* histogram_phi_denominator_;
-    // cuts applied to offline taus in denominator 
+    // cuts applied to offline and generator-level taus in denominator 
     double min_pt_;
     double max_absEta_;
     std::string decayMode_;
@@ -211,7 +211,7 @@ class TallinnL1PFTauAnalyzerSignal : public edm::EDAnalyzer
     double ptThreshold_;
     double max_relChargedIso_;
     double max_absChargedIso_;
-    // matching between offline taus in denominator and L1 trigger taus in denominator
+    // matching between offline or generator-level taus in denominator and L1 trigger taus in numerator
     double dRmatch_; 
   };
   std::vector<efficiencyPlotEntryType*> efficiencyPlots_;

@@ -22,31 +22,31 @@ process.source = cms.Source("PoolSource",
 
 #--------------------------------------------------------------------------------
 # set input files
-
-import os
-import re
-
-#inputFilePaths = [ '/hdfs/cms/store/user/sbhowmik/NeutrinoGun_E_10GeV/PhaseIIMTDTDRAutumn18MiniAOD_20190505/190505_093529/0000/' ]
-inputFilePaths = [
-    '/hdfs/cms/store/user/sbhowmik/NeutrinoGun_E_10GeV/PhaseIIMTDTDRAutumn18MiniAOD_20190524/190524_111617/0000/',
-    '/hdfs/cms/store/user/sbhowmik/NeutrinoGun_E_10GeV/PhaseIIMTDTDRAutumn18MiniAOD_20190524/190524_111617/0001/',
-    '/hdfs/cms/store/user/sbhowmik/NeutrinoGun_E_10GeV/PhaseIIMTDTDRAutumn18MiniAOD_20190524/190524_111617/0002/',
-    '/hdfs/cms/store/user/sbhowmik/NeutrinoGun_E_10GeV/PhaseIIMTDTDRAutumn18MiniAOD_20190524/190524_111617/0003/',
-    '/hdfs/cms/store/user/sbhowmik/NeutrinoGun_E_10GeV/PhaseIIMTDTDRAutumn18MiniAOD_20190524/190524_111617/0004/',
-]    
-inputFile_regex = r"[a-zA-Z0-9_/:.-]*NTuple_TallinnL1PFTauProducer_[a-zA-Z0-9-_]+.root"
-
+#
+#import os
+#import re
+#
+#
+#inputFilePaths = [
+#    '/hdfs/cms/store/user/sbhowmik/NeutrinoGun_E_10GeV/PhaseIIMTDTDRAutumn18MiniAOD_20190524/190524_111617/0000/',
+#    '/hdfs/cms/store/user/sbhowmik/NeutrinoGun_E_10GeV/PhaseIIMTDTDRAutumn18MiniAOD_20190524/190524_111617/0001/',
+#    '/hdfs/cms/store/user/sbhowmik/NeutrinoGun_E_10GeV/PhaseIIMTDTDRAutumn18MiniAOD_20190524/190524_111617/0002/',
+#    '/hdfs/cms/store/user/sbhowmik/NeutrinoGun_E_10GeV/PhaseIIMTDTDRAutumn18MiniAOD_20190524/190524_111617/0003/',
+#    '/hdfs/cms/store/user/sbhowmik/NeutrinoGun_E_10GeV/PhaseIIMTDTDRAutumn18MiniAOD_20190524/190524_111617/0004/',
+#]    
+#inputFile_regex = r"[a-zA-Z0-9_/:.-]*NTuple_TallinnL1PFTauProducer_[a-zA-Z0-9-_]+.root"
+#
 # check if name of inputFile matches regular expression
-inputFileNames = []
-for inputFilePath in inputFilePaths:
-    files = [ "".join([ "file:", inputFilePath, file ]) for file in os.listdir(inputFilePath) ]
-    for file in files:
-        inputFile_matcher = re.compile(inputFile_regex)
-        if inputFile_matcher.match(file):
-            inputFileNames.append(file)
-print "inputFileNames = %s" % inputFileNames 
-
-process.source.fileNames = cms.untracked.vstring(inputFileNames)
+#inputFileNames = []
+#for inputFilePath in inputFilePaths:
+#    files = [ "".join([ "file:", inputFilePath, file ]) for file in os.listdir(inputFilePath) ]
+#    for file in files:
+#        inputFile_matcher = re.compile(inputFile_regex)
+#        if inputFile_matcher.match(file):
+#            inputFileNames.append(file)
+#print "inputFileNames = %s" % inputFileNames 
+#
+#process.source.fileNames = cms.untracked.vstring(inputFileNames)
 #--------------------------------------------------------------------------------
 
 from Configuration.AlCa.GlobalTag import GlobalTag
@@ -72,15 +72,24 @@ for useStrips in [ True, False ]:
 
         moduleNamePF_TallinnL1PFTauAnalyzerBackground = "analyzeTallinnL1PFTaus" + moduleLabel + "PF"
         modulePF_TallinnL1PFTauAnalyzerBackground = cms.EDAnalyzer("TallinnL1PFTauAnalyzerBackground",
-          srcTallinnL1PFTaus = cms.InputTag(moduleNameBase + moduleLabel + "PF"),
+          srcL1PFTaus = cms.InputTag(moduleNameBase + moduleLabel + "PF"),
           dqmDirectory = cms.string("TallinnL1PFTauAnalyzerBackground" + moduleLabel + "PF")
         )
         setattr(process, moduleNamePF_TallinnL1PFTauAnalyzerBackground, modulePF_TallinnL1PFTauAnalyzerBackground)
         process.analysisSequence += getattr(process, moduleNamePF_TallinnL1PFTauAnalyzerBackground)
 
+        moduleNamePF_TallinnL1PFTauPairAnalyzer = "analyzeTallinnL1PFTauPairs" + moduleLabel + "PF"
+        modulePF_TallinnL1PFTauPairAnalyzer = cms.EDAnalyzer("TallinnL1PFTauPairAnalyzer",
+          srcL1PFTaus = cms.InputTag(moduleNameBase + moduleLabel + "PF"),
+          srcRefTaus = cms.InputTag(''),
+          dqmDirectory = cms.string("TallinnL1PFTauPairAnalyzer" + moduleLabel + "PF")
+        )
+        setattr(process, moduleNamePF_TallinnL1PFTauPairAnalyzer, modulePF_TallinnL1PFTauPairAnalyzer)
+        process.analysisSequence += getattr(process, moduleNamePF_TallinnL1PFTauPairAnalyzer)
+
         moduleNamePF_TallinnL1PFTauIsolationAnalyzer = "analyzeTallinL1PFTauIsolation" + moduleLabel + "PF"
         modulePF_TallinnL1PFTauIsolationAnalyzer = cms.EDAnalyzer("TallinnL1PFTauIsolationAnalyzer",
-          srcL1Taus  = cms.InputTag(moduleNameBase + moduleLabel + "PF"),
+          srcL1PFTaus  = cms.InputTag(moduleNameBase + moduleLabel + "PF"),
           srcGenTaus = cms.InputTag(''),
           dRmatch = cms.double(0.3),                                                            
           srcRho = cms.InputTag('kt6L1PFJetsPF:rho'),
@@ -95,15 +104,24 @@ for useStrips in [ True, False ]:
         
         moduleNamePuppi_TallinnL1PFTauAnalyzerBackground = "analyzeTallinnL1PFTaus" + moduleLabel + "Puppi"
         modulePuppi_TallinnL1PFTauAnalyzerBackground = cms.EDAnalyzer("TallinnL1PFTauAnalyzerBackground",
-          srcTallinnL1PFTaus = cms.InputTag(moduleNameBase + moduleLabel + "Puppi"),
+          srcL1PFTaus = cms.InputTag(moduleNameBase + moduleLabel + "Puppi"),
           dqmDirectory = cms.string("TallinnL1PFTauAnalyzerBackground" + moduleLabel + "Puppi")
         )
         setattr(process, moduleNamePuppi_TallinnL1PFTauAnalyzerBackground, modulePuppi_TallinnL1PFTauAnalyzerBackground)
         process.analysisSequence += getattr(process, moduleNamePuppi_TallinnL1PFTauAnalyzerBackground)
 
+        moduleNamePuppi_TallinnL1PFTauPairAnalyzer = "analyzeTallinnL1PFTauPairs" + moduleLabel + "Puppi"
+        modulePuppi_TallinnL1PFTauPairAnalyzer = cms.EDAnalyzer("TallinnL1PFTauPairAnalyzer",
+          srcL1PFTaus = cms.InputTag(moduleNameBase + moduleLabel + "Puppi"),
+          srcRefTaus = cms.InputTag(''),
+          dqmDirectory = cms.string("TallinnL1PFTauPairAnalyzer" + moduleLabel + "Puppi")
+        )
+        setattr(process, moduleNamePuppi_TallinnL1PFTauPairAnalyzer, modulePuppi_TallinnL1PFTauPairAnalyzer)
+        process.analysisSequence += getattr(process, moduleNamePuppi_TallinnL1PFTauPairAnalyzer)
+
         moduleNamePuppi_TallinnL1PFTauIsolationAnalyzer = "analyzeTallinL1PFTauIsolation" + moduleLabel + "Puppi"
         modulePuppi_TallinnL1PFTauIsolationAnalyzer = cms.EDAnalyzer("TallinnL1PFTauIsolationAnalyzer",
-          srcL1Taus = cms.InputTag(moduleNameBase + moduleLabel + "Puppi"),
+          srcL1PFTaus = cms.InputTag(moduleNameBase + moduleLabel + "Puppi"),
           srcGenTaus = cms.InputTag(''),
           dRmatch = cms.double(0.3),                                                
           srcRho = cms.InputTag('kt6L1PFJetsPuppi:rho'),

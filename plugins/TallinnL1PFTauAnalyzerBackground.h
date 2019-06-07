@@ -48,8 +48,8 @@ class TallinnL1PFTauAnalyzerBackground : public edm::EDAnalyzer
 
   std::string moduleLabel_;
 
-  edm::InputTag srcTallinnL1PFTaus_;
-  edm::EDGetTokenT<l1t::TallinnL1PFTauCollection> tokenTallinnL1PFTaus_;
+  edm::InputTag srcL1PFTaus_;
+  edm::EDGetTokenT<l1t::TallinnL1PFTauCollection> tokenL1PFTaus_;
 
   std::string dqmDirectory_;
 
@@ -113,8 +113,7 @@ class TallinnL1PFTauAnalyzerBackground : public edm::EDAnalyzer
     {
       std::vector<const l1t::TallinnL1PFTau*> l1PFTaus_passingAbsEta;
       for ( l1t::TallinnL1PFTauCollection::const_iterator l1PFTau = l1PFTaus.begin(); 
-	    l1PFTau != l1PFTaus.end(); ++l1PFTau ) 
-      {
+	    l1PFTau != l1PFTaus.end(); ++l1PFTau ) {
 	if ( (max_absEta_        < 0. || TMath::Abs(l1PFTau->eta()) <=  max_absEta_                      ) &&
 	     (max_relChargedIso_ < 0. || l1PFTau->sumChargedIso()   <= (max_relChargedIso_*l1PFTau->pt())) &&
 	     (max_absChargedIso_ < 0. || l1PFTau->sumChargedIso()   <=  max_absChargedIso_               ) )
@@ -131,13 +130,13 @@ class TallinnL1PFTauAnalyzerBackground : public edm::EDAnalyzer
       int numL1PFTausPtGt30 = 0;
       int numL1PFTausPtGt35 = 0;
       int numL1PFTausPtGt40 = 0;
-      for ( auto l1PFTau : l1PFTaus_passingAbsEta ) 
-      {
-	if ( l1PFTau->pt() > 20. ) ++numL1PFTausPtGt20;
-	if ( l1PFTau->pt() > 25. ) ++numL1PFTausPtGt25;
-	if ( l1PFTau->pt() > 30. ) ++numL1PFTausPtGt30;
-	if ( l1PFTau->pt() > 35. ) ++numL1PFTausPtGt35;
-	if ( l1PFTau->pt() > 40. ) ++numL1PFTausPtGt40;	
+      for ( std::vector<const l1t::TallinnL1PFTau*>::const_iterator l1PFTau = l1PFTaus_passingAbsEta.begin();
+	    l1PFTau != l1PFTaus_passingAbsEta.end(); ++l1PFTau ) {
+	if ( (*l1PFTau)->pt() > 20. ) ++numL1PFTausPtGt20;
+	if ( (*l1PFTau)->pt() > 25. ) ++numL1PFTausPtGt25;
+	if ( (*l1PFTau)->pt() > 30. ) ++numL1PFTausPtGt30;
+	if ( (*l1PFTau)->pt() > 35. ) ++numL1PFTausPtGt35;
+	if ( (*l1PFTau)->pt() > 40. ) ++numL1PFTausPtGt40;	
       }
       fillWithOverFlow(histogram_numL1PFTausPtGt20_, numL1PFTausPtGt20, evtWeight);
       fillWithOverFlow(histogram_numL1PFTausPtGt25_, numL1PFTausPtGt25, evtWeight);
@@ -180,18 +179,19 @@ class TallinnL1PFTauAnalyzerBackground : public edm::EDAnalyzer
             }
 	  }
 	}
-
-	if ( (ptThreshold < 20. && max_numL1PFTaus_passingPt < numL1PFTausPtGt20) ||
-	     (ptThreshold < 25. && max_numL1PFTaus_passingPt < numL1PFTausPtGt25) ||
-	     (ptThreshold < 30. && max_numL1PFTaus_passingPt < numL1PFTausPtGt30) ||
-	     (ptThreshold < 35. && max_numL1PFTaus_passingPt < numL1PFTausPtGt35) ||
-	     (ptThreshold < 40. && max_numL1PFTaus_passingPt < numL1PFTausPtGt40) )
-	{
-	  std::cout << "Internal logic error in <ratePlotEntryType::fillHistograms>:" << std::endl;
-	  std::cout << " max_numL1PFTaus_passingPt = " << max_numL1PFTaus_passingPt << " @ ptThreshold = " << ptThreshold << ","
-		    << " while numL1PFTausPtGt20/25/30/35/40 = " << numL1PFTausPtGt20 << "/" << numL1PFTausPtGt25 
-		    << "/" << numL1PFTausPtGt30 << "/" << numL1PFTausPtGt35 << "/" << numL1PFTausPtGt40 << " --> CHECK !!" << std::endl;
-	}
+	
+	// CV: the following may actually happen, due to the dz cut
+	//if ( (ptThreshold < 20. && max_numL1PFTaus_passingPt < numL1PFTausPtGt20) ||
+	//     (ptThreshold < 25. && max_numL1PFTaus_passingPt < numL1PFTausPtGt25) ||
+	//     (ptThreshold < 30. && max_numL1PFTaus_passingPt < numL1PFTausPtGt30) ||
+	//     (ptThreshold < 35. && max_numL1PFTaus_passingPt < numL1PFTausPtGt35) ||
+	//     (ptThreshold < 40. && max_numL1PFTaus_passingPt < numL1PFTausPtGt40) )
+	//{
+	//  std::cout << "Internal logic error in <ratePlotEntryType::fillHistograms>:" << std::endl;
+	//  std::cout << " max_numL1PFTaus_passingPt = " << max_numL1PFTaus_passingPt << " @ ptThreshold = " << ptThreshold << ","
+	//	      << " while numL1PFTausPtGt20/25/30/35/40 = " << numL1PFTausPtGt20 << "/" << numL1PFTausPtGt25 
+	//	      << "/" << numL1PFTausPtGt30 << "/" << numL1PFTausPtGt35 << "/" << numL1PFTausPtGt40 << " --> CHECK !!" << std::endl;
+	//}
 
 	if ( max_numL1PFTaus_passingPt > yAxis->GetXmax() ) max_numL1PFTaus_passingPt = TMath::Nint(yAxis->GetXmax() - 0.5);
 	histogram_numL1PFTaus_vs_ptThreshold_->Fill(ptThreshold, max_numL1PFTaus_passingPt, evtWeight);

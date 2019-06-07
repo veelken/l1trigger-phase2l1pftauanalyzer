@@ -22,23 +22,23 @@ process.source = cms.Source("PoolSource",
 
 #--------------------------------------------------------------------------------
 # set input files
-
-import os
-import re
-
-inputFilePath = '/hdfs/cms/store/user/sbhowmik/VBFHToTauTau_M125_14TeV_powheg_pythia8_correctedGridpack/PhaseIIMTDTDRAutumn18MiniAOD_20190524/190524_111901/0000/'
-inputFile_regex = r"[a-zA-Z0-9_/:.-]*NTuple_TallinnL1PFTauProducer_[a-zA-Z0-9-_]+.root"
-
+#
+#import os
+#import re
+#
+#inputFilePath = '/hdfs/cms/store/user/sbhowmik/VBFHToTauTau_M125_14TeV_powheg_pythia8_correctedGridpack/PhaseIIMTDTDRAutumn18MiniAOD_20190524/190524_111901/0000/'
+#inputFile_regex = r"[a-zA-Z0-9_/:.-]*NTuple_TallinnL1PFTauProducer_[a-zA-Z0-9-_]+.root"
+#
 # check if name of inputFile matches regular expression
-inputFileNames = []
-files = [ "".join([ "file:", inputFilePath, file ]) for file in os.listdir(inputFilePath) ]
-for file in files:
-    inputFile_matcher = re.compile(inputFile_regex)
-    if inputFile_matcher.match(file):
-        inputFileNames.append(file)
-print "inputFileNames = %s" % inputFileNames 
-
-process.source.fileNames = cms.untracked.vstring(inputFileNames)
+#inputFileNames = []
+#files = [ "".join([ "file:", inputFilePath, file ]) for file in os.listdir(inputFilePath) ]
+#for file in files:
+#    inputFile_matcher = re.compile(inputFile_regex)
+#    if inputFile_matcher.match(file):
+#        inputFileNames.append(file)
+#print "inputFileNames = %s" % inputFileNames 
+#
+#process.source.fileNames = cms.untracked.vstring(inputFileNames)
 #--------------------------------------------------------------------------------
 
 from Configuration.AlCa.GlobalTag import GlobalTag
@@ -138,6 +138,17 @@ for useStrips in [ True, False ]:
         setattr(process, moduleNamePF_TallinnL1PFTauAnalyzerSignalWrtGenHadTaus, modulePF_TallinnL1PFTauAnalyzerSignalWrtGenHadTaus)
         process.analysisSequence += getattr(process, moduleNamePF_TallinnL1PFTauAnalyzerSignalWrtGenHadTaus)
 
+        moduleNamePF_TallinnL1PFTauPairAnalyzerWrtGenHadTaus = "analyzeTallinnL1PFTauPairs" + moduleLabel + "PFWrtGenHadTaus"
+        modulePF_TallinnL1PFTauPairAnalyzerWrtGenHadTaus = cms.EDAnalyzer("TallinnL1PFTauPairAnalyzer",
+          srcL1PFTaus = cms.InputTag(moduleNameBase + moduleLabel + "PF"),
+          srcRefTaus = cms.InputTag('offlineMatchedGenHadTaus'),
+          min_refTau_pt = cms.double(30.),
+          max_refTau_eta = cms.double(1.4),
+          dqmDirectory = cms.string("TallinnL1PFTauPairAnalyzer" + moduleLabel + "PF_wrtGenHadTaus")
+        )
+        setattr(process, moduleNamePF_TallinnL1PFTauPairAnalyzerWrtGenHadTaus, modulePF_TallinnL1PFTauPairAnalyzerWrtGenHadTaus)
+        process.analysisSequence += getattr(process, moduleNamePF_TallinnL1PFTauPairAnalyzerWrtGenHadTaus)
+
         moduleNamePF_TallinnL1PFTauAnalyzerSignalWrtOfflineTaus = "analyzeTallinnL1PFTaus" + moduleLabel + "PFWrtOfflineTaus"
         modulePF_TallinnL1PFTauAnalyzerSignalWrtOfflineTaus = cms.EDAnalyzer("TallinnL1PFTauAnalyzerSignal",
           srcNumerator = cms.InputTag(moduleNameBase + moduleLabel + "PF"),
@@ -148,9 +159,20 @@ for useStrips in [ True, False ]:
         setattr(process, moduleNamePF_TallinnL1PFTauAnalyzerSignalWrtOfflineTaus, modulePF_TallinnL1PFTauAnalyzerSignalWrtOfflineTaus)
         process.analysisSequence += getattr(process, moduleNamePF_TallinnL1PFTauAnalyzerSignalWrtOfflineTaus)
 
+        moduleNamePF_TallinnL1PFTauPairAnalyzerWrtOfflineTaus = "analyzeTallinnL1PFTauPairs" + moduleLabel + "PFWrtOfflineTaus"
+        modulePF_TallinnL1PFTauPairAnalyzerWrtOfflineTaus = cms.EDAnalyzer("TallinnL1PFTauPairAnalyzer",
+          srcL1PFTaus = cms.InputTag(moduleNameBase + moduleLabel + "PF"),
+          srcRefTaus = cms.InputTag('offlineMatchedGenHadTaus'),
+          min_refTau_pt = cms.double(30.),
+          max_refTau_eta = cms.double(1.4),
+          dqmDirectory = cms.string("TallinnL1PFTauPairAnalyzer" + moduleLabel + "PF_wrtGenHadTaus")
+        )
+        setattr(process, moduleNamePF_TallinnL1PFTauPairAnalyzerWrtOfflineTaus, modulePF_TallinnL1PFTauPairAnalyzerWrtOfflineTaus)
+        process.analysisSequence += getattr(process, moduleNamePF_TallinnL1PFTauPairAnalyzerWrtOfflineTaus)
+
         moduleNamePF_TallinnL1PFTauIsolationAnalyzer = "analyzeTallinL1PFTauIsolation" + moduleLabel + "PF"
         modulePF_TallinnL1PFTauIsolationAnalyzer = cms.EDAnalyzer("TallinnL1PFTauIsolationAnalyzer",
-          srcL1Taus  = cms.InputTag(moduleNameBase + moduleLabel + "PF"),
+          srcL1PFTaus  = cms.InputTag(moduleNameBase + moduleLabel + "PF"),
           srcGenTaus = cms.InputTag(''),
           dRmatch = cms.double(0.3),                                                            
           srcRho = cms.InputTag('kt6L1PFJetsPF:rho'),
@@ -173,6 +195,17 @@ for useStrips in [ True, False ]:
         setattr(process, moduleNamePuppi_TallinnL1PFTauAnalyzerSignalWrtGenHadTaus, modulePuppi_TallinnL1PFTauAnalyzerSignalWrtGenHadTaus)
         process.analysisSequence += getattr(process, moduleNamePuppi_TallinnL1PFTauAnalyzerSignalWrtGenHadTaus)
 
+        moduleNamePuppi_TallinnL1PFTauPairAnalyzerWrtOfflineTaus = "analyzeTallinnL1PFTauPairs" + moduleLabel + "PuppiWrtOfflineTaus"
+        modulePuppi_TallinnL1PFTauPairAnalyzerWrtOfflineTaus = cms.EDAnalyzer("TallinnL1PFTauPairAnalyzer",
+          srcL1PFTaus = cms.InputTag(moduleNameBase + moduleLabel + "Puppi"),
+          srcRefTaus = cms.InputTag('offlineMatchedGenHadTaus'),
+          min_refTau_pt = cms.double(30.),
+          max_refTau_eta = cms.double(1.4),
+          dqmDirectory = cms.string("TallinnL1PFTauPairAnalyzer" + moduleLabel + "Puppi_wrtGenHadTaus")
+        )
+        setattr(process, moduleNamePuppi_TallinnL1PFTauPairAnalyzerWrtOfflineTaus, modulePuppi_TallinnL1PFTauPairAnalyzerWrtOfflineTaus)
+        process.analysisSequence += getattr(process, moduleNamePuppi_TallinnL1PFTauPairAnalyzerWrtOfflineTaus)
+
         moduleNamePuppi_TallinnL1PFTauAnalyzerSignalWrtOfflineTaus = "analyzeTallinnL1PFTaus" + moduleLabel + "PuppiWrtOfflineTaus"
         modulePuppi_TallinnL1PFTauAnalyzerSignalWrtOfflineTaus = cms.EDAnalyzer("TallinnL1PFTauAnalyzerSignal",
           srcNumerator = cms.InputTag(moduleNameBase + moduleLabel + "Puppi"),
@@ -183,9 +216,20 @@ for useStrips in [ True, False ]:
         setattr(process, moduleNamePuppi_TallinnL1PFTauAnalyzerSignalWrtOfflineTaus, modulePuppi_TallinnL1PFTauAnalyzerSignalWrtOfflineTaus)
         process.analysisSequence += getattr(process, moduleNamePuppi_TallinnL1PFTauAnalyzerSignalWrtOfflineTaus)
 
+        moduleNamePuppi_TallinnL1PFTauPairAnalyzerWrtOfflineTaus = "analyzeTallinnL1PFTauPairs" + moduleLabel + "PuppiWrtOfflineTaus"
+        modulePuppi_TallinnL1PFTauPairAnalyzerWrtOfflineTaus = cms.EDAnalyzer("TallinnL1PFTauPairAnalyzer",
+          srcL1PFTaus = cms.InputTag(moduleNameBase + moduleLabel + "Puppi"),
+          srcRefTaus = cms.InputTag('offlineMatchedGenHadTaus'),
+          min_refTau_pt = cms.double(30.),
+          max_refTau_eta = cms.double(1.4),
+          dqmDirectory = cms.string("TallinnL1PFTauPairAnalyzer" + moduleLabel + "Puppi_wrtGenHadTaus")
+        )
+        setattr(process, moduleNamePuppi_TallinnL1PFTauPairAnalyzerWrtOfflineTaus, modulePuppi_TallinnL1PFTauPairAnalyzerWrtOfflineTaus)
+        process.analysisSequence += getattr(process, moduleNamePuppi_TallinnL1PFTauPairAnalyzerWrtOfflineTaus)
+
         moduleNamePuppi_TallinnL1PFTauIsolationAnalyzer = "analyzeTallinL1PFTauIsolation" + moduleLabel + "Puppi"
         modulePuppi_TallinnL1PFTauIsolationAnalyzer = cms.EDAnalyzer("TallinnL1PFTauIsolationAnalyzer",
-          srcL1Taus = cms.InputTag(moduleNameBase + moduleLabel + "Puppi"),
+          srcL1PFTaus = cms.InputTag(moduleNameBase + moduleLabel + "Puppi"),
           srcGenTaus = cms.InputTag(''),
           dRmatch = cms.double(0.3),                                                
           srcRho = cms.InputTag('kt6L1PFJetsPuppi:rho'),

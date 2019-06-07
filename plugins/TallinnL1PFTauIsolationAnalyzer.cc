@@ -17,8 +17,8 @@ TallinnL1PFTauIsolationAnalyzer::TallinnL1PFTauIsolationAnalyzer(const edm::Para
   , histogram_rhoCorr_(nullptr)
   , histogram_rhoCorr_yMax_(-1.)
 {
-  src_l1Taus_ = cfg.getParameter<edm::InputTag>("srcL1Taus");
-  token_l1Taus_ = consumes<l1t::TallinnL1PFTauCollection>(src_l1Taus_);
+  src_l1PFTaus_ = cfg.getParameter<edm::InputTag>("srcL1PFTaus");
+  token_l1PFTaus_ = consumes<l1t::TallinnL1PFTauCollection>(src_l1PFTaus_);
   src_genTaus_ = cfg.getParameter<edm::InputTag>("srcGenTaus");
   token_genTaus_ = consumes<reco::GenJetCollection>(src_genTaus_);
   src_rho_ = cfg.getParameter<edm::InputTag>("srcRho");
@@ -114,8 +114,8 @@ void TallinnL1PFTauIsolationAnalyzer::beginJob()
 
 void TallinnL1PFTauIsolationAnalyzer::analyze(const edm::Event& evt, const edm::EventSetup& es)
 {
-  edm::Handle<l1t::TallinnL1PFTauCollection> l1Taus;
-  evt.getByToken(token_l1Taus_, l1Taus);
+  edm::Handle<l1t::TallinnL1PFTauCollection> l1PFTaus;
+  evt.getByToken(token_l1PFTaus_, l1PFTaus);
   
   edm::Handle<reco::GenJetCollection> genTaus;
   if ( src_genTaus_.label() != "" ) 
@@ -131,7 +131,7 @@ void TallinnL1PFTauIsolationAnalyzer::analyze(const edm::Event& evt, const edm::
   
   const double evtWeight = 1.;
   
-  for ( l1t::TallinnL1PFTauCollection::const_iterator l1Tau = l1Taus->begin(); l1Tau != l1Taus->end();  ++l1Tau )
+  for ( l1t::TallinnL1PFTauCollection::const_iterator l1PFTau = l1PFTaus->begin(); l1PFTau != l1PFTaus->end();  ++l1PFTau )
   {
     std::string genTau_decayMode;
     double dRmin = 1.e+3;
@@ -140,7 +140,7 @@ void TallinnL1PFTauIsolationAnalyzer::analyze(const edm::Event& evt, const edm::
     {
       for ( reco::GenJetCollection::const_iterator genTau = genTaus->begin(); genTau != genTaus->end(); ++genTau )
       {
-	double dR = reco::deltaR(genTau->eta(), genTau->phi(), l1Tau->eta(), l1Tau->phi());
+	double dR = reco::deltaR(genTau->eta(), genTau->phi(), l1PFTau->eta(), l1PFTau->phi());
 	if ( dR < dRmatch_ && dR < dRmin ) 
 	{ 
 	  genTau_decayMode = JetMCTagUtils::genTauDecayMode(*genTau);
@@ -157,11 +157,11 @@ void TallinnL1PFTauIsolationAnalyzer::analyze(const edm::Event& evt, const edm::
       rhoCorr = isolationConeArea*(*rho);
       if ( histogram_rhoCorr_ && histogram_rhoCorr_yMax_ > 0. ) 
       {
-        int idxBin = histogram_rhoCorr_->FindBin(TMath::Abs(l1Tau->eta()));
+        int idxBin = histogram_rhoCorr_->FindBin(TMath::Abs(l1PFTau->eta()));
         if ( !(idxBin >= 1 && idxBin <= histogram_rhoCorr_->GetNbinsX()) )
         {
 	  std::cerr << "Warning in <TallinnL1PFTauIsolationAnalyzer::analyze>:" 
-            	    << " Failed to compute rho correction for abs(eta) = " << l1Tau->eta() << " --> skipping event !!" << std::endl;
+            	    << " Failed to compute rho correction for abs(eta) = " << l1PFTau->eta() << " --> skipping event !!" << std::endl;
           return;
         }
         rhoCorr *= histogram_rhoCorr_->GetBinContent(idxBin)/histogram_rhoCorr_yMax_;
@@ -173,11 +173,11 @@ void TallinnL1PFTauIsolationAnalyzer::analyze(const edm::Event& evt, const edm::
     {    
       if ( src_genTaus_.label() != "" ) 
       {
-        isolationPlot->fillHistograms_wGenMatching(*l1Tau, rhoCorr, isMatched, genTau_decayMode, evtWeight);
+        isolationPlot->fillHistograms_wGenMatching(*l1PFTau, rhoCorr, isMatched, genTau_decayMode, evtWeight);
       }
       else
       {
-        isolationPlot->fillHistograms_woGenMatching(*l1Tau, rhoCorr, evtWeight);
+        isolationPlot->fillHistograms_woGenMatching(*l1PFTau, rhoCorr, evtWeight);
       }
     }  
   }

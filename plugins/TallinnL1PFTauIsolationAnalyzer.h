@@ -46,8 +46,8 @@ class TallinnL1PFTauIsolationAnalyzer : public edm::EDAnalyzer
 
   std::string moduleLabel_;
 
-  edm::InputTag src_l1Taus_;
-  edm::EDGetTokenT<l1t::TallinnL1PFTauCollection> token_l1Taus_;
+  edm::InputTag src_l1PFTaus_;
+  edm::EDGetTokenT<l1t::TallinnL1PFTauCollection> token_l1PFTaus_;
   edm::InputTag src_genTaus_;
   edm::EDGetTokenT<reco::GenJetCollection> token_genTaus_;
   double dRmatch_;
@@ -229,65 +229,65 @@ class TallinnL1PFTauIsolationAnalyzer : public edm::EDAnalyzer
       histogram_leadTrackPt_ = me_leadTrackPt_->getTH1();
       assert(histogram_leadTrackPt_);
     }
-    void fillHistograms(const l1t::TallinnL1PFTau& l1Tau, double rhoCorr, double evtWeight)
+    void fillHistograms(const l1t::TallinnL1PFTau& l1PFTau, double rhoCorr, double evtWeight)
     {
-      if ( (l1Tau.pt()              > min_pt_     || min_pt_     <= 0.) && (l1Tau.pt()              < max_pt_     || max_pt_     <= 0.) &&
-	   (TMath::Abs(l1Tau.eta()) > min_absEta_ || min_absEta_ <= 0.) && (TMath::Abs(l1Tau.eta()) < max_absEta_ || max_absEta_ <= 0.) )
+      if ( (l1PFTau.pt()              > min_pt_     || min_pt_     <= 0.) && (l1PFTau.pt()              < max_pt_     || max_pt_     <= 0.) &&
+	   (TMath::Abs(l1PFTau.eta()) > min_absEta_ || min_absEta_ <= 0.) && (TMath::Abs(l1PFTau.eta()) < max_absEta_ || max_absEta_ <= 0.) )
       {
-	double sumChargedIso = l1Tau.sumChargedIso();
+	double sumChargedIso = l1PFTau.sumChargedIso();
 	fillWithOverFlow(histogram_absChargedIso_, sumChargedIso, evtWeight);
-	fillWithOverFlow(histogram_relChargedIso_, sumChargedIso/TMath::Max(1., l1Tau.pt()), evtWeight);
+	fillWithOverFlow(histogram_relChargedIso_, sumChargedIso/TMath::Max(1., l1PFTau.pt()), evtWeight);
 
-	double sumNeutralIso = l1Tau.sumNeutralIso();
+	double sumNeutralIso = l1PFTau.sumNeutralIso();
 	fillWithOverFlow(histogram_absNeutralIso_, sumNeutralIso, evtWeight);
-	fillWithOverFlow(histogram_relNeutralIso_, sumNeutralIso/TMath::Max(1., l1Tau.pt()), evtWeight);
+	fillWithOverFlow(histogram_relNeutralIso_, sumNeutralIso/TMath::Max(1., l1PFTau.pt()), evtWeight);
 
 	double sumCombinedIso = sumChargedIso + sumNeutralIso;
 	fillWithOverFlow(histogram_absCombinedIso_, sumCombinedIso, evtWeight);
-	fillWithOverFlow(histogram_relCombinedIso_, sumCombinedIso/TMath::Max(1., l1Tau.pt()), evtWeight);
+	fillWithOverFlow(histogram_relCombinedIso_, sumCombinedIso/TMath::Max(1., l1PFTau.pt()), evtWeight);
 	
-	double sumChargedIsoPileup = l1Tau.sumChargedIsoPileup();
+	double sumChargedIsoPileup = l1PFTau.sumChargedIsoPileup();
 	fillWithOverFlow(histogram_sumChargedIsoPileup_, sumChargedIsoPileup, evtWeight);
 
 	double sumNeutralIso_wDeltaBetaCorr = TMath::Max(0., sumNeutralIso - 0.5*sumChargedIsoPileup);
 	fillWithOverFlow(histogram_absNeutralIso_wDeltaBetaCorr_, sumNeutralIso_wDeltaBetaCorr, evtWeight);
-	fillWithOverFlow(histogram_relNeutralIso_wDeltaBetaCorr_, sumNeutralIso_wDeltaBetaCorr/TMath::Max(1., l1Tau.pt()), evtWeight);
+	fillWithOverFlow(histogram_relNeutralIso_wDeltaBetaCorr_, sumNeutralIso_wDeltaBetaCorr/TMath::Max(1., l1PFTau.pt()), evtWeight);
 	
 	double sumNeutralIso_wRhoCorr = TMath::Max(0., sumNeutralIso - rhoCorr);
 	fillWithOverFlow(histogram_absNeutralIso_wRhoCorr_, sumNeutralIso_wRhoCorr, evtWeight);
-	fillWithOverFlow(histogram_relNeutralIso_wRhoCorr_, sumNeutralIso_wRhoCorr/TMath::Max(1., l1Tau.pt()), evtWeight);
+	fillWithOverFlow(histogram_relNeutralIso_wRhoCorr_, sumNeutralIso_wRhoCorr/TMath::Max(1., l1PFTau.pt()), evtWeight);
 
 	double sumCombinedIso_wDeltaBetaCorr = sumChargedIso + sumNeutralIso_wDeltaBetaCorr;
 	fillWithOverFlow(histogram_absCombinedIso_wDeltaBetaCorr_, sumCombinedIso_wDeltaBetaCorr, evtWeight);
-	fillWithOverFlow(histogram_relCombinedIso_wDeltaBetaCorr_, sumCombinedIso_wDeltaBetaCorr/TMath::Max(1., l1Tau.pt()), evtWeight);
+	fillWithOverFlow(histogram_relCombinedIso_wDeltaBetaCorr_, sumCombinedIso_wDeltaBetaCorr/TMath::Max(1., l1PFTau.pt()), evtWeight);
 
 	double sumCombinedIso_wRhoCorr = sumChargedIso + sumNeutralIso_wRhoCorr;
 	fillWithOverFlow(histogram_absCombinedIso_wRhoCorr_, sumCombinedIso_wRhoCorr, evtWeight);
-	fillWithOverFlow(histogram_relCombinedIso_wRhoCorr_, sumCombinedIso_wRhoCorr/TMath::Max(1., l1Tau.pt()), evtWeight);
+	fillWithOverFlow(histogram_relCombinedIso_wRhoCorr_, sumCombinedIso_wRhoCorr/TMath::Max(1., l1PFTau.pt()), evtWeight);
 
 	fillWithOverFlow(histogram_rhoCorr_, rhoCorr, evtWeight);
 
 	fillWithOverFlow2d(histogram_sumNeutralIso_vs_sumChargedIsoPileup_, sumChargedIsoPileup, sumNeutralIso, evtWeight);
 	fillWithOverFlow2d(histogram_sumNeutralIso_vs_rhoCorr_, rhoCorr, sumNeutralIso, evtWeight);
 
-	fillWithOverFlow(histogram_tauPt_, l1Tau.pt(), evtWeight);
+	fillWithOverFlow(histogram_tauPt_, l1PFTau.pt(), evtWeight);
 	double leadTrackPt = -1.;
-	if ( l1Tau.leadChargedPFCand().isNonnull() && l1Tau.leadChargedPFCand()->pfTrack().isNonnull() ) 
+	if ( l1PFTau.leadChargedPFCand().isNonnull() && l1PFTau.leadChargedPFCand()->pfTrack().isNonnull() ) 
 	{
-	  leadTrackPt = l1Tau.leadChargedPFCand()->pfTrack()->pt(); 
+	  leadTrackPt = l1PFTau.leadChargedPFCand()->pfTrack()->pt(); 
 	}
 	fillWithOverFlow(histogram_leadTrackPt_, leadTrackPt, evtWeight);
       }
     }
-    void fillHistograms_woGenMatching(const l1t::TallinnL1PFTau& l1Tau, double rhoCorr, double evtWeight)
+    void fillHistograms_woGenMatching(const l1t::TallinnL1PFTau& l1PFTau, double rhoCorr, double evtWeight)
     {
-      fillHistograms(l1Tau, rhoCorr, evtWeight);
+      fillHistograms(l1PFTau, rhoCorr, evtWeight);
     }
-    void fillHistograms_wGenMatching(const l1t::TallinnL1PFTau& l1Tau, double rhoCorr, bool isMatched, const std::string& genTau_decayMode, double evtWeight)
+    void fillHistograms_wGenMatching(const l1t::TallinnL1PFTau& l1PFTau, double rhoCorr, bool isMatched, const std::string& genTau_decayMode, double evtWeight)
     {
       if ( isMatched && (decayMode_ == "all" || genTau_decayMode == decayMode_) )
       {
-	fillHistograms(l1Tau, rhoCorr, evtWeight);
+	fillHistograms(l1PFTau, rhoCorr, evtWeight);
       }
     }
     MonitorElement* me_absChargedIso_;
