@@ -162,10 +162,10 @@ for useStrips in [ True, False ]:
         moduleNamePF_TallinnL1PFTauPairAnalyzerWrtOfflineTaus = "analyzeTallinnL1PFTauPairs" + moduleLabel + "PFWrtOfflineTaus"
         modulePF_TallinnL1PFTauPairAnalyzerWrtOfflineTaus = cms.EDAnalyzer("TallinnL1PFTauPairAnalyzer",
           srcL1PFTaus = cms.InputTag(moduleNameBase + moduleLabel + "PF"),
-          srcRefTaus = cms.InputTag('offlineMatchedGenHadTaus'),
+          srcRefTaus = cms.InputTag('selectedOfflinePFTaus'),
           min_refTau_pt = cms.double(30.),
           max_refTau_eta = cms.double(1.4),
-          dqmDirectory = cms.string("TallinnL1PFTauPairAnalyzer" + moduleLabel + "PF_wrtGenHadTaus")
+          dqmDirectory = cms.string("TallinnL1PFTauPairAnalyzer" + moduleLabel + "PF_wrtOfflineTaus")
         )
         setattr(process, moduleNamePF_TallinnL1PFTauPairAnalyzerWrtOfflineTaus, modulePF_TallinnL1PFTauPairAnalyzerWrtOfflineTaus)
         process.analysisSequence += getattr(process, moduleNamePF_TallinnL1PFTauPairAnalyzerWrtOfflineTaus)
@@ -195,16 +195,16 @@ for useStrips in [ True, False ]:
         setattr(process, moduleNamePuppi_TallinnL1PFTauAnalyzerSignalWrtGenHadTaus, modulePuppi_TallinnL1PFTauAnalyzerSignalWrtGenHadTaus)
         process.analysisSequence += getattr(process, moduleNamePuppi_TallinnL1PFTauAnalyzerSignalWrtGenHadTaus)
 
-        moduleNamePuppi_TallinnL1PFTauPairAnalyzerWrtOfflineTaus = "analyzeTallinnL1PFTauPairs" + moduleLabel + "PuppiWrtOfflineTaus"
-        modulePuppi_TallinnL1PFTauPairAnalyzerWrtOfflineTaus = cms.EDAnalyzer("TallinnL1PFTauPairAnalyzer",
+        moduleNamePuppi_TallinnL1PFTauPairAnalyzerWrtGenHadTaus = "analyzeTallinnL1PFTauPairs" + moduleLabel + "PuppiWrtGenHadTaus"
+        modulePuppi_TallinnL1PFTauPairAnalyzerWrtGenHadTaus = cms.EDAnalyzer("TallinnL1PFTauPairAnalyzer",
           srcL1PFTaus = cms.InputTag(moduleNameBase + moduleLabel + "Puppi"),
           srcRefTaus = cms.InputTag('offlineMatchedGenHadTaus'),
           min_refTau_pt = cms.double(30.),
           max_refTau_eta = cms.double(1.4),
           dqmDirectory = cms.string("TallinnL1PFTauPairAnalyzer" + moduleLabel + "Puppi_wrtGenHadTaus")
         )
-        setattr(process, moduleNamePuppi_TallinnL1PFTauPairAnalyzerWrtOfflineTaus, modulePuppi_TallinnL1PFTauPairAnalyzerWrtOfflineTaus)
-        process.analysisSequence += getattr(process, moduleNamePuppi_TallinnL1PFTauPairAnalyzerWrtOfflineTaus)
+        setattr(process, moduleNamePuppi_TallinnL1PFTauPairAnalyzerWrtGenHadTaus, modulePuppi_TallinnL1PFTauPairAnalyzerWrtGenHadTaus)
+        process.analysisSequence += getattr(process, moduleNamePuppi_TallinnL1PFTauPairAnalyzerWrtGenHadTaus)
 
         moduleNamePuppi_TallinnL1PFTauAnalyzerSignalWrtOfflineTaus = "analyzeTallinnL1PFTaus" + moduleLabel + "PuppiWrtOfflineTaus"
         modulePuppi_TallinnL1PFTauAnalyzerSignalWrtOfflineTaus = cms.EDAnalyzer("TallinnL1PFTauAnalyzerSignal",
@@ -219,10 +219,10 @@ for useStrips in [ True, False ]:
         moduleNamePuppi_TallinnL1PFTauPairAnalyzerWrtOfflineTaus = "analyzeTallinnL1PFTauPairs" + moduleLabel + "PuppiWrtOfflineTaus"
         modulePuppi_TallinnL1PFTauPairAnalyzerWrtOfflineTaus = cms.EDAnalyzer("TallinnL1PFTauPairAnalyzer",
           srcL1PFTaus = cms.InputTag(moduleNameBase + moduleLabel + "Puppi"),
-          srcRefTaus = cms.InputTag('offlineMatchedGenHadTaus'),
+          srcRefTaus = cms.InputTag('selectedOfflinePFTaus'),
           min_refTau_pt = cms.double(30.),
           max_refTau_eta = cms.double(1.4),
-          dqmDirectory = cms.string("TallinnL1PFTauPairAnalyzer" + moduleLabel + "Puppi_wrtGenHadTaus")
+          dqmDirectory = cms.string("TallinnL1PFTauPairAnalyzer" + moduleLabel + "Puppi_wrtOfflineTaus")
         )
         setattr(process, moduleNamePuppi_TallinnL1PFTauPairAnalyzerWrtOfflineTaus, modulePuppi_TallinnL1PFTauPairAnalyzerWrtOfflineTaus)
         process.analysisSequence += getattr(process, moduleNamePuppi_TallinnL1PFTauPairAnalyzerWrtOfflineTaus)
@@ -246,7 +246,7 @@ for useStrips in [ True, False ]:
 process.DQMStore = cms.Service("DQMStore")
 
 process.savePlots = cms.EDAnalyzer("DQMSimpleFileSaver",
-    outputFileName = cms.string('TallinnL1PFTauAnalyzer_signal_2019May31v2.root')
+    outputFileName = cms.string('TallinnL1PFTauAnalyzer_signal_2019Jun07.root')
 )
 
 process.p = cms.Path(process.analysisSequence + process.savePlots)
