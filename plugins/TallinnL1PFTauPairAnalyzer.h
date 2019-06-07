@@ -94,7 +94,7 @@ class TallinnL1PFTauPairAnalyzer : public edm::EDAnalyzer
       if ( max_absChargedIso_ > 0. ) histogramName_suffix.Append(Form("_absChargedIsoLt%1.2f", max_absChargedIso_));
       histogramName_suffix = histogramName_suffix.ReplaceAll(".", "p");
 
-      TString histogramName_efficiency_or_rate = Form("numL1PFTaus_vs_ptThreshold%s", histogramName_suffix.Data());
+      TString histogramName_efficiency_or_rate = Form("efficiency_or_rate%s", histogramName_suffix.Data());
       me_efficiency_or_rate_ = dqmStore.book2D(histogramName_efficiency_or_rate.Data(), histogramName_efficiency_or_rate.Data(), 101, -0.5, 100.5, 101, -0.5, 100.5);
       histogram_efficiency_or_rate_ = dynamic_cast<TH2*>(me_efficiency_or_rate_->getTH1());
       assert(histogram_efficiency_or_rate_);
