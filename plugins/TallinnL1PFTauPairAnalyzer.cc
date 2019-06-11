@@ -110,6 +110,7 @@ void TallinnL1PFTauPairAnalyzer::analyze(const edm::Event& evt, const edm::Event
 	refTaus_passingAbsEtaAndPt.push_back(&(*refTau));
       }
     }
+    if ( !(refTaus_passingAbsEtaAndPt.size() >= 2) ) return;
 
     for ( std::vector<const l1t::TallinnL1PFTau*>::const_iterator leadL1PFTau = l1PFTaus_sorted.begin();
 	  leadL1PFTau != l1PFTaus_sorted.end(); ++leadL1PFTau ) {

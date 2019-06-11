@@ -53,7 +53,7 @@ void compEfficiency_and_Rate()
   gROOT->SetBatch(true);
 
   std::string inputFilePath = Form("%s/src/L1Trigger/TallinnL1PFTauAnalyzer/test/", gSystem->Getenv("CMSSW_BASE"));
-  std::string inputFileName_signal = "TallinnL1PFTauAnalyzer_signal_2019Jun07.root";
+  std::string inputFileName_signal = "TallinnL1PFTauAnalyzer_signal_2019Jun07v2.root";
   TFile* inputFile_signal = openFile(inputFilePath, inputFileName_signal);
   std::string inputFileName_background = "TallinnL1PFTauAnalyzer_background_2019Jun07.root";
   TFile* inputFile_background = openFile(inputFilePath, inputFileName_background);
@@ -152,7 +152,7 @@ void compEfficiency_and_Rate()
 		  << "(leading tau pT > " << leadingTau_ptThreshold_asymmetric << "," 
 		  << " subleading tau pT > " << subleadingTau_ptThreshold_asymmetric << " GeV)" << std::endl;
 	std::cout << " rate = " << best_rate_asymmetric << std::endl;
-	std::cout << " efficiency = " << best_efficiency_asymmetric << std::endl;
+	std::cout << " efficiency = " << best_efficiency_asymmetric << std::endl;	
       }
     }
   }

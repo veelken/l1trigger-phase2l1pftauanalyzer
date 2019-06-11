@@ -22,31 +22,30 @@ process.source = cms.Source("PoolSource",
 
 #--------------------------------------------------------------------------------
 # set input files
-#
-#import os
-#import re
-#
-#
-#inputFilePaths = [
-#    '/hdfs/cms/store/user/sbhowmik/NeutrinoGun_E_10GeV/PhaseIIMTDTDRAutumn18MiniAOD_20190524/190524_111617/0000/',
-#    '/hdfs/cms/store/user/sbhowmik/NeutrinoGun_E_10GeV/PhaseIIMTDTDRAutumn18MiniAOD_20190524/190524_111617/0001/',
-#    '/hdfs/cms/store/user/sbhowmik/NeutrinoGun_E_10GeV/PhaseIIMTDTDRAutumn18MiniAOD_20190524/190524_111617/0002/',
-#    '/hdfs/cms/store/user/sbhowmik/NeutrinoGun_E_10GeV/PhaseIIMTDTDRAutumn18MiniAOD_20190524/190524_111617/0003/',
-#    '/hdfs/cms/store/user/sbhowmik/NeutrinoGun_E_10GeV/PhaseIIMTDTDRAutumn18MiniAOD_20190524/190524_111617/0004/',
-#]    
-#inputFile_regex = r"[a-zA-Z0-9_/:.-]*NTuple_TallinnL1PFTauProducer_[a-zA-Z0-9-_]+.root"
-#
+
+import os
+import re
+
+inputFilePaths = [
+    '/hdfs/cms/store/user/sbhowmik/NeutrinoGun_E_10GeV/PhaseIIMTDTDRAutumn18MiniAOD_20190524/190524_111617/0000/',
+    '/hdfs/cms/store/user/sbhowmik/NeutrinoGun_E_10GeV/PhaseIIMTDTDRAutumn18MiniAOD_20190524/190524_111617/0001/',
+    '/hdfs/cms/store/user/sbhowmik/NeutrinoGun_E_10GeV/PhaseIIMTDTDRAutumn18MiniAOD_20190524/190524_111617/0002/',
+    '/hdfs/cms/store/user/sbhowmik/NeutrinoGun_E_10GeV/PhaseIIMTDTDRAutumn18MiniAOD_20190524/190524_111617/0003/',
+    '/hdfs/cms/store/user/sbhowmik/NeutrinoGun_E_10GeV/PhaseIIMTDTDRAutumn18MiniAOD_20190524/190524_111617/0004/',
+]    
+inputFile_regex = r"[a-zA-Z0-9_/:.-]*NTuple_TallinnL1PFTauProducer_[a-zA-Z0-9-_]+.root"
+
 # check if name of inputFile matches regular expression
-#inputFileNames = []
-#for inputFilePath in inputFilePaths:
-#    files = [ "".join([ "file:", inputFilePath, file ]) for file in os.listdir(inputFilePath) ]
-#    for file in files:
-#        inputFile_matcher = re.compile(inputFile_regex)
-#        if inputFile_matcher.match(file):
-#            inputFileNames.append(file)
-#print "inputFileNames = %s" % inputFileNames 
-#
-#process.source.fileNames = cms.untracked.vstring(inputFileNames)
+inputFileNames = []
+for inputFilePath in inputFilePaths:
+    files = [ "".join([ "file:", inputFilePath, file ]) for file in os.listdir(inputFilePath) ]
+    for file in files:
+        inputFile_matcher = re.compile(inputFile_regex)
+        if inputFile_matcher.match(file):
+            inputFileNames.append(file)
+print "inputFileNames = %s" % inputFileNames 
+
+process.source.fileNames = cms.untracked.vstring(inputFileNames)
 #--------------------------------------------------------------------------------
 
 from Configuration.AlCa.GlobalTag import GlobalTag

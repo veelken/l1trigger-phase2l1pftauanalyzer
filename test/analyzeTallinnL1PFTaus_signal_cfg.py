@@ -22,23 +22,23 @@ process.source = cms.Source("PoolSource",
 
 #--------------------------------------------------------------------------------
 # set input files
-#
-#import os
-#import re
-#
-#inputFilePath = '/hdfs/cms/store/user/sbhowmik/VBFHToTauTau_M125_14TeV_powheg_pythia8_correctedGridpack/PhaseIIMTDTDRAutumn18MiniAOD_20190524/190524_111901/0000/'
-#inputFile_regex = r"[a-zA-Z0-9_/:.-]*NTuple_TallinnL1PFTauProducer_[a-zA-Z0-9-_]+.root"
-#
+
+import os
+import re
+
+inputFilePath = '/hdfs/cms/store/user/sbhowmik/VBFHToTauTau_M125_14TeV_powheg_pythia8_correctedGridpack/PhaseIIMTDTDRAutumn18MiniAOD_20190524/190524_111901/0000/'
+inputFile_regex = r"[a-zA-Z0-9_/:.-]*NTuple_TallinnL1PFTauProducer_[a-zA-Z0-9-_]+.root"
+
 # check if name of inputFile matches regular expression
-#inputFileNames = []
-#files = [ "".join([ "file:", inputFilePath, file ]) for file in os.listdir(inputFilePath) ]
-#for file in files:
-#    inputFile_matcher = re.compile(inputFile_regex)
-#    if inputFile_matcher.match(file):
-#        inputFileNames.append(file)
-#print "inputFileNames = %s" % inputFileNames 
-#
-#process.source.fileNames = cms.untracked.vstring(inputFileNames)
+inputFileNames = []
+files = [ "".join([ "file:", inputFilePath, file ]) for file in os.listdir(inputFilePath) ]
+for file in files:
+    inputFile_matcher = re.compile(inputFile_regex)
+    if inputFile_matcher.match(file):
+        inputFileNames.append(file)
+print "inputFileNames = %s" % inputFileNames 
+
+process.source.fileNames = cms.untracked.vstring(inputFileNames)
 #--------------------------------------------------------------------------------
 
 from Configuration.AlCa.GlobalTag import GlobalTag
@@ -246,7 +246,7 @@ for useStrips in [ True, False ]:
 process.DQMStore = cms.Service("DQMStore")
 
 process.savePlots = cms.EDAnalyzer("DQMSimpleFileSaver",
-    outputFileName = cms.string('TallinnL1PFTauAnalyzer_signal_2019Jun07.root')
+    outputFileName = cms.string('TallinnL1PFTauAnalyzer_signal_2019Jun07v2.root')
 )
 
 process.p = cms.Path(process.analysisSequence + process.savePlots)
