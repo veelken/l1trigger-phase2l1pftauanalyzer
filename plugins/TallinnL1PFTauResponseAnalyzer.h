@@ -121,8 +121,8 @@ class TallinnL1PFTauResponseAnalyzer : public edm::EDAnalyzer
 	  {
 	    if ( (                           l1PFTau.leadChargedPFCand().isNonnull()                     && 
 		  			     l1PFTau.leadChargedPFCand()->pfTrack().isNonnull()          ) &&
-               (max_relChargedIso_ < 0. ||   l1PFTau.sumChargedIso() <= (max_relChargedIso_*l1PFTau.pt())) &&
-	       (max_absChargedIso_ < 0. ||   l1PFTau.sumChargedIso() <=  max_absChargedIso_              ) )
+                 (max_relChargedIso_ < 0. || l1PFTau.sumChargedIso() <= (max_relChargedIso_*l1PFTau.pt())) &&
+	         (max_absChargedIso_ < 0. || l1PFTau.sumChargedIso() <=  max_absChargedIso_              ) )
 	    {
 	      double dR = reco::deltaR(refTau.eta(), refTau.phi(), l1PFTau.eta(), l1PFTau.phi());
 	      if ( dR < dRmatch_ ) 
