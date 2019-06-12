@@ -128,6 +128,7 @@ for useStrips in [ True, False ]:
         else:
             raise ValueError("Invalid Combination of 'useStrips' and 'applyPreselection' Configuration parameters !!")
 
+        # TallinnL1PFTaus built from PFCandidates without PUPPI weights
         moduleNamePF_TallinnL1PFTauAnalyzerSignalWrtGenHadTaus = "analyzeTallinnL1PFTaus" + moduleLabel + "PFWrtGenHadTaus"
         modulePF_TallinnL1PFTauAnalyzerSignalWrtGenHadTaus = cms.EDAnalyzer("TallinnL1PFTauAnalyzerSignal",
           srcNumerator = cms.InputTag(moduleNameBase + moduleLabel + "PF"),
@@ -185,6 +186,7 @@ for useStrips in [ True, False ]:
         setattr(process, moduleNamePF_TallinnL1PFTauIsolationAnalyzer, modulePF_TallinnL1PFTauIsolationAnalyzer)
         process.analysisSequence += getattr(process, moduleNamePF_TallinnL1PFTauIsolationAnalyzer)
 
+        # TallinnL1PFTaus built from PFCandidates with PUPPI weights
         moduleNamePuppi_TallinnL1PFTauAnalyzerSignalWrtGenHadTaus = "analyzeTallinnL1PFTaus" + moduleLabel + "PuppiWrtGenHadTaus"
         modulePuppi_TallinnL1PFTauAnalyzerSignalWrtGenHadTaus = cms.EDAnalyzer("TallinnL1PFTauAnalyzerSignal",
           srcNumerator = cms.InputTag(moduleNameBase + moduleLabel + "Puppi"),
@@ -241,12 +243,31 @@ for useStrips in [ True, False ]:
         )
         setattr(process, moduleNamePuppi_TallinnL1PFTauIsolationAnalyzer, modulePuppi_TallinnL1PFTauIsolationAnalyzer)
         process.analysisSequence += getattr(process, moduleNamePuppi_TallinnL1PFTauIsolationAnalyzer)
+
+# L1PFTaus built from PFCandidates using Isobel's algorithm
+process.analyzeL1PFTauPairsPFWrtGenHadTaus = cms.EDAnalyzer("L1PFTauPairAnalyzer",
+  srcL1PFTaus = cms.InputTag('L1PFTauProducer:L1PFTaus'),
+  srcRefTaus = cms.InputTag('offlineMatchedGenHadTaus'),
+  min_refTau_pt = cms.double(30.),
+  max_refTau_eta = cms.double(1.4),
+  dqmDirectory = cms.string("L1PFTauPairAnalyzerPF_wrtGenHadTaus")
+)
+#process.analysisSequence += process.analyzeL1PFTauPairsPFWrtGenHadTaus
+
+process.analyzeL1PFTauPairsPFWrtOfflineTaus = cms.EDAnalyzer("L1PFTauPairAnalyzer",
+  srcL1PFTaus = cms.InputTag('L1PFTauProducer:L1PFTaus'),
+  srcRefTaus = cms.InputTag('selectedOfflinePFTaus'),
+  min_refTau_pt = cms.double(30.),
+  max_refTau_eta = cms.double(1.4),
+  dqmDirectory = cms.string("L1PFTauPairAnalyzerPF_wrtOfflineTaus")
+)
+process.analysisSequence += process.analyzeL1PFTauPairsPFWrtOfflineTaus
 #--------------------------------------------------------------------------------
 
 process.DQMStore = cms.Service("DQMStore")
 
 process.savePlots = cms.EDAnalyzer("DQMSimpleFileSaver",
-    outputFileName = cms.string('TallinnL1PFTauAnalyzer_signal_2019Jun07v2.root')
+    outputFileName = cms.string('TallinnL1PFTauAnalyzer_signal_2019Jun12.root')
 )
 
 process.p = cms.Path(process.analysisSequence + process.savePlots)

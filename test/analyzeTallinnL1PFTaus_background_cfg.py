@@ -69,6 +69,7 @@ for useStrips in [ True, False ]:
         else:
             raise ValueError("Invalid Combination of 'useStrips' and 'applyPreselection' Configuration parameters !!")
 
+        # TallinnL1PFTaus built from PFCandidates without PUPPI weights
         moduleNamePF_TallinnL1PFTauAnalyzerBackground = "analyzeTallinnL1PFTaus" + moduleLabel + "PF"
         modulePF_TallinnL1PFTauAnalyzerBackground = cms.EDAnalyzer("TallinnL1PFTauAnalyzerBackground",
           srcL1PFTaus = cms.InputTag(moduleNameBase + moduleLabel + "PF"),
@@ -100,7 +101,8 @@ for useStrips in [ True, False ]:
         )
         setattr(process, moduleNamePF_TallinnL1PFTauIsolationAnalyzer, modulePF_TallinnL1PFTauIsolationAnalyzer)
         process.analysisSequence += getattr(process, moduleNamePF_TallinnL1PFTauIsolationAnalyzer)
-        
+
+        # TallinnL1PFTaus built from PFCandidates with PUPPI weights
         moduleNamePuppi_TallinnL1PFTauAnalyzerBackground = "analyzeTallinnL1PFTaus" + moduleLabel + "Puppi"
         modulePuppi_TallinnL1PFTauAnalyzerBackground = cms.EDAnalyzer("TallinnL1PFTauAnalyzerBackground",
           srcL1PFTaus = cms.InputTag(moduleNameBase + moduleLabel + "Puppi"),
@@ -132,12 +134,20 @@ for useStrips in [ True, False ]:
         )
         setattr(process, moduleNamePuppi_TallinnL1PFTauIsolationAnalyzer, modulePuppi_TallinnL1PFTauIsolationAnalyzer)
         process.analysisSequence += getattr(process, moduleNamePuppi_TallinnL1PFTauIsolationAnalyzer)
+
+# L1PFTaus built from PFCandidates using Isobel's algorithm
+process.analyzeL1PFTauPairsPF = cms.EDAnalyzer("L1PFTauPairAnalyzer",
+  srcL1PFTaus = cms.InputTag('L1PFTauProducer:L1PFTaus'),
+  srcRefTaus = cms.InputTag(''),
+  dqmDirectory = cms.string("L1PFTauPairAnalyzerPF")
+)
+process.analysisSequence += process.analyzeL1PFTauPairsPF
 #--------------------------------------------------------------------------------
 
 process.DQMStore = cms.Service("DQMStore")
 
 process.savePlots = cms.EDAnalyzer("DQMSimpleFileSaver",
-    outputFileName = cms.string('TallinnL1PFTauAnalyzer_background_2019Jun07.root')
+    outputFileName = cms.string('TallinnL1PFTauAnalyzer_background_2019Jun12.root')
 )
 
 process.p = cms.Path(process.analysisSequence + process.savePlots)

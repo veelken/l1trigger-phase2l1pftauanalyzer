@@ -105,6 +105,7 @@ for useStrips in [ True, False ]:
         else:
             raise ValueError("Invalid Combination of 'useStrips' and 'applyPreselection' Configuration parameters !!")
 
+        # TallinnL1PFTaus built from PFCandidates without PUPPI weights
         moduleNamePF_TallinnL1PFTauResponseAnalyzerWrtGenHadTaus = "analyzeTallinnL1PFTauResponse" + moduleLabel + "PFWrtGenHadTaus"
         modulePF_TallinnL1PFTauResponseAnalyzerWrtGenHadTaus = cms.EDAnalyzer("TallinnL1PFTauResponseAnalyzer",
           srcL1PFTaus = cms.InputTag(moduleNameBase + moduleLabel + "PF"),
@@ -124,12 +125,29 @@ for useStrips in [ True, False ]:
         )
         setattr(process, moduleNamePF_TallinnL1PFTauResponseAnalyzerWrtOfflineTaus, modulePF_TallinnL1PFTauResponseAnalyzerWrtOfflineTaus)
         process.analysisSequence += getattr(process, moduleNamePF_TallinnL1PFTauResponseAnalyzerWrtOfflineTaus)
+
+# L1PFTaus built from PFCandidates using Isobel's algorithm
+process.analyzeL1PFTauResponsePFWrtGenHadTaus = cms.EDAnalyzer("L1PFTauResponseAnalyzer",
+  srcL1PFTaus = cms.InputTag('L1PFTauProducer:L1PFTaus'),
+  srcRefTaus = cms.InputTag('offlineMatchedGenHadTaus'),
+  typeRefTaus = cms.string("gen"),                                                                            
+  dqmDirectory = cms.string("L1PFTauResponseAnalyzerPF_wrtGenHadTaus")
+)
+process.analysisSequence += analyzeL1PFTauResponsePFWrtGenHadTaus
+
+process.analyzeL1PFTauResponsePFWrtOfflineTaus = cms.EDAnalyzer("L1PFTauResponseAnalyzer",
+  srcL1PFTaus = cms.InputTag('L1PFTauProducer:L1PFTaus'),
+  srcRefTaus = cms.InputTag('selectedOfflinePFTaus'),
+  typeRefTaus = cms.string("offline"),                                                                            
+  dqmDirectory = cms.string("L1PFTauResponseAnalyzerPF_wrtOfflineTaus")
+)
+process.analysisSequence += analyzeL1PFTauResponsePFWrtOfflineTaus
 #--------------------------------------------------------------------------------
 
 process.DQMStore = cms.Service("DQMStore")
 
 process.savePlots = cms.EDAnalyzer("DQMSimpleFileSaver",
-    outputFileName = cms.string('TallinnL1PFTauResponseAnalyzer_signal_2019Jun06.root')
+    outputFileName = cms.string('TallinnL1PFTauResponseAnalyzer_signal_2019Jun12.root')
 )
 
 process.p = cms.Path(process.analysisSequence + process.savePlots)
