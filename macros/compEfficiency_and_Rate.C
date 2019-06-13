@@ -175,10 +175,10 @@ void compEfficiency_and_Rate()
 
   for ( std::vector<std::string>::const_iterator isolationWP = isolationWPs_isobel.begin();
 	isolationWP != isolationWPs_isobel.end(); ++isolationWP ) {
-    std::string histogram2dName_signal = Form("%sPF_wrtOfflineTaus/efficiency_or_rate_%s", 
+    std::string histogram2dName_signal = Form("%sPF_wrtOfflineTaus/efficiency_or_rate_absEtaLt1p40_%s", 
       dqmDirectory_isobel.data(), isolationWP->data());
     TH2* histogram2d_signal = loadHistogram2d(inputFile_signal, histogram2dName_signal);
-    std::string histogram2dName_background = Form("%sPF/efficiency_or_rate_%s", 
+    std::string histogram2dName_background = Form("%sPF/efficiency_or_rate_absEtaLt1p40_%s", 
       dqmDirectory_isobel.data(), isolationWP->data());
     TH2* histogram2d_background = loadHistogram2d(inputFile_background, histogram2dName_background);
 

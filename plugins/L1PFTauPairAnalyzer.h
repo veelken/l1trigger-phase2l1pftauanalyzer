@@ -6,7 +6,7 @@
 #include "FWCore/Framework/interface/EventSetup.h"
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
 #include "FWCore/Utilities/interface/InputTag.h"
-
+#include "FWCore/Utilities/interface/Exception.h"
 #include "DQMServices/Core/interface/DQMStore.h" 
 #include "DQMServices/Core/interface/MonitorElement.h"
 
@@ -67,7 +67,7 @@ class L1PFTauPairAnalyzer : public edm::EDAnalyzer
   edm::EDGetTokenT<reco::CandidateView> tokenRefTaus_;
 
   double min_refTau_pt_;
-  double max_refTau_eta_;
+  double max_refTau_absEta_;
   double dRmatch_;
 
   std::string dqmDirectory_;

@@ -133,7 +133,7 @@ process.analyzeL1PFTauResponsePFWrtGenHadTaus = cms.EDAnalyzer("L1PFTauResponseA
   typeRefTaus = cms.string("gen"),                                                                            
   dqmDirectory = cms.string("L1PFTauResponseAnalyzerPF_wrtGenHadTaus")
 )
-process.analysisSequence += analyzeL1PFTauResponsePFWrtGenHadTaus
+process.analysisSequence += process.analyzeL1PFTauResponsePFWrtGenHadTaus
 
 process.analyzeL1PFTauResponsePFWrtOfflineTaus = cms.EDAnalyzer("L1PFTauResponseAnalyzer",
   srcL1PFTaus = cms.InputTag('L1PFTauProducer:L1PFTaus'),
@@ -141,7 +141,7 @@ process.analyzeL1PFTauResponsePFWrtOfflineTaus = cms.EDAnalyzer("L1PFTauResponse
   typeRefTaus = cms.string("offline"),                                                                            
   dqmDirectory = cms.string("L1PFTauResponseAnalyzerPF_wrtOfflineTaus")
 )
-process.analysisSequence += analyzeL1PFTauResponsePFWrtOfflineTaus
+process.analysisSequence += process.analyzeL1PFTauResponsePFWrtOfflineTaus
 #--------------------------------------------------------------------------------
 
 process.DQMStore = cms.Service("DQMStore")

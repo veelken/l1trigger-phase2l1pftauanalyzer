@@ -13,7 +13,7 @@
 TallinnL1PFTauPairAnalyzer::TallinnL1PFTauPairAnalyzer(const edm::ParameterSet& cfg)
   : moduleLabel_(cfg.getParameter<std::string>("@module_label"))
   , min_refTau_pt_(-1.)
-  , max_refTau_eta_(-1.)
+  , max_refTau_absEta_(-1.)
   , dRmatch_(0.3)
 {
   srcL1PFTaus_ = cfg.getParameter<edm::InputTag>("srcL1PFTaus");
@@ -23,7 +23,7 @@ TallinnL1PFTauPairAnalyzer::TallinnL1PFTauPairAnalyzer(const edm::ParameterSet& 
   {
     tokenRefTaus_ = consumes<reco::CandidateView>(srcRefTaus_);
     min_refTau_pt_ = cfg.getParameter<double>("min_refTau_pt");
-    max_refTau_eta_ = cfg.getParameter<double>("max_refTau_eta");
+    max_refTau_absEta_ = cfg.getParameter<double>("max_refTau_absEta");
   }
 
   dqmDirectory_ = cfg.getParameter<std::string>("dqmDirectory");
@@ -105,7 +105,7 @@ void TallinnL1PFTauPairAnalyzer::analyze(const edm::Event& evt, const edm::Event
     std::vector<const reco::Candidate*> refTaus_passingAbsEtaAndPt;
     for ( reco::CandidateView::const_iterator refTau = refTaus->begin();
 	  refTau != refTaus->end(); ++refTau ) {
-      if ( refTau->pt() > min_refTau_pt_ && TMath::Abs(refTau->eta()) < max_refTau_eta_ )
+      if ( refTau->pt() > min_refTau_pt_ && TMath::Abs(refTau->eta()) < max_refTau_absEta_ )
       {
 	refTaus_passingAbsEtaAndPt.push_back(&(*refTau));
       }

@@ -359,7 +359,9 @@ void makeEfficiency_vs_RatePlots()
 	  absEtaRange != absEtaRanges.end(); ++absEtaRange ) {
       for ( std::vector<std::string>::const_iterator isolationWP = isolationWPs.begin();
 	    isolationWP != isolationWPs.end(); ++isolationWP ) {
-	std::string histogram2dName_signal = Form("%s%s_wrtOfflineTaus/efficiency_or_rate_%s_%s", 
+	//std::string histogram2dName_signal = Form("%s%s_wrtOfflineTaus/efficiency_or_rate_%s_%s", 
+        //  dqmDirectory.data(), pfAlgo->data(), absEtaRange->data(), isolationWP->data());
+	std::string histogram2dName_signal = Form("%s%s_wrtGenHadTaus/efficiency_or_rate_%s_%s", 
           dqmDirectory.data(), pfAlgo->data(), absEtaRange->data(), isolationWP->data());
         TH2* histogram2d_signal = loadHistogram2d(inputFile_signal, histogram2dName_signal);
 	std::string histogram2dName_background = Form("%s%s/efficiency_or_rate_%s_%s", 
@@ -454,10 +456,12 @@ void makeEfficiency_vs_RatePlots()
 
   for ( std::vector<std::string>::const_iterator isolationWP = isolationWPs_isobel.begin();
 	isolationWP != isolationWPs_isobel.end(); ++isolationWP ) {
-    std::string histogram2dName_signal = Form("%sPF_wrtOfflineTaus/efficiency_or_rate_%s", 
+    //std::string histogram2dName_signal = Form("%sPF_wrtOfflineTaus/efficiency_or_rate_absEtaLt1p40_%s", 
+    //  dqmDirectory_isobel.data(), isolationWP->data());
+    std::string histogram2dName_signal = Form("%sPF_wrtGenHadTaus/efficiency_or_rate_absEtaLt1p40_%s", 
       dqmDirectory_isobel.data(), isolationWP->data());
     TH2* histogram2d_signal = loadHistogram2d(inputFile_signal, histogram2dName_signal);
-    std::string histogram2dName_background = Form("%sPF/efficiency_or_rate_%s", 
+    std::string histogram2dName_background = Form("%sPF/efficiency_or_rate_absEtaLt1p40_%s", 
       dqmDirectory_isobel.data(), isolationWP->data());
     TH2* histogram2d_background = loadHistogram2d(inputFile_background, histogram2dName_background);
 
@@ -501,9 +505,9 @@ void makeEfficiency_vs_RatePlots()
 	     graphs_isobel_symmetric["TightIso"],                                                        legendEntries_vs_isolationWPs_isobel["TightIso"],
 	     false,
 	     colors, markerStyles, lineStyles, 
-	     0.045, 0.23, 0.785, 0.70, 0.135, 
+	     0.045, 0.23, 0.685, 0.70, 0.235, 
 	     labelTextLines4, 0.040,
-	     0.23, 0.71, 0.70, 0.045, 
+	     0.19, 0.61, 0.70, 0.045, 
 	     rate_min*1.e-3, rate_max*1.e-3, "Rate [kHz]", 1.2, // CV: convert rates to units of kHz
 	     false, 0., 1.09, "Efficiency", 1.4, 
 	     "makeEfficiency_vs_RatePlots_HPSatL1_vs_L1PFTau_symmetricPtThresholds.png");
@@ -518,9 +522,9 @@ void makeEfficiency_vs_RatePlots()
 	     graphs_isobel_asymmetric["TightIso"],                                                       legendEntries_vs_isolationWPs_isobel["TightIso"],
 	     false,
 	     colors, markerStyles, lineStyles, 
-	     0.045, 0.23, 0.785, 0.70, 0.135, 
+	     0.045, 0.23, 0.685, 0.70, 0.235, 
 	     labelTextLines4, 0.040,
-	     0.23, 0.71, 0.70, 0.045, 
+	     0.19, 0.61, 0.70, 0.045, 
 	     rate_min*1.e-3, rate_max*1.e-3, "Rate [kHz]", 1.2, // CV: convert rates to units of kHz
 	     false, 0., 1.09, "Efficiency", 1.4, 
 	     "makeEfficiency_vs_RatePlots_HPSatL1_vs_L1PFTau_asymmetricPtThresholds.png");

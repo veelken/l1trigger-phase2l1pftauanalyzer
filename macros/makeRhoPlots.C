@@ -200,21 +200,6 @@ void showHistograms(double canvasSizeX, double canvasSizeY,
   delete canvas;  
 }
 
-double compIntegral_within_Range(const TH1* histogram, double xMin, double xMax)
-{
-  const TAxis* xAxis = histogram->GetXaxis();
-  double integral = 0.;
-  int numBinsX = xAxis->GetNbins();
-  for ( int idxBinX = 1; idxBinX <= numBinsX; ++idxBinX ) { 
-    double binCenter = xAxis->GetBinCenter(idxBinX);
-    double binContent = histogram->GetBinContent(idxBinX);
-    if ( binCenter >= xMin && binCenter < xMax ) {
-      integral += binContent;
-    }
-  }
-  return integral;
-}
-
 void makeRhoPlots()
 {
 //--- stop ROOT from keeping references to all histograms

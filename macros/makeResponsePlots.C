@@ -208,7 +208,7 @@ void makeResponsePlots()
   gROOT->SetBatch(true);
 
   std::string inputFilePath = Form("%s/src/L1Trigger/TallinnL1PFTauAnalyzer/test/", gSystem->Getenv("CMSSW_BASE"));
-  std::string inputFileName = "TallinnL1PFTauResponseAnalyzer_signal_2019Jun06.root";
+  std::string inputFileName = "TallinnL1PFTauResponseAnalyzer_signal_2019Jun12.root";
   TFile* inputFile = openFile(inputFilePath, inputFileName);
 
   std::vector<std::string> pfAlgos;
@@ -249,7 +249,7 @@ void makeResponsePlots()
   std::vector<std::string> observables;
   observables.push_back("response");
 
-  std::map<std::string, int> rebin; // key = observable
+  std::map<std::string, int> rebin;   // key = observable
   rebin["response"]                      = 1;
 
   std::map<std::string, double> xMin; // key = observable
@@ -268,6 +268,7 @@ void makeResponsePlots()
   int lineStyles[6] = { 1, 1, 1, 1, 1, 1 };
   int markerStyles[6] = { 22, 32, 20, 24, 21, 25 };
 
+  // TallinnL1PFTaus 
   for ( std::vector<std::string>::const_iterator pfAlgo = pfAlgos.begin();
 	pfAlgo != pfAlgos.end(); ++pfAlgo ) {
     for ( std::vector<std::string>::const_iterator observable = observables.begin();
@@ -296,7 +297,7 @@ void makeResponsePlots()
 	      std::vector<std::string> labelTextLines;
 	      labelTextLines.push_back(Form("Mean = %1.3f", histogram->GetMean()));
 	      labelTextLines.push_back(Form("RMS = %1.3f", histogram->GetRMS()));
-	      std::string outputFileName = Form("makeResponsePlots_%s_wrt%s_%s_%s_%s_%s.png", 
+	      std::string outputFileName = Form("makeResponsePlots_HPSatL1_%s_wrt%s_%s_%s_%s_%s.png", 
                 pfAlgo->data(), refTauType->data(), observable->data(), absEtaRange->data(), min_pt->data(), isolationWP->data());
 	      showHistograms(1150, 850,
 			     histogram, "",
@@ -322,7 +323,7 @@ void makeResponsePlots()
 	      TH1* histogram_threeProng0Pi0 = histograms[*refTauType]["threeProng0Pi0"];
 	      TH1* histogram_threeProng1Pi0 = histograms[*refTauType]["threeProng1Pi0"];
 	      std::vector<std::string> labelTextLines;
-	      std::string outputFileName = Form("makeResponsePlots_%s_wrt%s_vs_decayModes_%s_%s_%s_%s.png", 
+	      std::string outputFileName = Form("makeResponsePlots_HPSatL1_%s_wrt%s_vs_decayModes_%s_%s_%s_%s.png", 
                 pfAlgo->data(), refTauType->data(), observable->data(), absEtaRange->data(), min_pt->data(), isolationWP->data());
 	      showHistograms(1150, 850,
 			     histogram_oneProng0Pi0,   "h^{#pm}",
@@ -339,6 +340,89 @@ void makeResponsePlots()
 			     true, 1.e-4, 1.99, "Events", 1.4, 
 			     outputFileName);
 	    }
+	  }
+	}
+      }
+    }
+  }
+
+  // Isobel's L1PFTaus 
+  std::vector<std::string> isolationWPs_isobel;
+  isolationWPs_isobel.push_back("vLooseIso");
+  isolationWPs_isobel.push_back("LooseIso");
+  isolationWPs_isobel.push_back("MediumIso");
+  isolationWPs_isobel.push_back("TightIso");
+
+  std::string dqmDirectory_isobel = "DQMData/L1PFTauResponseAnalyzerPF";
+
+  for ( std::vector<std::string>::const_iterator observable = observables.begin();
+	observable != observables.end(); ++observable ) {   
+    for ( std::vector<std::string>::const_iterator absEtaRange = absEtaRanges.begin();
+	  absEtaRange != absEtaRanges.end(); ++absEtaRange ) {
+      for ( std::vector<std::string>::const_iterator min_pt = min_pts.begin();
+	    min_pt != min_pts.end(); ++min_pt ) {      
+	for ( std::vector<std::string>::const_iterator isolationWP = isolationWPs_isobel.begin();
+	      isolationWP != isolationWPs_isobel.end(); ++isolationWP ) {
+	  std::map<std::string, std::map<std::string, TH1*>> histograms; // keys = refTauType, decayMode
+	  for ( std::vector<std::string>::const_iterator refTauType = refTauTypes.begin();
+		refTauType != refTauTypes.end(); ++refTauType ) {
+	    for ( std::vector<std::string>::const_iterator decayMode = decayModes.begin();
+		  decayMode != decayModes.end(); ++decayMode ) {
+  	      std::string histogramName = Form("%s_wrt%s/%s_%s_%s_%s_%s", 
+                dqmDirectory_isobel.data(), refTauType->data(), observable->data(), decayMode->data(), absEtaRange->data(), min_pt->data(), isolationWP->data());
+	      TH1* histogram = loadHistogram(inputFile, histogramName);
+	      histograms[*refTauType][*decayMode] = histogram;
+	    }
+	  }
+
+	  for ( std::vector<std::string>::const_iterator refTauType = refTauTypes.begin();
+	        refTauType != refTauTypes.end(); ++refTauType ) {
+	    TH1* histogram = histograms[*refTauType]["all"]; 
+	    std::vector<std::string> labelTextLines;
+	    labelTextLines.push_back(Form("Mean = %1.3f", histogram->GetMean()));
+	    labelTextLines.push_back(Form("RMS = %1.3f", histogram->GetRMS()));
+	    std::string outputFileName = Form("makeResponsePlots_L1PFTau_wrt%s_%s_%s_%s_%s.png", 
+              refTauType->data(), observable->data(), absEtaRange->data(), min_pt->data(), isolationWP->data());
+	    showHistograms(1150, 850,
+			   histogram, "",
+			   0, "",
+			   0, "",	     
+			   0, "",
+			   0, "",
+			   0, "",
+			   colors, lineStyles, 
+			   0.050, 0.70, 0.74, 0.23, 0.18, 
+			   labelTextLines, 0.050,
+			   0.71, 0.76, 0.23, 0.15, 
+			   xMin[*observable], xMax[*observable], xAxisTitles[*refTauType][*observable], 1.2, 
+			   true, 1.e-4, 1.99, "Events", 1.4, 
+			   outputFileName);
+	  }
+
+  	  for ( std::vector<std::string>::const_iterator refTauType = refTauTypes.begin();
+		refTauType != refTauTypes.end(); ++refTauType ) {
+	    TH1* histogram_oneProng0Pi0   = histograms[*refTauType]["oneProng0Pi0"];
+	    TH1* histogram_oneProng1Pi0   = histograms[*refTauType]["oneProng1Pi0"];
+	    TH1* histogram_oneProng2Pi0   = histograms[*refTauType]["oneProng2Pi0"];
+	    TH1* histogram_threeProng0Pi0 = histograms[*refTauType]["threeProng0Pi0"];
+	    TH1* histogram_threeProng1Pi0 = histograms[*refTauType]["threeProng1Pi0"];
+	    std::vector<std::string> labelTextLines;
+	    std::string outputFileName = Form("makeResponsePlots_L1PFTau_wrt%s_vs_decayModes_%s_%s_%s_%s.png", 
+	      refTauType->data(), observable->data(), absEtaRange->data(), min_pt->data(), isolationWP->data());
+  	    showHistograms(1150, 850,
+			   histogram_oneProng0Pi0,   "h^{#pm}",
+			   histogram_oneProng1Pi0,   "h^{#pm}#pi^{0}",
+			   histogram_oneProng2Pi0,   "h^{#pm}#pi^{0}#pi^{0}",
+			   histogram_threeProng0Pi0, "h^{#pm}h^{#mp}h^{#pm}",
+			   histogram_threeProng1Pi0, "h^{#pm}h^{#mp}h^{#pm}#pi^{0}",
+			   0, "",
+			   colors, lineStyles, 
+			   0.050, 0.73, 0.67, 0.20, 0.26, 
+			   labelTextLines, 0.050,
+			   0.70, 0.62, 0.23, 0.06, 
+			   xMin[*observable], xMax[*observable], xAxisTitles[*refTauType][*observable], 1.2, 
+			   true, 1.e-4, 1.99, "Events", 1.4, 
+			   outputFileName);
 	  }
 	}
       }

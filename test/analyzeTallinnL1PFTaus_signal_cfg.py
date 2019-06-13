@@ -144,7 +144,7 @@ for useStrips in [ True, False ]:
           srcL1PFTaus = cms.InputTag(moduleNameBase + moduleLabel + "PF"),
           srcRefTaus = cms.InputTag('offlineMatchedGenHadTaus'),
           min_refTau_pt = cms.double(30.),
-          max_refTau_eta = cms.double(1.4),
+          max_refTau_absEta = cms.double(1.4),
           dqmDirectory = cms.string("TallinnL1PFTauPairAnalyzer" + moduleLabel + "PF_wrtGenHadTaus")
         )
         setattr(process, moduleNamePF_TallinnL1PFTauPairAnalyzerWrtGenHadTaus, modulePF_TallinnL1PFTauPairAnalyzerWrtGenHadTaus)
@@ -165,7 +165,7 @@ for useStrips in [ True, False ]:
           srcL1PFTaus = cms.InputTag(moduleNameBase + moduleLabel + "PF"),
           srcRefTaus = cms.InputTag('selectedOfflinePFTaus'),
           min_refTau_pt = cms.double(30.),
-          max_refTau_eta = cms.double(1.4),
+          max_refTau_absEta = cms.double(1.4),
           dqmDirectory = cms.string("TallinnL1PFTauPairAnalyzer" + moduleLabel + "PF_wrtOfflineTaus")
         )
         setattr(process, moduleNamePF_TallinnL1PFTauPairAnalyzerWrtOfflineTaus, modulePF_TallinnL1PFTauPairAnalyzerWrtOfflineTaus)
@@ -202,7 +202,7 @@ for useStrips in [ True, False ]:
           srcL1PFTaus = cms.InputTag(moduleNameBase + moduleLabel + "Puppi"),
           srcRefTaus = cms.InputTag('offlineMatchedGenHadTaus'),
           min_refTau_pt = cms.double(30.),
-          max_refTau_eta = cms.double(1.4),
+          max_refTau_absEta = cms.double(1.4),
           dqmDirectory = cms.string("TallinnL1PFTauPairAnalyzer" + moduleLabel + "Puppi_wrtGenHadTaus")
         )
         setattr(process, moduleNamePuppi_TallinnL1PFTauPairAnalyzerWrtGenHadTaus, modulePuppi_TallinnL1PFTauPairAnalyzerWrtGenHadTaus)
@@ -223,7 +223,7 @@ for useStrips in [ True, False ]:
           srcL1PFTaus = cms.InputTag(moduleNameBase + moduleLabel + "Puppi"),
           srcRefTaus = cms.InputTag('selectedOfflinePFTaus'),
           min_refTau_pt = cms.double(30.),
-          max_refTau_eta = cms.double(1.4),
+          max_refTau_absEta = cms.double(1.4),
           dqmDirectory = cms.string("TallinnL1PFTauPairAnalyzer" + moduleLabel + "Puppi_wrtOfflineTaus")
         )
         setattr(process, moduleNamePuppi_TallinnL1PFTauPairAnalyzerWrtOfflineTaus, modulePuppi_TallinnL1PFTauPairAnalyzerWrtOfflineTaus)
@@ -249,16 +249,16 @@ process.analyzeL1PFTauPairsPFWrtGenHadTaus = cms.EDAnalyzer("L1PFTauPairAnalyzer
   srcL1PFTaus = cms.InputTag('L1PFTauProducer:L1PFTaus'),
   srcRefTaus = cms.InputTag('offlineMatchedGenHadTaus'),
   min_refTau_pt = cms.double(30.),
-  max_refTau_eta = cms.double(1.4),
+  max_refTau_absEta = cms.double(1.4),
   dqmDirectory = cms.string("L1PFTauPairAnalyzerPF_wrtGenHadTaus")
 )
-#process.analysisSequence += process.analyzeL1PFTauPairsPFWrtGenHadTaus
+process.analysisSequence += process.analyzeL1PFTauPairsPFWrtGenHadTaus
 
 process.analyzeL1PFTauPairsPFWrtOfflineTaus = cms.EDAnalyzer("L1PFTauPairAnalyzer",
   srcL1PFTaus = cms.InputTag('L1PFTauProducer:L1PFTaus'),
   srcRefTaus = cms.InputTag('selectedOfflinePFTaus'),
   min_refTau_pt = cms.double(30.),
-  max_refTau_eta = cms.double(1.4),
+  max_refTau_absEta = cms.double(1.4),
   dqmDirectory = cms.string("L1PFTauPairAnalyzerPF_wrtOfflineTaus")
 )
 process.analysisSequence += process.analyzeL1PFTauPairsPFWrtOfflineTaus
@@ -267,7 +267,7 @@ process.analysisSequence += process.analyzeL1PFTauPairsPFWrtOfflineTaus
 process.DQMStore = cms.Service("DQMStore")
 
 process.savePlots = cms.EDAnalyzer("DQMSimpleFileSaver",
-    outputFileName = cms.string('TallinnL1PFTauAnalyzer_signal_2019Jun12.root')
+    outputFileName = cms.string('TallinnL1PFTauAnalyzer_signal_2019Jun12v2.root')
 )
 
 process.p = cms.Path(process.analysisSequence + process.savePlots)

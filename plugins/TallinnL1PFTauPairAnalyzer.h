@@ -67,7 +67,7 @@ class TallinnL1PFTauPairAnalyzer : public edm::EDAnalyzer
   edm::EDGetTokenT<reco::CandidateView> tokenRefTaus_;
 
   double min_refTau_pt_;
-  double max_refTau_eta_;
+  double max_refTau_absEta_;
   double dRmatch_;
 
   std::string dqmDirectory_;
