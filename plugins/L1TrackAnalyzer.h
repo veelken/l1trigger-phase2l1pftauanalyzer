@@ -176,7 +176,9 @@ class L1TrackAnalyzer : public edm::EDAnalyzer
 
   struct efficiencyPlotEntryType
   {
-    efficiencyPlotEntryType(const std::string& recTrack_type, double genChargedHadron_min_pt, double genChargedHadron_max_absEta, const std::string& genTau_decayMode)
+    efficiencyPlotEntryType(const std::string& recTrack_type, 
+			    double genChargedHadron_min_pt, double genChargedHadron_max_pt, double genChargedHadron_min_absEta, double genChargedHadron_max_absEta, 
+			    const std::string& genTau_decayMode)
       : me_pt_numerator_(nullptr)
       , histogram_pt_numerator_(nullptr)
       , me_pt_denominator_(nullptr)
@@ -197,6 +199,8 @@ class L1TrackAnalyzer : public edm::EDAnalyzer
       , histogram_resolution_(nullptr)
       , recTrack_type_(recTrack_type)
       , genChargedHadron_min_pt_(genChargedHadron_min_pt)
+      , genChargedHadron_max_pt_(genChargedHadron_max_pt)
+      , genChargedHadron_min_absEta_(genChargedHadron_min_absEta)
       , genChargedHadron_max_absEta_(genChargedHadron_max_absEta)
       , genTau_decayMode_(genTau_decayMode)
     {
@@ -216,9 +220,34 @@ class L1TrackAnalyzer : public edm::EDAnalyzer
     void bookHistograms(DQMStore& dqmStore)
     {
       TString histogramName_suffix;
-      if ( genChargedHadron_max_absEta_ > 0.     ) histogramName_suffix.Append(Form("_absEtaLt%1.2f", genChargedHadron_max_absEta_));
-      if ( genChargedHadron_min_pt_     > 0.     ) histogramName_suffix.Append(Form("_ptGt%1.0f",     genChargedHadron_min_pt_));
-      if ( genTau_decayMode_            != "all" ) histogramName_suffix.Append(Form("_gen%sTau",      genTau_decayMode_capitalized_.data()));      
+      if ( genChargedHadron_min_absEta_ >= 0. && genChargedHadron_max_absEta_ > 0. ) 
+      { 
+	histogramName_suffix.Append(Form("_absEta%1.2fto%1.2f", genChargedHadron_min_absEta_, genChargedHadron_max_absEta_));
+      }
+      else if ( genChargedHadron_min_absEta_ >= 0. ) 
+      {
+	histogramName_suffix.Append(Form("_absEtaGt%1.2f", genChargedHadron_min_absEta_));
+      }
+      else if ( genChargedHadron_max_absEta_ > 0. ) 
+      {
+	histogramName_suffix.Append(Form("_absEtaLt%1.2f", genChargedHadron_max_absEta_));
+      }
+      if ( genChargedHadron_min_pt_ >= 0. && genChargedHadron_max_pt_ > 0. ) 
+      {
+	histogramName_suffix.Append(Form("_pt%1.2fto%1.2f", genChargedHadron_min_pt_, genChargedHadron_max_pt_));
+      }
+      else if ( genChargedHadron_min_pt_ >= 0. ) 
+      {
+	histogramName_suffix.Append(Form("_ptGt%1.2f", genChargedHadron_min_pt_));
+      }
+      else if ( genChargedHadron_max_pt_ > 0. ) 
+      {
+	histogramName_suffix.Append(Form("_ptLt%1.2f", genChargedHadron_max_pt_));
+      }
+      if ( genTau_decayMode_ != "all" ) 
+      {
+	histogramName_suffix.Append(Form("_gen%sTau", genTau_decayMode_capitalized_.data()));      
+      }
       histogramName_suffix = histogramName_suffix.ReplaceAll(".", "p");
 
       const int numBins_pt = 19;
@@ -293,7 +322,9 @@ class L1TrackAnalyzer : public edm::EDAnalyzer
 	  
 	if ( genTau_decayMode_ != "all" && match->genTau_decayMode() != genTau_decayMode_ ) continue;
 
-	if ( match->genChargedHadron_pt() > genChargedHadron_min_pt_ && TMath::Abs(match->genChargedHadron_eta()) < genChargedHadron_max_absEta_ )
+	double genChargedHadron_absEta = TMath::Abs(match->genChargedHadron_eta());
+	if ( match->genChargedHadron_pt() > genChargedHadron_min_pt_     && match->genChargedHadron_pt() < genChargedHadron_max_pt_     && 
+	     genChargedHadron_absEta      > genChargedHadron_min_absEta_ && genChargedHadron_absEta      < genChargedHadron_max_absEta_ )
 	{
 	  if ( match->hasRecTrack() )
 	  {
@@ -338,6 +369,8 @@ class L1TrackAnalyzer : public edm::EDAnalyzer
     std::string recTrack_type_;
     std::string recTrack_type_capitalized_;
     double genChargedHadron_min_pt_;
+    double genChargedHadron_max_pt_;
+    double genChargedHadron_min_absEta_;
     double genChargedHadron_max_absEta_;
     std::string genTau_decayMode_;
     std::string genTau_decayMode_capitalized_;

@@ -54,20 +54,30 @@ void TallinnL1PFTauAnalyzerSignal::beginJob()
   dqmStore.setCurrentFolder(dqmDirectory_.data());
 
   std::vector<std::string> decayModes = { "oneProng0Pi0", "oneProng1Pi0", "oneProng2Pi0", "threeProng0Pi0", "threeProng1Pi0", "all" };
-  std::vector<double> ptThresholds = { 20., 25., 30., 35., 40. };
+  std::vector<double> ptThresholds = { 20., 25., 30., 35., 40., 45., 50. };
   for ( auto decayMode : decayModes )
   {
     for ( auto ptThreshold : ptThresholds )
     {
-      efficiencyPlots_.push_back(new efficiencyPlotEntryType(45., 1.0, decayMode, ptThreshold, 0.40, -1.)); // vLoose
-      efficiencyPlots_.push_back(new efficiencyPlotEntryType(45., 1.0, decayMode, ptThreshold, 0.20, -1.)); // Loose
-      efficiencyPlots_.push_back(new efficiencyPlotEntryType(45., 1.0, decayMode, ptThreshold, 0.10, -1.)); // Medium
-      efficiencyPlots_.push_back(new efficiencyPlotEntryType(45., 1.0, decayMode, ptThreshold, 0.05, -1.)); // Tight
-    
-      efficiencyPlots_.push_back(new efficiencyPlotEntryType(45., 1.4, decayMode, ptThreshold, 0.40, -1.)); // vLoose
-      efficiencyPlots_.push_back(new efficiencyPlotEntryType(45., 1.4, decayMode, ptThreshold, 0.20, -1.)); // Loose
-      efficiencyPlots_.push_back(new efficiencyPlotEntryType(45., 1.4, decayMode, ptThreshold, 0.10, -1.)); // Medium
-      efficiencyPlots_.push_back(new efficiencyPlotEntryType(45., 1.4, decayMode, ptThreshold, 0.05, -1.)); // Tight
+      efficiencyPlots_.push_back(new efficiencyPlotEntryType(45., 1.e+3, -1.,  1.4,   decayMode, ptThreshold, 0.40, -1.)); // vLoose
+      efficiencyPlots_.push_back(new efficiencyPlotEntryType(45., 1.e+3, -1.,  1.4,   decayMode, ptThreshold, 0.20, -1.)); // Loose
+      efficiencyPlots_.push_back(new efficiencyPlotEntryType(45., 1.e+3, -1.,  1.4,   decayMode, ptThreshold, 0.10, -1.)); // Medium
+      efficiencyPlots_.push_back(new efficiencyPlotEntryType(45., 1.e+3, -1.,  1.4,   decayMode, ptThreshold, 0.05, -1.)); // Tight
+
+      efficiencyPlots_.push_back(new efficiencyPlotEntryType(45., 1.e+3,  1.4, 2.172, decayMode, ptThreshold, 0.40, -1.)); // vLoose
+      efficiencyPlots_.push_back(new efficiencyPlotEntryType(45., 1.e+3,  1.4, 2.172, decayMode, ptThreshold, 0.20, -1.)); // Loose
+      efficiencyPlots_.push_back(new efficiencyPlotEntryType(45., 1.e+3,  1.4, 2.172, decayMode, ptThreshold, 0.10, -1.)); // Medium
+      efficiencyPlots_.push_back(new efficiencyPlotEntryType(45., 1.e+3,  1.4, 2.172, decayMode, ptThreshold, 0.05, -1.)); // Tight
+
+      efficiencyPlots_.push_back(new efficiencyPlotEntryType(45., 1.e+3, -1.,  2.172, decayMode, ptThreshold, 0.40, -1.)); // vLoose
+      efficiencyPlots_.push_back(new efficiencyPlotEntryType(45., 1.e+3, -1.,  2.172, decayMode, ptThreshold, 0.20, -1.)); // Loose
+      efficiencyPlots_.push_back(new efficiencyPlotEntryType(45., 1.e+3, -1.,  2.172, decayMode, ptThreshold, 0.10, -1.)); // Medium
+      efficiencyPlots_.push_back(new efficiencyPlotEntryType(45., 1.e+3, -1.,  2.172, decayMode, ptThreshold, 0.05, -1.)); // Tight  
+
+      efficiencyPlots_.push_back(new efficiencyPlotEntryType(45., 1.e+3, -1.,  2.4,   decayMode, ptThreshold, 0.40, -1.)); // vLoose
+      efficiencyPlots_.push_back(new efficiencyPlotEntryType(45., 1.e+3, -1.,  2.4,   decayMode, ptThreshold, 0.20, -1.)); // Loose
+      efficiencyPlots_.push_back(new efficiencyPlotEntryType(45., 1.e+3, -1.,  2.4,   decayMode, ptThreshold, 0.10, -1.)); // Medium
+      efficiencyPlots_.push_back(new efficiencyPlotEntryType(45., 1.e+3, -1.,  2.4,   decayMode, ptThreshold, 0.05, -1.)); // Tight      
     }
   }
 

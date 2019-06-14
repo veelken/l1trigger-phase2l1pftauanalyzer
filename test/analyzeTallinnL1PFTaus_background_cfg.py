@@ -136,6 +136,12 @@ for useStrips in [ True, False ]:
         process.analysisSequence += getattr(process, moduleNamePuppi_TallinnL1PFTauIsolationAnalyzer)
 
 # L1PFTaus built from PFCandidates using Isobel's algorithm
+process.analyzeTallinnL1PFTausPF = cms.EDAnalyzer("L1PFTauAnalyzerBackground",
+  srcL1PFTaus = cms.InputTag('L1PFTauProducer:L1PFTaus'),
+  dqmDirectory = cms.string("L1PFTauAnalyzerBackgroundPF")
+)
+process.analysisSequence += process.analyzeTallinnL1PFTausPF
+
 process.analyzeL1PFTauPairsPF = cms.EDAnalyzer("L1PFTauPairAnalyzer",
   srcL1PFTaus = cms.InputTag('L1PFTauProducer:L1PFTaus'),
   srcRefTaus = cms.InputTag(''),

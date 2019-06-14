@@ -95,13 +95,29 @@ void L1TrackAnalyzer::beginJob()
   DQMStore& dqmStore = (*edm::Service<DQMStore>());
 
   std::vector<std::string> genTau_decayModes = { "oneProng0Pi0", "oneProng1Pi0", "oneProng2Pi0", "threeProng0Pi0", "threeProng1Pi0", "all" };
-  std::vector<double> genChargedHadron_absEtaRanges = { 1.0, 1.4 };
-  for ( auto genChargedHadron_absEtaRange : genChargedHadron_absEtaRanges )
+  std::vector<double> genChargedHadron_min_absEtaValues = { -1.,   1.4, -1.  };
+  std::vector<double> genChargedHadron_max_absEtaValues = {  1.4,  2.4,  2.4 };
+  assert(genChargedHadron_min_absEtaValues.size() == genChargedHadron_max_absEtaValues.size());
+  size_t numAbsEtaRanges = genChargedHadron_min_absEtaValues.size();
+  for ( size_t idxAbsEtaRange = 0; idxAbsEtaRange < numAbsEtaRanges; ++idxAbsEtaRange )
   {
+    double genChargedHadron_min_absEta = genChargedHadron_min_absEtaValues[idxAbsEtaRange];
+    double genChargedHadron_max_absEta = genChargedHadron_max_absEtaValues[idxAbsEtaRange];
     for ( auto genTau_decayMode : genTau_decayModes )
     {
       TString dqmDirectory = dqmDirectory_.data();
-      dqmDirectory.Append(Form("/absEtaLt%1.2f", genChargedHadron_absEtaRange));
+      if ( genChargedHadron_min_absEta >= 0. && genChargedHadron_max_absEta > 0. ) 
+      { 
+        dqmDirectory.Append(Form("/absEta%1.2fto%1.2f", genChargedHadron_min_absEta, genChargedHadron_max_absEta));
+      }
+      else if ( genChargedHadron_min_absEta >= 0. ) 
+      {
+        dqmDirectory.Append(Form("/absEtaGt%1.2f", genChargedHadron_min_absEta));
+      }
+      else if ( genChargedHadron_max_absEta > 0. ) 
+      {
+        dqmDirectory.Append(Form("/absEtaLt%1.2f", genChargedHadron_max_absEta));
+      }
       std::string genTau_decayMode_capitalized = genTau_decayMode;
       genTau_decayMode_capitalized[0] = toupper(genTau_decayMode_capitalized[0]);	
       dqmDirectory.Append(Form("/gen%sTau", genTau_decayMode_capitalized.data()));
@@ -109,49 +125,49 @@ void L1TrackAnalyzer::beginJob()
 
       dqmStore.setCurrentFolder(Form("%s/offlineTrack_woQualityCuts", dqmDirectory.Data()));
       efficiencyPlotEntryType* efficiencyPlot_offlineTracks_woQualityCuts = new efficiencyPlotEntryType(
-        "offlineTrack_woQualityCuts", 1., genChargedHadron_absEtaRange, genTau_decayMode); 
+	"offlineTrack_woQualityCuts", 1., 1.e+3, genChargedHadron_min_absEta, genChargedHadron_max_absEta, genTau_decayMode); 
       efficiencyPlot_offlineTracks_woQualityCuts->bookHistograms(dqmStore);
       efficiencyPlots_offlineTracks_woQualityCuts_.push_back(efficiencyPlot_offlineTracks_woQualityCuts);
 
       dqmStore.setCurrentFolder(Form("%s/offlineTrack_wQualityCuts", dqmDirectory.Data()));
       efficiencyPlotEntryType* efficiencyPlot_offlineTracks_wQualityCuts = new efficiencyPlotEntryType(
-        "offlineTrack_wQualityCuts", 1., genChargedHadron_absEtaRange, genTau_decayMode); 
+        "offlineTrack_wQualityCuts", 1., 1.e+3, genChargedHadron_min_absEta, genChargedHadron_max_absEta, genTau_decayMode); 
       efficiencyPlot_offlineTracks_wQualityCuts->bookHistograms(dqmStore);
       efficiencyPlots_offlineTracks_wQualityCuts_.push_back(efficiencyPlot_offlineTracks_wQualityCuts);
       
       dqmStore.setCurrentFolder(Form("%s/offlinePFCandTrack_woQualityCuts", dqmDirectory.Data()));
       efficiencyPlotEntryType* efficiencyPlot_offlinePFCandTracks_woQualityCuts = new efficiencyPlotEntryType(
-        "offlinePFCandTrack_woQualityCuts", 1., genChargedHadron_absEtaRange, genTau_decayMode); 
+        "offlinePFCandTrack_woQualityCuts", 1., 1.e+3, genChargedHadron_min_absEta, genChargedHadron_max_absEta, genTau_decayMode); 
       efficiencyPlot_offlinePFCandTracks_woQualityCuts->bookHistograms(dqmStore);
       efficiencyPlots_offlinePFCandTracks_woQualityCuts_.push_back(efficiencyPlot_offlinePFCandTracks_woQualityCuts);
             
       dqmStore.setCurrentFolder(Form("%s/offlinePFCandTrack_wQualityCuts", dqmDirectory.Data()));
       efficiencyPlotEntryType* efficiencyPlot_offlinePFCandTracks_wQualityCuts = new efficiencyPlotEntryType(
-        "offlinePFCandTrack_wQualityCuts", 1., genChargedHadron_absEtaRange, genTau_decayMode); 
+        "offlinePFCandTrack_wQualityCuts", 1., 1.e+3, genChargedHadron_min_absEta, genChargedHadron_max_absEta, genTau_decayMode); 
       efficiencyPlot_offlinePFCandTracks_wQualityCuts->bookHistograms(dqmStore);
       efficiencyPlots_offlinePFCandTracks_wQualityCuts_.push_back(efficiencyPlot_offlinePFCandTracks_wQualityCuts);
       
       dqmStore.setCurrentFolder(Form("%s/l1Track_woQualityCuts", dqmDirectory.Data()));
       efficiencyPlotEntryType* efficiencyPlot_l1Tracks_woQualityCuts = new efficiencyPlotEntryType(
-        "l1Track_woQualityCuts", 1., genChargedHadron_absEtaRange, genTau_decayMode); 
+        "l1Track_woQualityCuts", 1., 1.e+3, genChargedHadron_min_absEta, genChargedHadron_max_absEta, genTau_decayMode); 
       efficiencyPlot_l1Tracks_woQualityCuts->bookHistograms(dqmStore);
       efficiencyPlots_l1Tracks_woQualityCuts_.push_back(efficiencyPlot_l1Tracks_woQualityCuts);
             
       dqmStore.setCurrentFolder(Form("%s/l1Track_wQualityCuts", dqmDirectory.Data()));
       efficiencyPlotEntryType* efficiencyPlot_l1Tracks_wQualityCuts = new efficiencyPlotEntryType(
-        "l1Track_wQualityCuts", 1., genChargedHadron_absEtaRange, genTau_decayMode); 
+        "l1Track_wQualityCuts", 1., 1.e+3, genChargedHadron_min_absEta, genChargedHadron_max_absEta, genTau_decayMode); 
       efficiencyPlot_l1Tracks_wQualityCuts->bookHistograms(dqmStore);
       efficiencyPlots_l1Tracks_wQualityCuts_.push_back(efficiencyPlot_l1Tracks_wQualityCuts);
       
       dqmStore.setCurrentFolder(Form("%s/l1PFCandTrack_woQualityCuts", dqmDirectory.Data()));
       efficiencyPlotEntryType* efficiencyPlot_l1PFCandTracks_woQualityCuts = new efficiencyPlotEntryType(
-        "l1PFCandTrack_woQualityCuts", 1., genChargedHadron_absEtaRange, genTau_decayMode); 
+        "l1PFCandTrack_woQualityCuts", 1., 1.e+3, genChargedHadron_min_absEta, genChargedHadron_max_absEta, genTau_decayMode); 
       efficiencyPlot_l1PFCandTracks_woQualityCuts->bookHistograms(dqmStore);
       efficiencyPlots_l1PFCandTracks_woQualityCuts_.push_back(efficiencyPlot_l1PFCandTracks_woQualityCuts);
             
       dqmStore.setCurrentFolder(Form("%s/l1PFCandTrack_wQualityCuts", dqmDirectory.Data()));
       efficiencyPlotEntryType* efficiencyPlot_l1PFCandTracks_wQualityCuts = new efficiencyPlotEntryType(
-        "l1PFCandTrack_wQualityCuts", 1., genChargedHadron_absEtaRange, genTau_decayMode); 
+        "l1PFCandTrack_wQualityCuts", 1., 1.e+3, genChargedHadron_min_absEta, genChargedHadron_max_absEta, genTau_decayMode); 
       efficiencyPlot_l1PFCandTracks_wQualityCuts->bookHistograms(dqmStore);
       efficiencyPlots_l1PFCandTracks_wQualityCuts_.push_back(efficiencyPlot_l1PFCandTracks_wQualityCuts);
     }

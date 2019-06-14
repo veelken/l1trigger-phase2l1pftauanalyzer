@@ -232,8 +232,10 @@ void makeRatePlots()
   pfAlgos.push_back("WithoutStripsAndPreselectionPuppi");
 
   std::vector<std::string> absEtaRanges;
-  absEtaRanges.push_back("absEtaLt1p00");
   absEtaRanges.push_back("absEtaLt1p40");
+  absEtaRanges.push_back("absEta1p40to2p17");
+  absEtaRanges.push_back("absEtaLt2p17");
+  absEtaRanges.push_back("absEtaLt2p40");
 
   std::vector<std::string> isolationWPs;
   isolationWPs.push_back("relChargedIsoLt0p40");
@@ -254,12 +256,17 @@ void makeRatePlots()
   int colors[6] = { 1, 2, 8, 4, 6, 7 };
   int lineStyles[6] = { 1, 1, 1, 1, 1, 1 };
 
+  // TallinnL1PFTaus 
+  typedef std::map<std::string, TH1*>              string_to_TH1Map1;
+  typedef std::map<std::string, string_to_TH1Map1> string_to_TH1Map2;
+  typedef std::map<std::string, string_to_TH1Map2> string_to_TH1Map3;
+  string_to_TH1Map3 histograms_rateSingleTau; // key = pfAlgo, absEtaRange, isolationWP
+  string_to_TH1Map3 histograms_rateDoubleTau; // key = pfAlgo, absEtaRange, isolationWP
+
   for ( std::vector<std::string>::const_iterator pfAlgo = pfAlgos.begin();
 	pfAlgo != pfAlgos.end(); ++pfAlgo ) {
     for ( std::vector<std::string>::const_iterator absEtaRange = absEtaRanges.begin();
 	  absEtaRange != absEtaRanges.end(); ++absEtaRange ) {
-      std::map<std::string, TH1*> histograms_rateSingleTau; // key = isolationWP
-      std::map<std::string, TH1*> histograms_rateDoubleTau; // key = isolationWP
       for ( std::vector<std::string>::const_iterator isolationWP = isolationWPs.begin();
 	    isolationWP != isolationWPs.end(); ++isolationWP ) {
         std::string histogram2dName = Form("%s%s/numL1PFTaus_vs_ptThreshold_%s_%s", 
@@ -267,18 +274,19 @@ void makeRatePlots()
         TH2* histogram2d = loadHistogram2d(inputFile, histogram2dName);
 
         TH1* histogram_rateSingleTau = makeRateHistogram(histogram2d, 1);
-        histograms_rateSingleTau[*isolationWP] = histogram_rateSingleTau;
+        histograms_rateSingleTau[*pfAlgo][*absEtaRange][*isolationWP] = histogram_rateSingleTau;
         TH1* histogram_rateDoubleTau = makeRateHistogram(histogram2d, 2);
-        histograms_rateDoubleTau[*isolationWP] = histogram_rateDoubleTau;
+        histograms_rateDoubleTau[*pfAlgo][*absEtaRange][*isolationWP] = histogram_rateDoubleTau;
       }
       
-      std::string outputFileName_rateSingleTau = Form("makeRatePlots_SingleTau_%s_%s.png", 
+      string_to_TH1Map1 histograms1 = histograms_rateSingleTau[*pfAlgo][*absEtaRange];
+      std::string outputFileName1 = Form("makeRatePlots_HPSatL1_SingleTau_%s_%s.png", 
         pfAlgo->data(), absEtaRange->data());
       showHistograms(1150, 1150,
-		     histograms_rateSingleTau["relChargedIsoLt0p40"], legendEntries["relChargedIsoLt0p40"],
-		     histograms_rateSingleTau["relChargedIsoLt0p20"], legendEntries["relChargedIsoLt0p20"],
-		     histograms_rateSingleTau["relChargedIsoLt0p10"], legendEntries["relChargedIsoLt0p10"],
-		     histograms_rateSingleTau["relChargedIsoLt0p05"], legendEntries["relChargedIsoLt0p05"],
+		     histograms1["relChargedIsoLt0p40"], legendEntries["relChargedIsoLt0p40"],
+		     histograms1["relChargedIsoLt0p20"], legendEntries["relChargedIsoLt0p20"],
+		     histograms1["relChargedIsoLt0p10"], legendEntries["relChargedIsoLt0p10"],
+		     histograms1["relChargedIsoLt0p05"], legendEntries["relChargedIsoLt0p05"],
 		     0, "",
 		     0, "",
 		     colors, lineStyles, 
@@ -287,15 +295,16 @@ void makeRatePlots()
 		     0.63, 0.65, 0.26, 0.07, 
 		     -1., -1., "L1 #tau p_{T} Threshold [GeV]", 1.2, 
 		     true, 1.e+3, 1.e+8, "Single #tau Trigger Rate [Hz]", 1.4, 
-		     outputFileName_rateSingleTau);
+		     outputFileName1);
       
-      std::string outputFileName_rateDoubleTau = Form("makeRatePlots_DoubleTau_%s_%s.png", 
+      string_to_TH1Map1 histograms2 = histograms_rateDoubleTau[*pfAlgo][*absEtaRange];
+      std::string outputFileName_rateDoubleTau = Form("makeRatePlots_HPSatL1_DoubleTau_%s_%s.png", 
         pfAlgo->data(), absEtaRange->data());
       showHistograms(1150, 1150,
-		     histograms_rateDoubleTau["relChargedIsoLt0p40"], legendEntries["relChargedIsoLt0p40"],
-		     histograms_rateDoubleTau["relChargedIsoLt0p20"], legendEntries["relChargedIsoLt0p20"],
-		     histograms_rateDoubleTau["relChargedIsoLt0p10"], legendEntries["relChargedIsoLt0p10"],
-		     histograms_rateDoubleTau["relChargedIsoLt0p05"], legendEntries["relChargedIsoLt0p05"],
+		     histograms2["relChargedIsoLt0p40"], legendEntries["relChargedIsoLt0p40"],
+		     histograms2["relChargedIsoLt0p20"], legendEntries["relChargedIsoLt0p20"],
+		     histograms2["relChargedIsoLt0p10"], legendEntries["relChargedIsoLt0p10"],
+		     histograms2["relChargedIsoLt0p05"], legendEntries["relChargedIsoLt0p05"],
 		     0, "",
 		     0, "",
 		     colors, lineStyles, 
@@ -305,15 +314,122 @@ void makeRatePlots()
 		     -1., -1., "L1 #tau p_{T} Threshold [GeV]", 1.2, 
 		     true, 1.e+3, 1.e+8, "Double #tau Trigger Rate [Hz]", 1.4, 
 		     outputFileName_rateDoubleTau);
+    }
+  }
 
-      for ( std::map<std::string, TH1*>::const_iterator it = histograms_rateSingleTau.begin(); it != histograms_rateSingleTau.end(); ++it )
-      {
-	delete it->second;
-      }
-      for ( std::map<std::string, TH1*>::const_iterator it = histograms_rateDoubleTau.begin(); it != histograms_rateDoubleTau.end(); ++it )
-      {
-	delete it->second;
-      }
+  // Isobel's L1PFTaus 
+  std::vector<std::string> isolationWPs_isobel;
+  isolationWPs_isobel.push_back("vLooseIso");
+  isolationWPs_isobel.push_back("LooseIso");
+  isolationWPs_isobel.push_back("MediumIso");
+  isolationWPs_isobel.push_back("TightIso");
+
+  std::map<std::string, std::string> legendEntries_isobel; // key = isolationWP
+  legendEntries_isobel["vLooseIso"] = "very Loose";
+  legendEntries_isobel["LooseIso"]  = "Loose";
+  legendEntries_isobel["MediumIso"] = "Medium";
+  legendEntries_isobel["TightIso"]  = "Tight";
+
+  std::string dqmDirectory_isobel = "DQMData/L1PFTauAnalyzerBackground";
+
+  string_to_TH1Map2 histograms_rateSingleTau_isobel; // key = absEtaRange, isolationWP
+  string_to_TH1Map2 histograms_rateDoubleTau_isobel; // key = absEtaRange, isolationWP
+
+  for ( std::vector<std::string>::const_iterator absEtaRange = absEtaRanges.begin();
+	absEtaRange != absEtaRanges.end(); ++absEtaRange ) {
+    for ( std::vector<std::string>::const_iterator isolationWP = isolationWPs_isobel.begin();
+	  isolationWP != isolationWPs_isobel.end(); ++isolationWP ) {
+      std::string histogram2dName = Form("%s/numL1PFTaus_vs_ptThreshold_%s_%s", 
+	dqmDirectory_isobel.data(), absEtaRange->data(), isolationWP->data());
+      TH2* histogram2d = loadHistogram2d(inputFile, histogram2dName);
+
+      TH1* histogram_rateSingleTau = makeRateHistogram(histogram2d, 1);
+      histograms_rateSingleTau_isobel[*absEtaRange][*isolationWP] = histogram_rateSingleTau;
+      TH1* histogram_rateDoubleTau = makeRateHistogram(histogram2d, 2);
+      histograms_rateDoubleTau_isobel[*absEtaRange][*isolationWP] = histogram_rateDoubleTau;
+    }
+      
+    string_to_TH1Map1 histograms3 = histograms_rateSingleTau_isobel[*absEtaRange];
+    std::string outputFileName3 = Form("makeRatePlots_L1PFTau_SingleTau_%s.png", 
+      absEtaRange->data());
+    showHistograms(1150, 1150,
+		   histograms3["vLooseIso"], legendEntries_isobel["vLooseIso"],
+		   histograms3["LooseIso"],  legendEntries_isobel["LooseIso"],
+		   histograms3["MediumIso"], legendEntries_isobel["MediumIso"],
+		   histograms3["TightIso"],  legendEntries_isobel["TightIso"],
+		   0, "",
+		   0, "",
+		   colors, lineStyles, 
+		   0.045, 0.65, 0.70, 0.23, 0.21,
+		   labelTextLines, 0.050,
+		   0.63, 0.65, 0.26, 0.07, 
+		   -1., -1., "L1 #tau p_{T} Threshold [GeV]", 1.2, 
+		   true, 1.e+3, 1.e+8, "Single #tau Trigger Rate [Hz]", 1.4, 
+		   outputFileName3);
+      
+    string_to_TH1Map1 histograms4 = histograms_rateDoubleTau_isobel[*absEtaRange];							  
+    std::string outputFileName4 = Form("makeRatePlots_L1PFTau_DoubleTau_%s.png", 
+      absEtaRange->data());
+    showHistograms(1150, 1150,
+		   histograms4["vLooseIso"], legendEntries_isobel["vLooseIso"],
+		   histograms4["LooseIso"],  legendEntries_isobel["LooseIso"],
+		   histograms4["MediumIso"], legendEntries_isobel["MediumIso"],
+		   histograms4["TightIso"],  legendEntries_isobel["TightIso"],
+		   0, "",
+		   0, "",
+		   colors, lineStyles, 
+		   0.045, 0.65, 0.70, 0.23, 0.21,
+		   labelTextLines, 0.050,
+		   0.63, 0.65, 0.26, 0.07, 
+		   -1., -1., "L1 #tau p_{T} Threshold [GeV]", 1.2, 
+		   true, 1.e+3, 1.e+8, "Double #tau Trigger Rate [Hz]", 1.4, 
+		   outputFileName4);
+  }
+
+  for ( std::vector<std::string>::const_iterator absEtaRange = absEtaRanges.begin();
+	absEtaRange != absEtaRanges.end(); ++absEtaRange ) {
+    assert(isolationWPs.size() == isolationWPs_isobel.size());
+    for ( int idxIsolationWP = 0; idxIsolationWP < 4; ++idxIsolationWP ) {
+      const std::string& isolationWP = isolationWPs[idxIsolationWP];
+      TH1* histogram_rateSingleTau = histograms_rateSingleTau["WithoutStripsAndPreselectionPF"][*absEtaRange][isolationWP];
+      TH1* histogram_rateDoubleTau = histograms_rateDoubleTau["WithoutStripsAndPreselectionPF"][*absEtaRange][isolationWP];
+      const std::string& isolationWP_isobel = isolationWPs_isobel[idxIsolationWP];
+      TH1* histogram_rateSingleTau_isobel = histograms_rateSingleTau_isobel[*absEtaRange][isolationWP_isobel];
+      TH1* histogram_rateDoubleTau_isobel = histograms_rateDoubleTau_isobel[*absEtaRange][isolationWP_isobel];
+      
+      std::string outputFileName5 = Form("makeRatePlots_HPSatL1_vs_L1PFTau_SingleTau_%s.png", 
+        absEtaRange->data());
+      showHistograms(1150, 1150,
+		     histogram_rateSingleTau,        "HPS@L1 (Tallinn)",
+		     histogram_rateSingleTau_isobel, "L1PFTau",
+		     0, "",
+		     0, "",
+		     0, "",
+		     0, "",
+		     colors, lineStyles, 
+		     0.045, 0.65, 0.70, 0.23, 0.21,
+		     labelTextLines, 0.050,
+		     0.63, 0.65, 0.26, 0.07, 
+		     -1., -1., "L1 #tau p_{T} Threshold [GeV]", 1.2, 
+		     true, 1.e+3, 1.e+8, "Single #tau Trigger Rate [Hz]", 1.4, 
+		     outputFileName5);
+      
+      std::string outputFileName6 = Form("makeRatePlots_HPSatL1_vs_L1PFTau_DoubleTau_%s.png", 
+        absEtaRange->data());
+      showHistograms(1150, 1150,
+		     histogram_rateDoubleTau,        "HPS@L1 (Tallinn)",
+		     histogram_rateDoubleTau_isobel, "L1PFTau",
+		     0, "",
+		     0, "",
+		     0, "",
+		     0, "",
+		     colors, lineStyles, 
+		     0.045, 0.65, 0.70, 0.23, 0.21,
+		     labelTextLines, 0.050,
+		     0.63, 0.65, 0.26, 0.07, 
+		     -1., -1., "L1 #tau p_{T} Threshold [GeV]", 1.2, 
+		     true, 1.e+3, 1.e+8, "Double #tau Trigger Rate [Hz]", 1.4, 
+		     outputFileName6);
     }
   }
 

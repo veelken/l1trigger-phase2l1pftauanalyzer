@@ -449,8 +449,10 @@ void makeEfficiencyPlots()
   observables.push_back("eta");
 
   std::vector<std::string> absEtaRanges;
-  absEtaRanges.push_back("absEtaLt1p00");
   absEtaRanges.push_back("absEtaLt1p40");
+  absEtaRanges.push_back("absEta1p40to2p17");
+  absEtaRanges.push_back("absEtaLt2p17");
+  absEtaRanges.push_back("absEtaLt2p40");
 
   std::vector<std::string> decayModes;
   decayModes.push_back("oneProng0Pi0");
@@ -466,6 +468,8 @@ void makeEfficiencyPlots()
   ptThresholds.push_back("ptGt30");
   ptThresholds.push_back("ptGt35");
   ptThresholds.push_back("ptGt40");
+  ptThresholds.push_back("ptGt45");
+  ptThresholds.push_back("ptGt50");
 
   std::vector<std::string> isolationWPs;
   isolationWPs.push_back("relChargedIsoLt0p40");
@@ -507,6 +511,16 @@ void makeEfficiencyPlots()
   int lineStyles[6] = { 1, 1, 1, 1, 1, 1 };
   int markerStyles[6] = { 22, 32, 20, 24, 21, 25 };
 
+  // TallinnL1PFTaus 
+  typedef std::map<std::string, TGraph*>              string_to_TGraphMap1;
+  typedef std::map<std::string, string_to_TGraphMap1> string_to_TGraphMap2;
+  typedef std::map<std::string, string_to_TGraphMap2> string_to_TGraphMap3;
+  typedef std::map<std::string, string_to_TGraphMap3> string_to_TGraphMap4;
+  typedef std::map<std::string, string_to_TGraphMap4> string_to_TGraphMap5;
+  typedef std::map<std::string, string_to_TGraphMap5> string_to_TGraphMap6;
+  string_to_TGraphMap5 graphs_efficiency_vs_isolationWPs;                // key = pfAlgo, observable, absEtaRange, ptThreshold, isolationWP
+  string_to_TGraphMap6 graphs_efficiency_vs_isolationWPs_and_decayModes; // key = pfAlgo, observable, absEtaRange, ptThreshold, isolationWP, decayMode
+
   for ( std::vector<std::string>::const_iterator pfAlgo = pfAlgos.begin();
 	pfAlgo != pfAlgos.end(); ++pfAlgo ) {
     for ( std::vector<std::string>::const_iterator observable = observables.begin();
@@ -515,7 +529,6 @@ void makeEfficiencyPlots()
 	    absEtaRange != absEtaRanges.end(); ++absEtaRange ) {
         for ( std::vector<std::string>::const_iterator ptThreshold = ptThresholds.begin();
 	      ptThreshold != ptThresholds.end(); ++ptThreshold ) {      
-          std::map<std::string, TGraph*> graphs_efficiency_vs_isolationWPs; // key = isolationWP
           for ( std::vector<std::string>::const_iterator isolationWP = isolationWPs.begin();
 	        isolationWP != isolationWPs.end(); ++isolationWP ) {
             //std::string histogramName_numerator = Form("%s%s_wrtGenHadTaus/effL1PFTau_vs_%s_numerator_all_%s_%s_%s", 
@@ -529,22 +542,23 @@ void makeEfficiencyPlots()
               dqmDirectory.data(), pfAlgo->data(), observable->data(), absEtaRange->data(), ptThreshold->data(), isolationWP->data());
             TH1* histogram_denominator = loadHistogram(inputFile, histogramName_denominator);
 	    TGraph* graph_efficiency = makeEfficiencyGraph(histogram_numerator, histogram_denominator);
-	    graphs_efficiency_vs_isolationWPs[*isolationWP] = graph_efficiency;
+	    graphs_efficiency_vs_isolationWPs[*pfAlgo][*observable][*absEtaRange][*ptThreshold][*isolationWP] = graph_efficiency;
           }
 
+	  string_to_TGraphMap1 graphs1 = graphs_efficiency_vs_isolationWPs[*pfAlgo][*observable][*absEtaRange][*ptThreshold];
 	  bool addFitFunctions = false;
 	  if ( (*observable) == "pt" ) 
 	  {
 	    addFitFunctions = true;
 	  }
 	  std::vector<std::string> labelTextLines = getLabelTextLines(*ptThreshold);
-          std::string outputFileName_efficiency_vs_isolationWPs = Form("makeEfficiencyPlots_%s_vs_%s_%s_%s.png", 
+          std::string outputFileName1 = Form("makeEfficiencyPlots_HPSatL1_%s_vs_%s_%s_%s.png", 
             pfAlgo->data(), observable->data(), absEtaRange->data(), ptThreshold->data());
 	  showGraphs(1150, 850,
-		     graphs_efficiency_vs_isolationWPs["relChargedIsoLt0p40"], legendEntries_vs_isolationWPs["relChargedIsoLt0p40"],
-		     graphs_efficiency_vs_isolationWPs["relChargedIsoLt0p20"], legendEntries_vs_isolationWPs["relChargedIsoLt0p20"],
-		     graphs_efficiency_vs_isolationWPs["relChargedIsoLt0p10"], legendEntries_vs_isolationWPs["relChargedIsoLt0p10"],
-		     graphs_efficiency_vs_isolationWPs["relChargedIsoLt0p05"], legendEntries_vs_isolationWPs["relChargedIsoLt0p05"],
+		     graphs1["relChargedIsoLt0p40"], legendEntries_vs_isolationWPs["relChargedIsoLt0p40"],
+		     graphs1["relChargedIsoLt0p20"], legendEntries_vs_isolationWPs["relChargedIsoLt0p20"],
+		     graphs1["relChargedIsoLt0p10"], legendEntries_vs_isolationWPs["relChargedIsoLt0p10"],
+		     graphs1["relChargedIsoLt0p05"], legendEntries_vs_isolationWPs["relChargedIsoLt0p05"],
 		     0, "",
 		     0, "",
 		     addFitFunctions,
@@ -554,16 +568,10 @@ void makeEfficiencyPlots()
 		     0.17, 0.85, 0.26, 0.05, 
 		     xMin[*observable], xMax[*observable], xAxisTitles[*observable], 1.2, 
 		     false, 0., 1.09, "Efficiency", 1.4, 
-		     outputFileName_efficiency_vs_isolationWPs);
-
-  	  for ( std::map<std::string, TGraph*>::const_iterator it = graphs_efficiency_vs_isolationWPs.begin(); it != graphs_efficiency_vs_isolationWPs.end(); ++it )
-          {
-  	    delete it->second;
-          }
+		     outputFileName1);
 
   	  for ( std::vector<std::string>::const_iterator isolationWP = isolationWPs.begin();
 	        isolationWP != isolationWPs.end(); ++isolationWP ) {  
-	    std::map<std::string, TGraph*> graphs_efficiency_vs_decayModes; // key = decayMode
 	    for ( std::vector<std::string>::const_iterator decayMode = decayModes.begin();
 		  decayMode != decayModes.end(); ++decayMode ) {
   	      //std::string histogramName_numerator = Form("%s%s_wrtGenHadTaus/effL1PFTau_vs_%s_numerator_%s_%s_%s_%s", 
@@ -577,18 +585,19 @@ void makeEfficiencyPlots()
                 dqmDirectory.data(), pfAlgo->data(), observable->data(), decayMode->data(), absEtaRange->data(), ptThreshold->data(), isolationWP->data());
               TH1* histogram_denominator = loadHistogram(inputFile, histogramName_denominator);
 	      TGraph* graph_efficiency = makeEfficiencyGraph(histogram_numerator, histogram_denominator);
-	      graphs_efficiency_vs_decayModes[*decayMode] = graph_efficiency;
+	      graphs_efficiency_vs_isolationWPs_and_decayModes[*pfAlgo][*observable][*absEtaRange][*ptThreshold][*isolationWP][*decayMode] = graph_efficiency;
             }
-	  
+
+	    string_to_TGraphMap1 graphs2 = graphs_efficiency_vs_isolationWPs_and_decayModes[*pfAlgo][*observable][*absEtaRange][*ptThreshold][*isolationWP];
 	    std::vector<std::string> labelTextLines = getLabelTextLines(*ptThreshold);
-	    std::string outputFileName_efficiency_vs_decayModes = Form("makeEfficiencyPlots_%s_vs_%s_%s_%s_%s.png", 
+	    std::string outputFileName2 = Form("makeEfficiencyPlots_HPSatL1_%s_vs_%s_%s_%s_%s.png", 
               pfAlgo->data(), observable->data(), absEtaRange->data(), ptThreshold->data(), isolationWP->data());
 	    showGraphs(1150, 850,
-		       graphs_efficiency_vs_decayModes["oneProng0Pi0"],   legendEntries_vs_decayModes["oneProng0Pi0"],
-		       graphs_efficiency_vs_decayModes["oneProng1Pi0"],   legendEntries_vs_decayModes["oneProng1Pi0"],
-		       graphs_efficiency_vs_decayModes["oneProng2Pi0"],   legendEntries_vs_decayModes["oneProng2Pi0"],
-		       graphs_efficiency_vs_decayModes["threeProng0Pi0"], legendEntries_vs_decayModes["threeProng0Pi0"],
-		       graphs_efficiency_vs_decayModes["threeProng1Pi0"], legendEntries_vs_decayModes["threeProng1Pi0"],
+		       graphs2["oneProng0Pi0"],   legendEntries_vs_decayModes["oneProng0Pi0"],
+		       graphs2["oneProng1Pi0"],   legendEntries_vs_decayModes["oneProng1Pi0"],
+		       graphs2["oneProng2Pi0"],   legendEntries_vs_decayModes["oneProng2Pi0"],
+		       graphs2["threeProng0Pi0"], legendEntries_vs_decayModes["threeProng0Pi0"],
+		       graphs2["threeProng1Pi0"], legendEntries_vs_decayModes["threeProng1Pi0"],
 		       0, "",
 		       false,
 		       colors, markerStyles, lineStyles, 
@@ -597,13 +606,156 @@ void makeEfficiencyPlots()
 		       0.17, 0.85, 0.26, 0.05, 
 		       xMin[*observable], xMax[*observable], xAxisTitles[*observable], 1.2, 
 		       false, 0., 1.09, "Efficiency", 1.4, 
-		       outputFileName_efficiency_vs_decayModes);
-
-  	    for ( std::map<std::string, TGraph*>::const_iterator it = graphs_efficiency_vs_decayModes.begin(); it != graphs_efficiency_vs_decayModes.end(); ++it )
-	    {
-	      delete it->second;
-            }
+		       outputFileName2);
 	  }
+	}
+      }
+    }
+  }
+
+  // Isobel's L1PFTaus 
+  std::vector<std::string> isolationWPs_isobel;
+  isolationWPs_isobel.push_back("vLooseIso");
+  isolationWPs_isobel.push_back("LooseIso");
+  isolationWPs_isobel.push_back("MediumIso");
+  isolationWPs_isobel.push_back("TightIso");
+
+  std::map<std::string, std::string> legendEntries_vs_isolationWPs_isobel; // key = isolationWP
+  legendEntries_vs_isolationWPs_isobel["vLooseIso"] = "very Loose";
+  legendEntries_vs_isolationWPs_isobel["LooseIso"]  = "Loose";
+  legendEntries_vs_isolationWPs_isobel["MediumIso"] = "Medium";
+  legendEntries_vs_isolationWPs_isobel["TightIso"]  = "Tight";
+
+  std::string dqmDirectory_isobel = "DQMData/L1PFTauAnalyzerSignal";
+
+  string_to_TGraphMap4 graphs_efficiency_vs_isolationWPs_isobel;                // key = observable, absEtaRange, ptThreshold, isolationWP
+  string_to_TGraphMap5 graphs_efficiency_vs_isolationWPs_and_decayModes_isobel; // key = observable, absEtaRange, ptThreshold, isolationWP, decayMode
+
+  for ( std::vector<std::string>::const_iterator observable = observables.begin();
+	observable != observables.end(); ++observable ) {      
+    for ( std::vector<std::string>::const_iterator absEtaRange = absEtaRanges.begin();
+	  absEtaRange != absEtaRanges.end(); ++absEtaRange ) {
+      for ( std::vector<std::string>::const_iterator ptThreshold = ptThresholds.begin();
+	    ptThreshold != ptThresholds.end(); ++ptThreshold ) {      
+	for ( std::vector<std::string>::const_iterator isolationWP = isolationWPs_isobel.begin();
+	      isolationWP != isolationWPs_isobel.end(); ++isolationWP ) {
+	  //std::string histogramName_numerator = Form("%s%s_wrtGenHadTaus/effL1PFTau_vs_%s_numerator_all_%s_%s_%s", 
+	  //  dqmDirectory_isobel.data(), pfAlgo->data(), observable->data(), absEtaRange->data(), ptThreshold->data(), isolationWP->data());
+	  std::string histogramName_numerator = Form("%s_wrtOfflineTaus/effL1PFTau_vs_%s_numerator_all_%s_%s_%s", 
+            dqmDirectory_isobel.data(), observable->data(), absEtaRange->data(), ptThreshold->data(), isolationWP->data());
+	  TH1* histogram_numerator = loadHistogram(inputFile, histogramName_numerator);
+	  //std::string histogramName_denominator = Form("%s%s_wrtGenHadTaus/effL1PFTau_vs_%s_denominator_all_%s_%s_%s", 
+	  //  dqmDirectory_isobel.data(), pfAlgo->data(), observable->data(), absEtaRange->data(), ptThreshold->data(), isolationWP->data());
+	  std::string histogramName_denominator = Form("%s_wrtOfflineTaus/effL1PFTau_vs_%s_denominator_all_%s_%s_%s", 
+            dqmDirectory_isobel.data(), observable->data(), absEtaRange->data(), ptThreshold->data(), isolationWP->data());
+	  TH1* histogram_denominator = loadHistogram(inputFile, histogramName_denominator);
+	  TGraph* graph_efficiency = makeEfficiencyGraph(histogram_numerator, histogram_denominator);
+	  graphs_efficiency_vs_isolationWPs_isobel[*observable][*absEtaRange][*ptThreshold][*isolationWP] = graph_efficiency;
+	}
+
+	string_to_TGraphMap1 graphs3 = graphs_efficiency_vs_isolationWPs_isobel[*observable][*absEtaRange][*ptThreshold];
+	bool addFitFunctions = false;
+	if ( (*observable) == "pt" ) 
+	{
+	  addFitFunctions = true;
+	}
+	std::vector<std::string> labelTextLines = getLabelTextLines(*ptThreshold);
+	std::string outputFileName3 = Form("makeEfficiencyPlots_L1PFTau_vs_%s_%s_%s.png", 
+          observable->data(), absEtaRange->data(), ptThreshold->data());
+	showGraphs(1150, 850,
+		   graphs3["vLooseIso"], legendEntries_vs_isolationWPs["vLooseIso"],
+		   graphs3["LooseIso"],  legendEntries_vs_isolationWPs["LooseIso"],
+		   graphs3["MediumIso"], legendEntries_vs_isolationWPs["MediumIso"],
+		   graphs3["TightIso"],  legendEntries_vs_isolationWPs["TightIso"],
+		   0, "",
+		   0, "",
+		   addFitFunctions,
+		   colors, markerStyles, lineStyles, 
+		   0.045, 0.68, 0.17, 0.23, 0.26, 
+		   labelTextLines, 0.045,
+		   0.17, 0.85, 0.26, 0.05, 
+		   xMin[*observable], xMax[*observable], xAxisTitles[*observable], 1.2, 
+		   false, 0., 1.09, "Efficiency", 1.4, 
+		   outputFileName3);
+	
+	for ( std::vector<std::string>::const_iterator isolationWP = isolationWPs_isobel.begin();
+	      isolationWP != isolationWPs_isobel.end(); ++isolationWP ) {  
+	  for ( std::vector<std::string>::const_iterator decayMode = decayModes.begin();
+		decayMode != decayModes.end(); ++decayMode ) {
+	    //std::string histogramName_numerator = Form("%s%s_wrtGenHadTaus/effL1PFTau_vs_%s_numerator_%s_%s_%s_%s", 
+	    //  dqmDirectory_isobel.data(), pfAlgo->data(), observable->data(), decayMode->data(), absEtaRange->data(), ptThreshold->data(), isolationWP->data());
+	    std::string histogramName_numerator = Form("%s_wrtOfflineTaus/effL1PFTau_vs_%s_numerator_%s_%s_%s_%s", 
+	      dqmDirectory_isobel.data(), observable->data(), decayMode->data(), absEtaRange->data(), ptThreshold->data(), isolationWP->data());
+	    TH1* histogram_numerator = loadHistogram(inputFile, histogramName_numerator);
+	    //std::string histogramName_denominator = Form("%s%s_wrtGenHadTaus/effL1PFTau_vs_%s_denominator_%s_%s_%s_%s", 
+	    //  dqmDirectory_isobel.data(), pfAlgo->data(), observable->data(), decayMode->data(), absEtaRange->data(), ptThreshold->data(), isolationWP->data());
+	    std::string histogramName_denominator = Form("%s_wrtOfflineTaus/effL1PFTau_vs_%s_denominator_%s_%s_%s_%s", 
+              dqmDirectory_isobel.data(), observable->data(), decayMode->data(), absEtaRange->data(), ptThreshold->data(), isolationWP->data());
+	    TH1* histogram_denominator = loadHistogram(inputFile, histogramName_denominator);
+	    TGraph* graph_efficiency = makeEfficiencyGraph(histogram_numerator, histogram_denominator);
+	    graphs_efficiency_vs_isolationWPs_and_decayModes_isobel[*observable][*absEtaRange][*ptThreshold][*isolationWP][*decayMode] = graph_efficiency;
+	  }
+	  
+	  string_to_TGraphMap1 graphs4 = graphs_efficiency_vs_isolationWPs_and_decayModes_isobel[*observable][*absEtaRange][*ptThreshold][*isolationWP];
+	  std::vector<std::string> labelTextLines = getLabelTextLines(*ptThreshold);
+	  std::string outputFileName4 = Form("makeEfficiencyPlots_L1PFTau_vs_%s_%s_%s_%s.png", 
+            observable->data(), absEtaRange->data(), ptThreshold->data(), isolationWP->data());
+	  showGraphs(1150, 850,
+		     graphs4["oneProng0Pi0"],   legendEntries_vs_decayModes["oneProng0Pi0"],
+		     graphs4["oneProng1Pi0"],   legendEntries_vs_decayModes["oneProng1Pi0"],
+		     graphs4["oneProng2Pi0"],   legendEntries_vs_decayModes["oneProng2Pi0"],
+		     graphs4["threeProng0Pi0"], legendEntries_vs_decayModes["threeProng0Pi0"],
+		     graphs4["threeProng1Pi0"], legendEntries_vs_decayModes["threeProng1Pi0"],
+		     0, "",
+		     false,
+		     colors, markerStyles, lineStyles, 
+		     0.045, 0.68, 0.17, 0.23, 0.26, 
+		     labelTextLines, 0.045,
+		     0.17, 0.85, 0.26, 0.05, 
+		     xMin[*observable], xMax[*observable], xAxisTitles[*observable], 1.2, 
+		     false, 0., 1.09, "Efficiency", 1.4, 
+		     outputFileName4);
+	}
+      }
+    }
+  }
+
+  for ( std::vector<std::string>::const_iterator observable = observables.begin();
+	observable != observables.end(); ++observable ) {      
+    for ( std::vector<std::string>::const_iterator absEtaRange = absEtaRanges.begin();
+	  absEtaRange != absEtaRanges.end(); ++absEtaRange ) {
+      for ( std::vector<std::string>::const_iterator ptThreshold = ptThresholds.begin();
+	    ptThreshold != ptThresholds.end(); ++ptThreshold ) {      
+	assert(isolationWPs.size() == isolationWPs_isobel.size());
+	for ( int idxIsolationWP = 0; idxIsolationWP < 4; ++idxIsolationWP ) {
+	  const std::string& isolationWP = isolationWPs[idxIsolationWP];
+	  TGraph* graph = graphs_efficiency_vs_isolationWPs["WithoutStripsAndPreselectionPF"][*observable][*absEtaRange][*ptThreshold][isolationWP];
+	  const std::string& isolationWP_isobel = isolationWPs_isobel[idxIsolationWP];
+	  TGraph* graph_isobel = graphs_efficiency_vs_isolationWPs_isobel[*observable][*absEtaRange][*ptThreshold][isolationWP_isobel];
+
+	  bool addFitFunctions = false;
+	  if ( (*observable) == "pt" ) 
+	  {
+	    addFitFunctions = true;
+	  }
+	  std::vector<std::string> labelTextLines = getLabelTextLines(*ptThreshold);
+	  std::string outputFileName5 = Form("makeEfficiencyPlots_HPSatL1_vs_L1PFTau_vs_%s_%s_%s.png", 
+            observable->data(), absEtaRange->data(), ptThreshold->data());
+	  showGraphs(1150, 850,
+		     graph,        "HPS@L1 (Tallinn)",
+		     graph_isobel, "L1PFTau",
+		     0, "",
+		     0, "",
+		     0, "",
+		     0, "",
+		     addFitFunctions,
+		     colors, markerStyles, lineStyles, 
+		     0.045, 0.68, 0.17, 0.23, 0.26, 
+		     labelTextLines, 0.045,
+		     0.17, 0.85, 0.26, 0.05, 
+		     xMin[*observable], xMax[*observable], xAxisTitles[*observable], 1.2, 
+		     false, 0., 1.09, "Efficiency", 1.4, 
+		     outputFileName5);
 	}
       }
     }

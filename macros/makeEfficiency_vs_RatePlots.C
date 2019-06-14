@@ -323,8 +323,10 @@ void makeEfficiency_vs_RatePlots()
   pfAlgos.push_back("WithoutStripsAndPreselectionPF");
 
   std::vector<std::string> absEtaRanges;
-  //absEtaRanges.push_back("absEtaLt1p00");
   absEtaRanges.push_back("absEtaLt1p40");
+  absEtaRanges.push_back("absEta1p40to2p17");
+  absEtaRanges.push_back("absEtaLt2p17");
+  absEtaRanges.push_back("absEtaLt2p40");
 
   std::vector<std::string> isolationWPs;
   isolationWPs.push_back("relChargedIsoLt0p40");

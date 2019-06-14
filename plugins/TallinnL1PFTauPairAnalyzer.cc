@@ -13,6 +13,8 @@
 TallinnL1PFTauPairAnalyzer::TallinnL1PFTauPairAnalyzer(const edm::ParameterSet& cfg)
   : moduleLabel_(cfg.getParameter<std::string>("@module_label"))
   , min_refTau_pt_(-1.)
+  , max_refTau_pt_(-1.)
+  , min_refTau_absEta_(-1.)
   , max_refTau_absEta_(-1.)
   , dRmatch_(0.3)
 {
@@ -23,6 +25,8 @@ TallinnL1PFTauPairAnalyzer::TallinnL1PFTauPairAnalyzer(const edm::ParameterSet& 
   {
     tokenRefTaus_ = consumes<reco::CandidateView>(srcRefTaus_);
     min_refTau_pt_ = cfg.getParameter<double>("min_refTau_pt");
+    max_refTau_pt_ = cfg.getParameter<double>("max_refTau_pt");
+    min_refTau_absEta_ = cfg.getParameter<double>("min_refTau_absEta");
     max_refTau_absEta_ = cfg.getParameter<double>("max_refTau_absEta");
   }
 
@@ -46,16 +50,26 @@ void TallinnL1PFTauPairAnalyzer::beginJob()
 
   DQMStore& dqmStore = (*edm::Service<DQMStore>());
   dqmStore.setCurrentFolder(dqmDirectory_.data());
-
-  efficiency_or_ratePlots_.push_back(new efficiency_or_ratePlotEntryType(1.0, 0.40, -1., 0.4)); // vLoose
-  efficiency_or_ratePlots_.push_back(new efficiency_or_ratePlotEntryType(1.0, 0.20, -1., 0.4)); // Loose
-  efficiency_or_ratePlots_.push_back(new efficiency_or_ratePlotEntryType(1.0, 0.10, -1., 0.4)); // Medium
-  efficiency_or_ratePlots_.push_back(new efficiency_or_ratePlotEntryType(1.0, 0.05, -1., 0.4)); // Tight
   
-  efficiency_or_ratePlots_.push_back(new efficiency_or_ratePlotEntryType(1.4, 0.40, -1., 0.4)); // vLoose
-  efficiency_or_ratePlots_.push_back(new efficiency_or_ratePlotEntryType(1.4, 0.20, -1., 0.4)); // Loose
-  efficiency_or_ratePlots_.push_back(new efficiency_or_ratePlotEntryType(1.4, 0.10, -1., 0.4)); // Medium
-  efficiency_or_ratePlots_.push_back(new efficiency_or_ratePlotEntryType(1.4, 0.05, -1., 0.4)); // Tight
+  efficiency_or_ratePlots_.push_back(new efficiency_or_ratePlotEntryType(-1.,  1.4,   0.40, -1., 0.4)); // vLoose
+  efficiency_or_ratePlots_.push_back(new efficiency_or_ratePlotEntryType(-1.,  1.4,   0.20, -1., 0.4)); // Loose
+  efficiency_or_ratePlots_.push_back(new efficiency_or_ratePlotEntryType(-1.,  1.4,   0.10, -1., 0.4)); // Medium
+  efficiency_or_ratePlots_.push_back(new efficiency_or_ratePlotEntryType(-1.,  1.4,   0.05, -1., 0.4)); // Tight
+
+  efficiency_or_ratePlots_.push_back(new efficiency_or_ratePlotEntryType( 1.4, 2.172, 0.40, -1., 0.4)); // vLoose
+  efficiency_or_ratePlots_.push_back(new efficiency_or_ratePlotEntryType( 1.4, 2.172, 0.20, -1., 0.4)); // Loose
+  efficiency_or_ratePlots_.push_back(new efficiency_or_ratePlotEntryType( 1.4, 2.172, 0.10, -1., 0.4)); // Medium
+  efficiency_or_ratePlots_.push_back(new efficiency_or_ratePlotEntryType( 1.4, 2.172, 0.05, -1., 0.4)); // Tight
+
+  efficiency_or_ratePlots_.push_back(new efficiency_or_ratePlotEntryType(-1.,  2.172, 0.40, -1., 0.4)); // vLoose
+  efficiency_or_ratePlots_.push_back(new efficiency_or_ratePlotEntryType(-1.,  2.172, 0.20, -1., 0.4)); // Loose
+  efficiency_or_ratePlots_.push_back(new efficiency_or_ratePlotEntryType(-1.,  2.172, 0.10, -1., 0.4)); // Medium
+  efficiency_or_ratePlots_.push_back(new efficiency_or_ratePlotEntryType(-1.,  2.172, 0.05, -1., 0.4)); // Tight
+
+  efficiency_or_ratePlots_.push_back(new efficiency_or_ratePlotEntryType(-1.,  2.4,   0.40, -1., 0.4)); // vLoose
+  efficiency_or_ratePlots_.push_back(new efficiency_or_ratePlotEntryType(-1.,  2.4,   0.20, -1., 0.4)); // Loose
+  efficiency_or_ratePlots_.push_back(new efficiency_or_ratePlotEntryType(-1.,  2.4,   0.10, -1., 0.4)); // Medium
+  efficiency_or_ratePlots_.push_back(new efficiency_or_ratePlotEntryType(-1.,  2.4,   0.05, -1., 0.4)); // Tight
 
   for ( auto efficiency_or_ratePlot : efficiency_or_ratePlots_ ) 
   {
@@ -105,7 +119,8 @@ void TallinnL1PFTauPairAnalyzer::analyze(const edm::Event& evt, const edm::Event
     std::vector<const reco::Candidate*> refTaus_passingAbsEtaAndPt;
     for ( reco::CandidateView::const_iterator refTau = refTaus->begin();
 	  refTau != refTaus->end(); ++refTau ) {
-      if ( refTau->pt() > min_refTau_pt_ && TMath::Abs(refTau->eta()) < max_refTau_absEta_ )
+      double refTau_absEta = TMath::Abs(refTau->eta());
+      if ( refTau->pt() > min_refTau_pt_ && refTau->pt() < max_refTau_pt_ && refTau_absEta > min_refTau_absEta_ && refTau_absEta < max_refTau_absEta_ )
       {
 	refTaus_passingAbsEtaAndPt.push_back(&(*refTau));
       }

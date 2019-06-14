@@ -53,7 +53,8 @@ class TallinnL1PFTauAnalyzerSignal : public edm::EDAnalyzer
 
   struct efficiencyPlotEntryType
   {
-    efficiencyPlotEntryType(double min_pt, double max_absEta, const std::string& decayMode, double ptThreshold, double max_relChargedIso, double max_absChargedIso)
+    efficiencyPlotEntryType(double min_pt, double max_pt, double min_absEta, double max_absEta, const std::string& decayMode, 
+			    double ptThreshold, double max_relChargedIso, double max_absChargedIso)
       : me_pt_numerator_(nullptr)
       , histogram_pt_numerator_(nullptr)
       , me_pt_denominator_(nullptr)
@@ -67,6 +68,8 @@ class TallinnL1PFTauAnalyzerSignal : public edm::EDAnalyzer
       , me_phi_denominator_(nullptr)
       , histogram_phi_denominator_(nullptr)
       , min_pt_(min_pt)
+      , max_pt_(max_pt)
+      , min_absEta_(min_absEta)
       , max_absEta_(max_absEta)
       , decayMode_(decayMode)
       , ptThreshold_(ptThreshold)
@@ -78,9 +81,10 @@ class TallinnL1PFTauAnalyzerSignal : public edm::EDAnalyzer
     {}
     void bookHistograms(DQMStore& dqmStore)
     {
-      TString histogramName_suffix = decayMode_.data();      
-      if ( max_absEta_        > 0. ) histogramName_suffix.Append(Form("_absEtaLt%1.2f",        max_absEta_));
-      if ( ptThreshold_ > 0.       ) histogramName_suffix.Append(Form("_ptGt%1.0f",            ptThreshold_));
+      TString histogramName_suffix = decayMode_.data(); 
+      if      ( min_absEta_ >= 0. && max_absEta_ > 0. ) histogramName_suffix.Append(Form("_absEta%1.2fto%1.2f", min_absEta_, max_absEta_));
+      else if ( min_absEta_ >= 0.                     ) histogramName_suffix.Append(Form("_absEtaGt%1.2f", min_absEta_));
+      else if (                      max_absEta_ > 0. ) histogramName_suffix.Append(Form("_absEtaLt%1.2f", max_absEta_));
       if ( max_relChargedIso_ > 0. ) histogramName_suffix.Append(Form("_relChargedIsoLt%1.2f", max_relChargedIso_));
       if ( max_absChargedIso_ > 0. ) histogramName_suffix.Append(Form("_absChargedIsoLt%1.2f", max_absChargedIso_));
       histogramName_suffix = histogramName_suffix.ReplaceAll(".", "p");
@@ -133,17 +137,18 @@ class TallinnL1PFTauAnalyzerSignal : public edm::EDAnalyzer
 	  }
 	}
 
-	if ( TMath::Abs(denominatorTau.eta()) < max_absEta_ ) 
+	double denominatorTau_absEta = TMath::Abs(denominatorTau.eta());
+	if ( denominatorTau_absEta > min_absEta_ && denominatorTau_absEta < max_absEta_ ) 
 	{
 	  histogram_pt_denominator_->Fill(denominatorTau.pt(), evtWeight);
 	  if ( isMatched ) histogram_pt_numerator_->Fill(denominatorTau.pt(), evtWeight);
 	}
-	if ( denominatorTau.pt() > min_pt_ ) 
+	if ( denominatorTau.pt() > min_pt_ && denominatorTau.pt() < max_pt_ ) 
 	{
 	  histogram_eta_denominator_->Fill(denominatorTau.eta(), evtWeight);
 	  if ( isMatched ) histogram_eta_numerator_->Fill(denominatorTau.eta(), evtWeight);
 	}
-	if ( denominatorTau.pt() > min_pt_ && TMath::Abs(denominatorTau.eta()) < max_absEta_ ) 
+	if ( denominatorTau.pt() > min_pt_ && denominatorTau.pt() < max_pt_ && denominatorTau_absEta > min_absEta_ && denominatorTau_absEta < max_absEta_ )
 	{
 	  histogram_phi_denominator_->Fill(denominatorTau.phi(), evtWeight);
 	  if ( isMatched ) histogram_phi_numerator_->Fill(denominatorTau.phi(), evtWeight);
@@ -174,17 +179,18 @@ class TallinnL1PFTauAnalyzerSignal : public edm::EDAnalyzer
 	  }
 	}
 
-	if ( TMath::Abs(denominatorTau.eta()) < max_absEta_ ) 
+	double denominatorTau_absEta = TMath::Abs(denominatorTau.eta());
+	if ( denominatorTau_absEta > min_absEta_ && denominatorTau_absEta < max_absEta_ ) 
 	{
 	  histogram_pt_denominator_->Fill(denominatorTau.pt(), evtWeight);
 	  if ( isMatched ) histogram_pt_numerator_->Fill(denominatorTau.pt(), evtWeight);
 	}
-	if ( denominatorTau.pt() > min_pt_ ) 
+	if ( denominatorTau.pt() > min_pt_ && denominatorTau.pt() < max_pt_ ) 
 	{
 	  histogram_eta_denominator_->Fill(denominatorTau.eta(), evtWeight);
 	  if ( isMatched ) histogram_eta_numerator_->Fill(denominatorTau.eta(), evtWeight);
 	}
-	if ( denominatorTau.pt() > min_pt_ && TMath::Abs(denominatorTau.eta()) < max_absEta_ ) 
+	if ( denominatorTau.pt() > min_pt_ && denominatorTau.pt() < max_pt_ && denominatorTau_absEta > min_absEta_ && denominatorTau_absEta < max_absEta_ )
 	{
 	  histogram_phi_denominator_->Fill(denominatorTau.phi(), evtWeight);
 	  if ( isMatched ) histogram_phi_numerator_->Fill(denominatorTau.phi(), evtWeight);
@@ -205,6 +211,8 @@ class TallinnL1PFTauAnalyzerSignal : public edm::EDAnalyzer
     TH1* histogram_phi_denominator_;
     // cuts applied to offline and generator-level taus in denominator 
     double min_pt_;
+    double max_pt_;
+    double min_absEta_;
     double max_absEta_;
     std::string decayMode_;
     // cuts applied to L1 trigger taus in numerator 

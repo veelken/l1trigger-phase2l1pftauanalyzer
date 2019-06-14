@@ -67,6 +67,8 @@ class L1PFTauPairAnalyzer : public edm::EDAnalyzer
   edm::EDGetTokenT<reco::CandidateView> tokenRefTaus_;
 
   double min_refTau_pt_;
+  double max_refTau_pt_;
+  double min_refTau_absEta_;
   double max_refTau_absEta_;
   double dRmatch_;
 
@@ -74,11 +76,12 @@ class L1PFTauPairAnalyzer : public edm::EDAnalyzer
 
   struct efficiency_or_ratePlotEntryType
   {
-    efficiency_or_ratePlotEntryType(double max_absEta, const std::string& isolation)
+    efficiency_or_ratePlotEntryType(double min_absEta, double max_absEta, const std::string& isolation)
       : me_efficiency_or_rate_(nullptr)
       , histogram_efficiency_or_rate_(nullptr)
       , me_denominator_(nullptr)
       , histogram_denominator_(nullptr)
+      , min_absEta_(min_absEta)
       , max_absEta_(max_absEta)
       , isolation_string_(isolation)
     {
@@ -88,15 +91,17 @@ class L1PFTauPairAnalyzer : public edm::EDAnalyzer
       else if ( isolation_string_ == "Medium" ) isolation_ = kMediumIso;
       else if ( isolation_string_ == "Tight"  ) isolation_ = kTightIso; 
       else throw cms::Exception("L1PFTauPairAnalyzer") 
-	<< " Invalid Configuration parameter 'isolation' = " << isolation_string_ << " !!\n";;
+	<< " Invalid Configuration parameter 'isolation' = " << isolation_string_ << " !!\n";
     }
     ~efficiency_or_ratePlotEntryType() 
     {}
     void bookHistograms(DQMStore& dqmStore)
     {
       TString histogramName_suffix;
-      if ( max_absEta_        > 0. ) histogramName_suffix.Append(Form("_absEtaLt%1.2f", max_absEta_));
-      if ( isolation_string_ != "" ) histogramName_suffix.Append(Form("_%sIso",         isolation_string_.data()));
+      if      ( min_absEta_ >= 0. && max_absEta_ > 0. ) histogramName_suffix.Append(Form("_absEta%1.2fto%1.2f", min_absEta_, max_absEta_));
+      else if ( min_absEta_ >= 0.                     ) histogramName_suffix.Append(Form("_absEtaGt%1.2f", min_absEta_));
+      else if (                      max_absEta_ > 0. ) histogramName_suffix.Append(Form("_absEtaLt%1.2f", max_absEta_));
+      if ( isolation_string_ != "" ) histogramName_suffix.Append(Form("_%sIso", isolation_string_.data()));
       histogramName_suffix = histogramName_suffix.ReplaceAll(".", "p");
 
       TString histogramName_efficiency_or_rate = Form("efficiency_or_rate%s", histogramName_suffix.Data());
@@ -117,7 +122,10 @@ class L1PFTauPairAnalyzer : public edm::EDAnalyzer
       {
 	const l1t::L1PFTau* leadL1PFTau    = l1PFTauPair->leadL1PFTau();
 	const l1t::L1PFTau* subleadL1PFTau = l1PFTauPair->subleadL1PFTau();
-	if ( ( max_absEta_ < 0.                                                                             || 
+	if ( ( min_absEta_ < 0.                                                                             || 
+	      (TMath::Abs(leadL1PFTau->eta())    >=  min_absEta_                                          && 
+	       TMath::Abs(subleadL1PFTau->eta()) >=  min_absEta_                                          ) ) &&
+	     ( max_absEta_ < 0.                                                                             || 
 	      (TMath::Abs(leadL1PFTau->eta())    <=  max_absEta_                                          && 
 	       TMath::Abs(subleadL1PFTau->eta()) <=  max_absEta_                                          ) ) &&
 	     ( isolation_ == kNone                                                                          || 
@@ -182,6 +190,7 @@ class L1PFTauPairAnalyzer : public edm::EDAnalyzer
     TH2* histogram_efficiency_or_rate_;
     MonitorElement* me_denominator_;
     TH1* histogram_denominator_;
+    double min_absEta_;    
     double max_absEta_;    
     std::string isolation_string_;
     enum { kNone, kVLooseIso, kLooseIso, kMediumIso, kTightIso };

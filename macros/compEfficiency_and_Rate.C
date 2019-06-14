@@ -125,8 +125,9 @@ void compEfficiency_and_Rate()
   pfAlgos.push_back("WithoutStripsAndPreselectionPuppi");
 
   std::vector<std::string> absEtaRanges;
-  //absEtaRanges.push_back("absEtaLt1p00");
   absEtaRanges.push_back("absEtaLt1p40");
+  absEtaRanges.push_back("absEta1p40to2p40");
+  absEtaRanges.push_back("absEtaLt2p40");
 
   std::vector<std::string> isolationWPs;
   isolationWPs.push_back("relChargedIsoLt0p40");
@@ -173,17 +174,20 @@ void compEfficiency_and_Rate()
 
   std::string dqmDirectory_isobel = "DQMData/L1PFTauPairAnalyzer";
 
-  for ( std::vector<std::string>::const_iterator isolationWP = isolationWPs_isobel.begin();
-	isolationWP != isolationWPs_isobel.end(); ++isolationWP ) {
-    std::string histogram2dName_signal = Form("%sPF_wrtOfflineTaus/efficiency_or_rate_absEtaLt1p40_%s", 
-      dqmDirectory_isobel.data(), isolationWP->data());
-    TH2* histogram2d_signal = loadHistogram2d(inputFile_signal, histogram2dName_signal);
-    std::string histogram2dName_background = Form("%sPF/efficiency_or_rate_absEtaLt1p40_%s", 
-      dqmDirectory_isobel.data(), isolationWP->data());
-    TH2* histogram2d_background = loadHistogram2d(inputFile_background, histogram2dName_background);
+  for ( std::vector<std::string>::const_iterator absEtaRange = absEtaRanges.begin();
+	absEtaRange != absEtaRanges.end(); ++absEtaRange ) {
+    for ( std::vector<std::string>::const_iterator isolationWP = isolationWPs_isobel.begin();
+	  isolationWP != isolationWPs_isobel.end(); ++isolationWP ) {
+      std::string histogram2dName_signal = Form("%sPF_wrtOfflineTaus/efficiency_or_rate_%s_%s", 
+        dqmDirectory_isobel.data(), absEtaRange->data(), isolationWP->data());
+      TH2* histogram2d_signal = loadHistogram2d(inputFile_signal, histogram2dName_signal);
+      std::string histogram2dName_background = Form("%sPF/efficiency_or_rate_%s_%s", 
+        dqmDirectory_isobel.data(), absEtaRange->data(), isolationWP->data());
+      TH2* histogram2d_background = loadHistogram2d(inputFile_background, histogram2dName_background);
 
-    std::string header = Form("srcL1PFTaus = L1PFTauProducer:L1PFTaus, isolationWP = %s:", isolationWP->data());
-    printEfficiency_and_Rate(histogram2d_signal, histogram2d_background, header, rate_target, rate_accCorrFactor);
+      std::string header = Form("srcL1PFTaus = L1PFTauProducer:L1PFTaus, absEtaRange = %s, isolationWP = %s:", absEtaRange->data(), isolationWP->data());
+      printEfficiency_and_Rate(histogram2d_signal, histogram2d_background, header, rate_target, rate_accCorrFactor);
+    }
   }
 
   delete inputFile_signal;

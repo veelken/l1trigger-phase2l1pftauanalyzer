@@ -55,7 +55,7 @@ class TallinnL1PFTauAnalyzerBackground : public edm::EDAnalyzer
 
   struct ratePlotEntryType
   {
-    ratePlotEntryType(double max_absEta, double max_relChargedIso, double max_absChargedIso, double max_dz)
+    ratePlotEntryType(double min_absEta, double max_absEta, double max_relChargedIso, double max_absChargedIso, double max_dz)
       : me_numL1PFTaus_vs_ptThreshold_(nullptr)
       , histogram_numL1PFTaus_vs_ptThreshold_(nullptr)
       , me_numL1PFTausPtGt20_(nullptr)
@@ -67,7 +67,12 @@ class TallinnL1PFTauAnalyzerBackground : public edm::EDAnalyzer
       , me_numL1PFTausPtGt35_(nullptr)
       , histogram_numL1PFTausPtGt35_(nullptr)
       , me_numL1PFTausPtGt40_(nullptr)
-      , histogram_numL1PFTausPtGt40_(nullptr) 
+      , histogram_numL1PFTausPtGt40_(nullptr)
+      , me_numL1PFTausPtGt45_(nullptr)
+      , histogram_numL1PFTausPtGt45_(nullptr)
+      , me_numL1PFTausPtGt50_(nullptr)
+      , histogram_numL1PFTausPtGt50_(nullptr)
+      , min_absEta_(min_absEta)
       , max_absEta_(max_absEta)
       , max_relChargedIso_(max_relChargedIso)
       , max_absChargedIso_(max_absChargedIso)
@@ -78,7 +83,9 @@ class TallinnL1PFTauAnalyzerBackground : public edm::EDAnalyzer
     void bookHistograms(DQMStore& dqmStore)
     {
       TString histogramName_suffix;
-      if ( max_absEta_        > 0. ) histogramName_suffix.Append(Form("_absEtaLt%1.2f",        max_absEta_));
+      if      ( min_absEta_ >= 0. && max_absEta_ > 0. ) histogramName_suffix.Append(Form("_absEta%1.2fto%1.2f", min_absEta_, max_absEta_));
+      else if ( min_absEta_ >= 0.                     ) histogramName_suffix.Append(Form("_absEtaGt%1.2f", min_absEta_));
+      else if (                      max_absEta_ > 0. ) histogramName_suffix.Append(Form("_absEtaLt%1.2f", max_absEta_));
       if ( max_relChargedIso_ > 0. ) histogramName_suffix.Append(Form("_relChargedIsoLt%1.2f", max_relChargedIso_));
       if ( max_absChargedIso_ > 0. ) histogramName_suffix.Append(Form("_absChargedIsoLt%1.2f", max_absChargedIso_));
       histogramName_suffix = histogramName_suffix.ReplaceAll(".", "p");
@@ -108,13 +115,23 @@ class TallinnL1PFTauAnalyzerBackground : public edm::EDAnalyzer
       me_numL1PFTausPtGt40_ = dqmStore.book1D(histogramName_numL1PFTausPtGt40.Data(), histogramName_numL1PFTausPtGt40.Data(), 21, -0.5, +20.5);
       histogram_numL1PFTausPtGt40_ = me_numL1PFTausPtGt40_->getTH1();
       assert(histogram_numL1PFTausPtGt40_);
+      TString histogramName_numL1PFTausPtGt45 = Form("numL1PFTausPtGt45%s", histogramName_suffix.Data());
+      me_numL1PFTausPtGt45_ = dqmStore.book1D(histogramName_numL1PFTausPtGt45.Data(), histogramName_numL1PFTausPtGt45.Data(), 21, -0.5, +20.5);
+      histogram_numL1PFTausPtGt45_ = me_numL1PFTausPtGt45_->getTH1();
+      assert(histogram_numL1PFTausPtGt45_);
+      TString histogramName_numL1PFTausPtGt50 = Form("numL1PFTausPtGt50%s", histogramName_suffix.Data());
+      me_numL1PFTausPtGt50_ = dqmStore.book1D(histogramName_numL1PFTausPtGt50.Data(), histogramName_numL1PFTausPtGt50.Data(), 21, -0.5, +20.5);
+      histogram_numL1PFTausPtGt50_ = me_numL1PFTausPtGt50_->getTH1();
+      assert(histogram_numL1PFTausPtGt50_);
     }
     void fillHistograms(const l1t::TallinnL1PFTauCollection& l1PFTaus, double evtWeight)
     {
       std::vector<const l1t::TallinnL1PFTau*> l1PFTaus_passingAbsEta;
       for ( l1t::TallinnL1PFTauCollection::const_iterator l1PFTau = l1PFTaus.begin(); 
 	    l1PFTau != l1PFTaus.end(); ++l1PFTau ) {
-	if ( (max_absEta_        < 0. || TMath::Abs(l1PFTau->eta()) <=  max_absEta_                      ) &&
+	double l1PFTau_absEta = TMath::Abs(l1PFTau->eta());
+	if ( (min_absEta_        < 0. || l1PFTau_absEta             >=  min_absEta_                      ) &&
+	     (max_absEta_        < 0. || l1PFTau_absEta             <=  max_absEta_                      ) &&
 	     (max_relChargedIso_ < 0. || l1PFTau->sumChargedIso()   <= (max_relChargedIso_*l1PFTau->pt())) &&
 	     (max_absChargedIso_ < 0. || l1PFTau->sumChargedIso()   <=  max_absChargedIso_               ) )
 	{
@@ -130,19 +147,25 @@ class TallinnL1PFTauAnalyzerBackground : public edm::EDAnalyzer
       int numL1PFTausPtGt30 = 0;
       int numL1PFTausPtGt35 = 0;
       int numL1PFTausPtGt40 = 0;
+      int numL1PFTausPtGt45 = 0;
+      int numL1PFTausPtGt50 = 0;
       for ( std::vector<const l1t::TallinnL1PFTau*>::const_iterator l1PFTau = l1PFTaus_passingAbsEta.begin();
 	    l1PFTau != l1PFTaus_passingAbsEta.end(); ++l1PFTau ) {
 	if ( (*l1PFTau)->pt() > 20. ) ++numL1PFTausPtGt20;
 	if ( (*l1PFTau)->pt() > 25. ) ++numL1PFTausPtGt25;
 	if ( (*l1PFTau)->pt() > 30. ) ++numL1PFTausPtGt30;
 	if ( (*l1PFTau)->pt() > 35. ) ++numL1PFTausPtGt35;
-	if ( (*l1PFTau)->pt() > 40. ) ++numL1PFTausPtGt40;	
+	if ( (*l1PFTau)->pt() > 40. ) ++numL1PFTausPtGt40;
+	if ( (*l1PFTau)->pt() > 45. ) ++numL1PFTausPtGt45;
+	if ( (*l1PFTau)->pt() > 50. ) ++numL1PFTausPtGt50;
       }
       fillWithOverFlow(histogram_numL1PFTausPtGt20_, numL1PFTausPtGt20, evtWeight);
       fillWithOverFlow(histogram_numL1PFTausPtGt25_, numL1PFTausPtGt25, evtWeight);
       fillWithOverFlow(histogram_numL1PFTausPtGt30_, numL1PFTausPtGt30, evtWeight);
       fillWithOverFlow(histogram_numL1PFTausPtGt35_, numL1PFTausPtGt35, evtWeight);
       fillWithOverFlow(histogram_numL1PFTausPtGt40_, numL1PFTausPtGt40, evtWeight);
+      fillWithOverFlow(histogram_numL1PFTausPtGt45_, numL1PFTausPtGt45, evtWeight);
+      fillWithOverFlow(histogram_numL1PFTausPtGt50_, numL1PFTausPtGt50, evtWeight);
 
       TAxis* xAxis = histogram_numL1PFTaus_vs_ptThreshold_->GetXaxis();
       TAxis* yAxis = histogram_numL1PFTaus_vs_ptThreshold_->GetYaxis();
@@ -179,19 +202,6 @@ class TallinnL1PFTauAnalyzerBackground : public edm::EDAnalyzer
             }
 	  }
 	}
-	
-	// CV: the following may actually happen, due to the dz cut
-	//if ( (ptThreshold < 20. && max_numL1PFTaus_passingPt < numL1PFTausPtGt20) ||
-	//     (ptThreshold < 25. && max_numL1PFTaus_passingPt < numL1PFTausPtGt25) ||
-	//     (ptThreshold < 30. && max_numL1PFTaus_passingPt < numL1PFTausPtGt30) ||
-	//     (ptThreshold < 35. && max_numL1PFTaus_passingPt < numL1PFTausPtGt35) ||
-	//     (ptThreshold < 40. && max_numL1PFTaus_passingPt < numL1PFTausPtGt40) )
-	//{
-	//  std::cout << "Internal logic error in <ratePlotEntryType::fillHistograms>:" << std::endl;
-	//  std::cout << " max_numL1PFTaus_passingPt = " << max_numL1PFTaus_passingPt << " @ ptThreshold = " << ptThreshold << ","
-	//	      << " while numL1PFTausPtGt20/25/30/35/40 = " << numL1PFTausPtGt20 << "/" << numL1PFTausPtGt25 
-	//	      << "/" << numL1PFTausPtGt30 << "/" << numL1PFTausPtGt35 << "/" << numL1PFTausPtGt40 << " --> CHECK !!" << std::endl;
-	//}
 
 	if ( max_numL1PFTaus_passingPt > yAxis->GetXmax() ) max_numL1PFTaus_passingPt = TMath::Nint(yAxis->GetXmax() - 0.5);
 	histogram_numL1PFTaus_vs_ptThreshold_->Fill(ptThreshold, max_numL1PFTaus_passingPt, evtWeight);
@@ -213,7 +223,12 @@ class TallinnL1PFTauAnalyzerBackground : public edm::EDAnalyzer
     MonitorElement* me_numL1PFTausPtGt35_;
     TH1* histogram_numL1PFTausPtGt35_;
     MonitorElement* me_numL1PFTausPtGt40_;
-    TH1* histogram_numL1PFTausPtGt40_;    
+    TH1* histogram_numL1PFTausPtGt40_;   
+    MonitorElement* me_numL1PFTausPtGt45_;
+    TH1* histogram_numL1PFTausPtGt45_;
+    MonitorElement* me_numL1PFTausPtGt50_;
+    TH1* histogram_numL1PFTausPtGt50_;  
+    double min_absEta_;    
     double max_absEta_;    
     double max_relChargedIso_;
     double max_absChargedIso_;

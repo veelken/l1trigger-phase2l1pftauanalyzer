@@ -67,6 +67,8 @@ class TallinnL1PFTauPairAnalyzer : public edm::EDAnalyzer
   edm::EDGetTokenT<reco::CandidateView> tokenRefTaus_;
 
   double min_refTau_pt_;
+  double max_refTau_pt_;
+  double min_refTau_absEta_;
   double max_refTau_absEta_;
   double dRmatch_;
 
@@ -74,11 +76,12 @@ class TallinnL1PFTauPairAnalyzer : public edm::EDAnalyzer
 
   struct efficiency_or_ratePlotEntryType
   {
-    efficiency_or_ratePlotEntryType(double max_absEta, double max_relChargedIso, double max_absChargedIso, double max_dz)
+    efficiency_or_ratePlotEntryType(double min_absEta, double max_absEta, double max_relChargedIso, double max_absChargedIso, double max_dz)
       : me_efficiency_or_rate_(nullptr)
       , histogram_efficiency_or_rate_(nullptr)
       , me_denominator_(nullptr)
       , histogram_denominator_(nullptr)
+      , min_absEta_(min_absEta)
       , max_absEta_(max_absEta)
       , max_relChargedIso_(max_relChargedIso)
       , max_absChargedIso_(max_absChargedIso)
@@ -89,7 +92,9 @@ class TallinnL1PFTauPairAnalyzer : public edm::EDAnalyzer
     void bookHistograms(DQMStore& dqmStore)
     {
       TString histogramName_suffix;
-      if ( max_absEta_        > 0. ) histogramName_suffix.Append(Form("_absEtaLt%1.2f",        max_absEta_));
+      if      ( min_absEta_ >= 0. && max_absEta_ > 0. ) histogramName_suffix.Append(Form("_absEta%1.2fto%1.2f", min_absEta_, max_absEta_));
+      else if ( min_absEta_ >= 0.                     ) histogramName_suffix.Append(Form("_absEtaGt%1.2f", min_absEta_));
+      else if (                      max_absEta_ > 0. ) histogramName_suffix.Append(Form("_absEtaLt%1.2f", max_absEta_));
       if ( max_relChargedIso_ > 0. ) histogramName_suffix.Append(Form("_relChargedIsoLt%1.2f", max_relChargedIso_));
       if ( max_absChargedIso_ > 0. ) histogramName_suffix.Append(Form("_absChargedIsoLt%1.2f", max_absChargedIso_));
       histogramName_suffix = histogramName_suffix.ReplaceAll(".", "p");
@@ -112,9 +117,12 @@ class TallinnL1PFTauPairAnalyzer : public edm::EDAnalyzer
       {
 	const l1t::TallinnL1PFTau* leadL1PFTau    = l1PFTauPair->leadL1PFTau();
 	const l1t::TallinnL1PFTau* subleadL1PFTau = l1PFTauPair->subleadL1PFTau();
-	if ( (max_absEta_        < 0. || 
-	      (TMath::Abs(leadL1PFTau->eta())    <=  max_absEta_                              && 
-	       TMath::Abs(subleadL1PFTau->eta()) <=  max_absEta_                             )) &&
+	if ( ( min_absEta_ < 0.                                                                             || 
+	      (TMath::Abs(leadL1PFTau->eta())    >=  min_absEta_                                          && 
+	       TMath::Abs(subleadL1PFTau->eta()) >=  min_absEta_                                          ) ) &&
+	     ( max_absEta_ < 0.                                                                             || 
+	      (TMath::Abs(leadL1PFTau->eta())    <=  max_absEta_                                          && 
+	       TMath::Abs(subleadL1PFTau->eta()) <=  max_absEta_                                          ) ) &&
 	     (max_relChargedIso_ < 0. || 
 	      (leadL1PFTau->sumChargedIso()      <= (max_relChargedIso_*leadL1PFTau->pt()   ) &&
 	       subleadL1PFTau->sumChargedIso()   <= (max_relChargedIso_*subleadL1PFTau->pt()))) &&
@@ -187,7 +195,8 @@ class TallinnL1PFTauPairAnalyzer : public edm::EDAnalyzer
     TH2* histogram_efficiency_or_rate_;
     MonitorElement* me_denominator_;
     TH1* histogram_denominator_;
-    double max_absEta_;    
+    double min_absEta_;    
+    double max_absEta_;   
     double max_relChargedIso_;
     double max_absChargedIso_;
     double max_dz_;
