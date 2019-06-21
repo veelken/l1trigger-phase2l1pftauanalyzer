@@ -61,6 +61,11 @@ void L1PFTauPairAnalyzer::beginJob()
   efficiency_or_ratePlots_.push_back(new efficiency_or_ratePlotEntryType(1.4, 2.172, "Medium")); // Medium
   efficiency_or_ratePlots_.push_back(new efficiency_or_ratePlotEntryType(1.4, 2.172, "Tight"));  // Tight
 
+  efficiency_or_ratePlots_.push_back(new efficiency_or_ratePlotEntryType(1.4, 2.4,   "vLoose")); // vLoose
+  efficiency_or_ratePlots_.push_back(new efficiency_or_ratePlotEntryType(1.4, 2.4,   "Loose"));  // Loose
+  efficiency_or_ratePlots_.push_back(new efficiency_or_ratePlotEntryType(1.4, 2.4,   "Medium")); // Medium
+  efficiency_or_ratePlots_.push_back(new efficiency_or_ratePlotEntryType(1.4, 2.4,   "Tight"));  // Tight
+
   efficiency_or_ratePlots_.push_back(new efficiency_or_ratePlotEntryType(-1., 2.172, "vLoose")); // vLoose
   efficiency_or_ratePlots_.push_back(new efficiency_or_ratePlotEntryType(-1., 2.172, "Loose"));  // Loose
   efficiency_or_ratePlots_.push_back(new efficiency_or_ratePlotEntryType(-1., 2.172, "Medium")); // Medium

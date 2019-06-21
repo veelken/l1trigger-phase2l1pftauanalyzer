@@ -76,13 +76,15 @@ void TallinnL1PFTauIsolationAnalyzer::beginJob()
   {
     decayModes = { "all" };
   }
-  std::vector<double> ptThresholds = { 20., 25., 30., 35., 40. };
+  std::vector<double> ptThresholds = { 20., 25., 30., 35., 40., 45., 50. };
   for ( auto decayMode : decayModes )
   {
     for ( auto ptThreshold : ptThresholds )
     {
-      isolationPlots_.push_back(new isolationPlotEntryType(ptThreshold, -1., -1., 1.0, decayMode)); 
-      isolationPlots_.push_back(new isolationPlotEntryType(ptThreshold, -1., -1., 1.4, decayMode));
+      isolationPlots_.push_back(new isolationPlotEntryType(ptThreshold, -1., -1.,  1.4,   decayMode));
+      isolationPlots_.push_back(new isolationPlotEntryType(ptThreshold, -1.,  1.4, 2.172, decayMode));
+      isolationPlots_.push_back(new isolationPlotEntryType(ptThreshold, -1., -1.,  2.172, decayMode));
+      isolationPlots_.push_back(new isolationPlotEntryType(ptThreshold, -1., -1.,  2.4,   decayMode));
     }
   }
 

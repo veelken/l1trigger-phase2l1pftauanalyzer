@@ -32,7 +32,7 @@ process.analysisSequence = cms.Sequence()
 #    src = cms.InputTag('prunedGenParticles'),
 #    maxEventsToPrint = cms.untracked.int32(100)
 #)
-#process.analysisSequence += process.analysisSequence
+#process.analysisSequence += process.printGenParticleList
 #--------------------------------------------------------------------------------
 
 #--------------------------------------------------------------------------------

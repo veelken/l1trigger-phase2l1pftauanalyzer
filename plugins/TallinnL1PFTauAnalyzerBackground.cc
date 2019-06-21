@@ -39,21 +39,36 @@ void TallinnL1PFTauAnalyzerBackground::beginJob()
   ratePlots_.push_back(new ratePlotEntryType(-1.,  1.4,   0.20, -1., 0.4)); // Loose
   ratePlots_.push_back(new ratePlotEntryType(-1.,  1.4,   0.10, -1., 0.4)); // Medium
   ratePlots_.push_back(new ratePlotEntryType(-1.,  1.4,   0.05, -1., 0.4)); // Tight
+  ratePlots_.push_back(new ratePlotEntryType(-1.,  1.4,   0.02, -1., 0.4)); // vTight
+  ratePlots_.push_back(new ratePlotEntryType(-1.,  1.4,   0.01, -1., 0.4)); // vvTight
   
   ratePlots_.push_back(new ratePlotEntryType( 1.4, 2.172, 0.40, -1., 0.4)); // vLoose
   ratePlots_.push_back(new ratePlotEntryType( 1.4, 2.172, 0.20, -1., 0.4)); // Loose
   ratePlots_.push_back(new ratePlotEntryType( 1.4, 2.172, 0.10, -1., 0.4)); // Medium
   ratePlots_.push_back(new ratePlotEntryType( 1.4, 2.172, 0.05, -1., 0.4)); // Tight
+  ratePlots_.push_back(new ratePlotEntryType( 1.4, 2.172, 0.02, -1., 0.4)); // vTight
+  ratePlots_.push_back(new ratePlotEntryType( 1.4, 2.172, 0.01, -1., 0.4)); // vvTight
+
+  ratePlots_.push_back(new ratePlotEntryType( 1.4, 2.4,   0.40, -1., 0.4)); // vLoose
+  ratePlots_.push_back(new ratePlotEntryType( 1.4, 2.4,   0.20, -1., 0.4)); // Loose
+  ratePlots_.push_back(new ratePlotEntryType( 1.4, 2.4,   0.10, -1., 0.4)); // Medium
+  ratePlots_.push_back(new ratePlotEntryType( 1.4, 2.4,   0.05, -1., 0.4)); // Tight
+  ratePlots_.push_back(new ratePlotEntryType( 1.4, 2.4,   0.02, -1., 0.4)); // vTight
+  ratePlots_.push_back(new ratePlotEntryType( 1.4, 2.4,   0.01, -1., 0.4)); // vvTight
 
   ratePlots_.push_back(new ratePlotEntryType(-1.,  2.172, 0.40, -1., 0.4)); // vLoose
   ratePlots_.push_back(new ratePlotEntryType(-1.,  2.172, 0.20, -1., 0.4)); // Loose
   ratePlots_.push_back(new ratePlotEntryType(-1.,  2.172, 0.10, -1., 0.4)); // Medium
   ratePlots_.push_back(new ratePlotEntryType(-1.,  2.172, 0.05, -1., 0.4)); // Tight
+  ratePlots_.push_back(new ratePlotEntryType(-1.,  2.172, 0.02, -1., 0.4)); // vTight
+  ratePlots_.push_back(new ratePlotEntryType(-1.,  2.172, 0.01, -1., 0.4)); // vvTight
 
   ratePlots_.push_back(new ratePlotEntryType(-1.,  2.4,   0.40, -1., 0.4)); // vLoose
   ratePlots_.push_back(new ratePlotEntryType(-1.,  2.4,   0.20, -1., 0.4)); // Loose
   ratePlots_.push_back(new ratePlotEntryType(-1.,  2.4,   0.10, -1., 0.4)); // Medium
   ratePlots_.push_back(new ratePlotEntryType(-1.,  2.4,   0.05, -1., 0.4)); // Tight
+  ratePlots_.push_back(new ratePlotEntryType(-1.,  2.4,   0.02, -1., 0.4)); // vTight
+  ratePlots_.push_back(new ratePlotEntryType(-1.,  2.4,   0.01, -1., 0.4)); // vvTight
 
   for ( auto ratePlot : ratePlots_ ) 
   {

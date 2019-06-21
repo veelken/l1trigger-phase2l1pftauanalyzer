@@ -49,7 +49,7 @@ process.analysisSequence = cms.Sequence()
 #--------------------------------------------------------------------------------
 process.selectedGenHadTaus = cms.EDFilter("GenJetSelector",
   src = cms.InputTag('tauGenJetsSelectorAllHadrons'),
-  cut = cms.string('pt > 20. & abs(eta) < 1.4'),
+  cut = cms.string('pt > 20. & abs(eta) < 2.4'),
   filter = cms.bool(False)
 )
 process.analysisSequence += process.selectedGenHadTaus
@@ -65,7 +65,7 @@ process.analysisSequence += process.genMatchedOfflinePFTaus
 
 process.selectedOfflinePFTaus = cms.EDFilter("PATTauSelector",
   src = cms.InputTag('genMatchedOfflinePFTaus'),
-  cut = cms.string("pt > 20. & abs(eta) < 1.4 & tauID('decayModeFinding') > 0.5 & tauID('byLooseCombinedIsolationDeltaBetaCorr3Hits') > 0.5")
+  cut = cms.string("pt > 20. & abs(eta) < 2.4 & tauID('decayModeFinding') > 0.5 & tauID('byLooseCombinedIsolationDeltaBetaCorr3Hits') > 0.5")
 )
 process.analysisSequence += process.selectedOfflinePFTaus
 

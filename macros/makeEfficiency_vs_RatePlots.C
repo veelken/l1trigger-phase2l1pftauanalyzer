@@ -313,9 +313,9 @@ void makeEfficiency_vs_RatePlots()
   gROOT->SetBatch(true);
 
   std::string inputFilePath = Form("%s/src/L1Trigger/TallinnL1PFTauAnalyzer/test/", gSystem->Getenv("CMSSW_BASE"));
-  std::string inputFileName_signal = "TallinnL1PFTauAnalyzer_signal_2019Jun12.root";
+  std::string inputFileName_signal = "TallinnL1PFTauAnalyzer_signal_qqH_2019Jun21.root";
   TFile* inputFile_signal = openFile(inputFilePath, inputFileName_signal);
-  std::string inputFileName_background = "TallinnL1PFTauAnalyzer_background_2019Jun12.root";
+  std::string inputFileName_background = "TallinnL1PFTauAnalyzer_background_2019Jun21.root";
   TFile* inputFile_background = openFile(inputFilePath, inputFileName_background);
 
   std::vector<std::string> pfAlgos;
@@ -325,6 +325,7 @@ void makeEfficiency_vs_RatePlots()
   std::vector<std::string> absEtaRanges;
   absEtaRanges.push_back("absEtaLt1p40");
   absEtaRanges.push_back("absEta1p40to2p17");
+  absEtaRanges.push_back("absEta1p40to2p40");
   absEtaRanges.push_back("absEtaLt2p17");
   absEtaRanges.push_back("absEtaLt2p40");
 
@@ -343,7 +344,8 @@ void makeEfficiency_vs_RatePlots()
   double rate_min           =  1.e+3; //  1 kHz
   double rate_max           = 20.e+3; // 20 kHz
   double rate_step          =  1.e+3; //  1 kHz
-  double rate_accCorrFactor =  4.;    // extrapolation from |eta| < 1.4 to full HL-LHC tracking acceptance (squared for ditau trigger)
+  //double rate_accCorrFactor =  4.;    // extrapolation from |eta| < 1.4 to full HL-LHC tracking acceptance (squared for ditau trigger)
+  double rate_accCorrFactor =  1.;    // no extrapolation
 
   std::string dqmDirectory = "DQMData/TallinnL1PFTauPairAnalyzer";
 

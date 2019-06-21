@@ -424,7 +424,7 @@ void makeEfficiencyPlots()
   gROOT->SetBatch(true);
 
   std::string inputFilePath = Form("%s/src/L1Trigger/TallinnL1PFTauAnalyzer/test/", gSystem->Getenv("CMSSW_BASE"));
-  std::string inputFileName = "TallinnL1PFTauAnalyzer_signal_2019May31.root";
+  std::string inputFileName = "TallinnL1PFTauAnalyzer_signal_qqH_2019Jun21.root";
   std::string inputFileName_full = inputFilePath;
   if ( inputFileName_full.find_last_of("/") != (inputFileName_full.size() - 1) ) inputFileName_full.append("/");
   inputFileName_full.append(inputFileName);
@@ -435,22 +435,25 @@ void makeEfficiencyPlots()
   }
 
   std::vector<std::string> pfAlgos;
-  pfAlgos.push_back("WithStripsAndPreselectionPF");
+  //pfAlgos.push_back("WithStripsAndPreselectionPF");
   pfAlgos.push_back("WithStripsWithoutPreselectionPF");
-  pfAlgos.push_back("WithoutStripsWithPreselectionPF");
+  //pfAlgos.push_back("WithoutStripsWithPreselectionPF");
   pfAlgos.push_back("WithoutStripsAndPreselectionPF");
-  pfAlgos.push_back("WithStripsAndPreselectionPuppi");
-  pfAlgos.push_back("WithStripsWithoutPreselectionPuppi");
-  pfAlgos.push_back("WithoutStripsWithPreselectionPuppi");
-  pfAlgos.push_back("WithoutStripsAndPreselectionPuppi");
+  //pfAlgos.push_back("WithStripsAndPreselectionPuppi");
+  //pfAlgos.push_back("WithStripsWithoutPreselectionPuppi");
+  //pfAlgos.push_back("WithoutStripsWithPreselectionPuppi");
+  //pfAlgos.push_back("WithoutStripsAndPreselectionPuppi");
 
   std::vector<std::string> observables;
   observables.push_back("pt");
   observables.push_back("eta");
+  observables.push_back("phi");
+  observables.push_back("minDeltaR");
 
   std::vector<std::string> absEtaRanges;
   absEtaRanges.push_back("absEtaLt1p40");
   absEtaRanges.push_back("absEta1p40to2p17");
+  absEtaRanges.push_back("absEta1p40to2p40");
   absEtaRanges.push_back("absEtaLt2p17");
   absEtaRanges.push_back("absEtaLt2p40");
 
@@ -639,14 +642,14 @@ void makeEfficiencyPlots()
 	    ptThreshold != ptThresholds.end(); ++ptThreshold ) {      
 	for ( std::vector<std::string>::const_iterator isolationWP = isolationWPs_isobel.begin();
 	      isolationWP != isolationWPs_isobel.end(); ++isolationWP ) {
-	  //std::string histogramName_numerator = Form("%s%s_wrtGenHadTaus/effL1PFTau_vs_%s_numerator_all_%s_%s_%s", 
-	  //  dqmDirectory_isobel.data(), pfAlgo->data(), observable->data(), absEtaRange->data(), ptThreshold->data(), isolationWP->data());
-	  std::string histogramName_numerator = Form("%s_wrtOfflineTaus/effL1PFTau_vs_%s_numerator_all_%s_%s_%s", 
+	  //std::string histogramName_numerator = Form("%sPF_wrtGenHadTaus/effL1PFTau_vs_%s_numerator_all_%s_%s_%s", 
+	  //  dqmDirectory_isobel.data(), observable->data(), absEtaRange->data(), ptThreshold->data(), isolationWP->data());
+	  std::string histogramName_numerator = Form("%sPF_wrtOfflineTaus/effL1PFTau_vs_%s_numerator_all_%s_%s_%s", 
             dqmDirectory_isobel.data(), observable->data(), absEtaRange->data(), ptThreshold->data(), isolationWP->data());
 	  TH1* histogram_numerator = loadHistogram(inputFile, histogramName_numerator);
-	  //std::string histogramName_denominator = Form("%s%s_wrtGenHadTaus/effL1PFTau_vs_%s_denominator_all_%s_%s_%s", 
+	  //std::string histogramName_denominator = Form("%sPF_wrtGenHadTaus/effL1PFTau_vs_%s_denominator_all_%s_%s_%s", 
 	  //  dqmDirectory_isobel.data(), pfAlgo->data(), observable->data(), absEtaRange->data(), ptThreshold->data(), isolationWP->data());
-	  std::string histogramName_denominator = Form("%s_wrtOfflineTaus/effL1PFTau_vs_%s_denominator_all_%s_%s_%s", 
+	  std::string histogramName_denominator = Form("%sPF_wrtOfflineTaus/effL1PFTau_vs_%s_denominator_all_%s_%s_%s", 
             dqmDirectory_isobel.data(), observable->data(), absEtaRange->data(), ptThreshold->data(), isolationWP->data());
 	  TH1* histogram_denominator = loadHistogram(inputFile, histogramName_denominator);
 	  TGraph* graph_efficiency = makeEfficiencyGraph(histogram_numerator, histogram_denominator);
@@ -682,14 +685,14 @@ void makeEfficiencyPlots()
 	      isolationWP != isolationWPs_isobel.end(); ++isolationWP ) {  
 	  for ( std::vector<std::string>::const_iterator decayMode = decayModes.begin();
 		decayMode != decayModes.end(); ++decayMode ) {
-	    //std::string histogramName_numerator = Form("%s%s_wrtGenHadTaus/effL1PFTau_vs_%s_numerator_%s_%s_%s_%s", 
+	    //std::string histogramName_numerator = Form("%sPF_wrtGenHadTaus/effL1PFTau_vs_%s_numerator_%s_%s_%s_%s", 
 	    //  dqmDirectory_isobel.data(), pfAlgo->data(), observable->data(), decayMode->data(), absEtaRange->data(), ptThreshold->data(), isolationWP->data());
-	    std::string histogramName_numerator = Form("%s_wrtOfflineTaus/effL1PFTau_vs_%s_numerator_%s_%s_%s_%s", 
+	    std::string histogramName_numerator = Form("%sPF_wrtOfflineTaus/effL1PFTau_vs_%s_numerator_%s_%s_%s_%s", 
 	      dqmDirectory_isobel.data(), observable->data(), decayMode->data(), absEtaRange->data(), ptThreshold->data(), isolationWP->data());
 	    TH1* histogram_numerator = loadHistogram(inputFile, histogramName_numerator);
-	    //std::string histogramName_denominator = Form("%s%s_wrtGenHadTaus/effL1PFTau_vs_%s_denominator_%s_%s_%s_%s", 
+	    //std::string histogramName_denominator = Form("%sPF_wrtGenHadTaus/effL1PFTau_vs_%s_denominator_%s_%s_%s_%s", 
 	    //  dqmDirectory_isobel.data(), pfAlgo->data(), observable->data(), decayMode->data(), absEtaRange->data(), ptThreshold->data(), isolationWP->data());
-	    std::string histogramName_denominator = Form("%s_wrtOfflineTaus/effL1PFTau_vs_%s_denominator_%s_%s_%s_%s", 
+	    std::string histogramName_denominator = Form("%sPF_wrtOfflineTaus/effL1PFTau_vs_%s_denominator_%s_%s_%s_%s", 
               dqmDirectory_isobel.data(), observable->data(), decayMode->data(), absEtaRange->data(), ptThreshold->data(), isolationWP->data());
 	    TH1* histogram_denominator = loadHistogram(inputFile, histogramName_denominator);
 	    TGraph* graph_efficiency = makeEfficiencyGraph(histogram_numerator, histogram_denominator);

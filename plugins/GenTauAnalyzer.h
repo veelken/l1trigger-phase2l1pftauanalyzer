@@ -99,7 +99,7 @@ class GenTauAnalyzer : public edm::EDAnalyzer
     void fillHistograms(const reco::GenJetCollection& genTaus, double evtWeight)
     {
       if ( (int)genTaus.size() > idx_ ) {
-	const reco::GenJet& genTau = genTaus.at(idx_);
+	const reco::GenJet& genTau = genTaus[idx_];
 
 	std::string genTau_decayMode = JetMCTagUtils::genTauDecayMode(genTau);
 	if ( decayMode_ != "all" && genTau_decayMode != decayMode_ ) return;
@@ -133,6 +133,9 @@ class GenTauAnalyzer : public edm::EDAnalyzer
     int idx_;
   };
   std::vector<plotEntryType*> plots_;
+
+  MonitorElement* me_deltaR_;
+  TH1* histogram_deltaR_;
 };
 
 #endif   

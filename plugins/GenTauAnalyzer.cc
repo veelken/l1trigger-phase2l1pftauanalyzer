@@ -3,6 +3,8 @@
 #include "FWCore/ServiceRegistry/interface/Service.h"
 #include "DataFormats/Common/interface/Handle.h"
 
+#include "DataFormats/Math/interface/deltaR.h" // reco::deltaR
+
 #include <TMath.h>
 
 #include <iostream>
@@ -51,6 +53,11 @@ void GenTauAnalyzer::beginJob()
   {
     plot->bookHistograms(dqmStore);
   }
+  
+  TString histogramName_deltaR = "deltaR";
+  me_deltaR_ = dqmStore.book1D(histogramName_deltaR.Data(), histogramName_deltaR.Data(), 50, 0., 5.); 
+  histogram_deltaR_ = me_deltaR_->getTH1();
+  assert(histogram_deltaR_);
 }
 
 namespace
@@ -79,6 +86,11 @@ void GenTauAnalyzer::analyze(const edm::Event& evt, const edm::EventSetup& es)
   {    
     plot->fillHistograms(genTaus_sorted, evtWeight);
   }
+
+  const reco::GenJet& genTau_lead = genTaus_sorted[0];
+  const reco::GenJet& genTau_sublead = genTaus_sorted[1];
+  double dR = reco::deltaR(genTau_lead.eta(), genTau_lead.phi(), genTau_sublead.eta(), genTau_sublead.phi());
+  histogram_deltaR_->Fill(dR, evtWeight);
 }
 
 void GenTauAnalyzer::endJob()

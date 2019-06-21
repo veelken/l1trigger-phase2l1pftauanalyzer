@@ -299,7 +299,7 @@ void makePFCandidateTypePlots()
   gROOT->SetBatch(true);
 
   std::string inputFilePath = Form("%s/src/L1Trigger/TallinnL1PFTauAnalyzer/test/", gSystem->Getenv("CMSSW_BASE"));
-  std::string inputFileName = "L1PFCandidateTypeAnalyzer_signal_2019May31.root";
+  std::string inputFileName = "L1PFCandidateTypeAnalyzer_signal_qqH_2019Jun18.root";
   TFile* inputFile = openFile(inputFilePath, inputFileName);
 
   std::vector<std::string> pfAlgos;

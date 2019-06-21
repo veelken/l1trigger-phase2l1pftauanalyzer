@@ -66,6 +66,10 @@ class L1PFTauAnalyzerSignal : public edm::EDAnalyzer
       , histogram_phi_numerator_(nullptr)
       , me_phi_denominator_(nullptr)
       , histogram_phi_denominator_(nullptr)
+      , me_minDeltaR_numerator_(nullptr)
+      , histogram_minDeltaR_numerator_(nullptr)
+      , me_minDeltaR_denominator_(nullptr)
+      , histogram_minDeltaR_denominator_(nullptr)
       , min_pt_(min_pt)
       , max_pt_(max_pt)
       , min_absEta_(min_absEta)
@@ -91,6 +95,7 @@ class L1PFTauAnalyzerSignal : public edm::EDAnalyzer
       if      ( min_absEta_ >= 0. && max_absEta_ > 0. ) histogramName_suffix.Append(Form("_absEta%1.2fto%1.2f", min_absEta_, max_absEta_));
       else if ( min_absEta_ >= 0.                     ) histogramName_suffix.Append(Form("_absEtaGt%1.2f", min_absEta_));
       else if (                      max_absEta_ > 0. ) histogramName_suffix.Append(Form("_absEtaLt%1.2f", max_absEta_));
+      if ( ptThreshold_ > 0. ) histogramName_suffix.Append(Form("_ptGt%1.0f", ptThreshold_));
       if ( isolation_string_ != "" ) histogramName_suffix.Append(Form("_%sIso", isolation_string_.data()));
       histogramName_suffix = histogramName_suffix.ReplaceAll(".", "p");
 
@@ -120,9 +125,28 @@ class L1PFTauAnalyzerSignal : public edm::EDAnalyzer
       me_phi_denominator_ = dqmStore.book1D(histogramName_phi_denominator.Data(), histogramName_phi_denominator.Data(), 18, -TMath::Pi(), +TMath::Pi());
       histogram_phi_denominator_ = me_phi_denominator_->getTH1();
       assert(histogram_phi_denominator_);
+
+      TString histogramName_minDeltaR_numerator = Form("effL1PFTau_vs_minDeltaR_numerator_%s", histogramName_suffix.Data());
+      me_minDeltaR_numerator_ = dqmStore.book1D(histogramName_minDeltaR_numerator.Data(), histogramName_minDeltaR_numerator.Data(), 50, 0., 5.); 
+      histogram_minDeltaR_numerator_ = me_minDeltaR_numerator_->getTH1();
+      assert(histogram_minDeltaR_numerator_);
+      TString histogramName_minDeltaR_denominator = Form("effL1PFTau_vs_minDeltaR_denominator_%s", histogramName_suffix.Data());
+      me_minDeltaR_denominator_ = dqmStore.book1D(histogramName_minDeltaR_denominator.Data(), histogramName_minDeltaR_denominator.Data(), 50, 0., 5.); 
+      histogram_minDeltaR_denominator_ = me_minDeltaR_denominator_->getTH1();
+      assert(histogram_minDeltaR_denominator_);
     }
     void fillHistograms(const l1t::L1PFTauCollection& numeratorTaus, const reco::GenJetCollection& denominatorTaus, double evtWeight)
     {
+      double minDeltaR = 1.e+3;
+      for ( reco::GenJetCollection::const_iterator denominatorTau1 = denominatorTaus.begin();
+	    denominatorTau1 != denominatorTaus.end(); ++denominatorTau1 ) {
+	for ( reco::GenJetCollection::const_iterator denominatorTau2 = denominatorTau1 + 1;
+	      denominatorTau2 != denominatorTaus.end(); ++denominatorTau2 ) {
+	  double dR = deltaR(denominatorTau1->eta(), denominatorTau1->phi(), denominatorTau2->eta(), denominatorTau2->phi());
+	  if ( dR > 0. && dR < minDeltaR ) minDeltaR = dR;
+        }
+      }
+
       for ( auto denominatorTau : denominatorTaus )
       {
 	std::string denominatorTau_decayMode = JetMCTagUtils::genTauDecayMode(denominatorTau);
@@ -159,10 +183,25 @@ class L1PFTauAnalyzerSignal : public edm::EDAnalyzer
 	  histogram_phi_denominator_->Fill(denominatorTau.phi(), evtWeight);
 	  if ( isMatched ) histogram_phi_numerator_->Fill(denominatorTau.phi(), evtWeight);
 	}
+	if ( denominatorTau.pt() > min_pt_ && denominatorTau.pt() < max_pt_ && denominatorTau_absEta > min_absEta_ && denominatorTau_absEta < max_absEta_ )
+	{
+	  histogram_minDeltaR_denominator_->Fill(minDeltaR, evtWeight);
+	  if ( isMatched ) histogram_minDeltaR_numerator_->Fill(minDeltaR, evtWeight);
+	}
       }
     }
     void fillHistograms(const l1t::L1PFTauCollection& numeratorTaus, const pat::TauCollection& denominatorTaus, double evtWeight)
     {
+      double minDeltaR = 1.e+3;
+      for ( pat::TauCollection::const_iterator denominatorTau1 = denominatorTaus.begin();
+	    denominatorTau1 != denominatorTaus.end(); ++denominatorTau1 ) {
+	for ( pat::TauCollection::const_iterator denominatorTau2 = denominatorTau1 + 1;
+	      denominatorTau2 != denominatorTaus.end(); ++denominatorTau2 ) {
+	  double dR = deltaR(denominatorTau1->eta(), denominatorTau1->phi(), denominatorTau2->eta(), denominatorTau2->phi());
+	  if ( dR > 0. && dR < minDeltaR ) minDeltaR = dR;
+        }
+      }
+
       for ( auto denominatorTau : denominatorTaus )
       {
 	if ( (decayMode_ == "oneProng0Pi0"   && denominatorTau.decayMode() != reco::PFTau::kOneProng0PiZero)   ||
@@ -202,6 +241,11 @@ class L1PFTauAnalyzerSignal : public edm::EDAnalyzer
 	  histogram_phi_denominator_->Fill(denominatorTau.phi(), evtWeight);
 	  if ( isMatched ) histogram_phi_numerator_->Fill(denominatorTau.phi(), evtWeight);
 	}
+	if ( denominatorTau.pt() > min_pt_ && denominatorTau.pt() < max_pt_ && denominatorTau_absEta > min_absEta_ && denominatorTau_absEta < max_absEta_ )
+	{
+	  histogram_minDeltaR_denominator_->Fill(minDeltaR, evtWeight);
+	  if ( isMatched ) histogram_minDeltaR_numerator_->Fill(minDeltaR, evtWeight);
+	}
       }
     }
     MonitorElement* me_pt_numerator_;
@@ -216,6 +260,10 @@ class L1PFTauAnalyzerSignal : public edm::EDAnalyzer
     TH1* histogram_phi_numerator_;
     MonitorElement* me_phi_denominator_;
     TH1* histogram_phi_denominator_;
+    MonitorElement* me_minDeltaR_numerator_;
+    TH1* histogram_minDeltaR_numerator_;
+    MonitorElement* me_minDeltaR_denominator_;
+    TH1* histogram_minDeltaR_denominator_;
     // cuts applied to offline and generator-level taus in denominator 
     double min_pt_;
     double max_pt_;

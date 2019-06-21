@@ -211,7 +211,7 @@ void makeRatePlots()
   gROOT->SetBatch(true);
 
   std::string inputFilePath = Form("%s/src/L1Trigger/TallinnL1PFTauAnalyzer/test/", gSystem->Getenv("CMSSW_BASE"));
-  std::string inputFileName = "TallinnL1PFTauAnalyzer_background_2019May31.root";
+  std::string inputFileName = "TallinnL1PFTauAnalyzer_background_2019Jun21.root";
   std::string inputFileName_full = inputFilePath;
   if ( inputFileName_full.find_last_of("/") != (inputFileName_full.size() - 1) ) inputFileName_full.append("/");
   inputFileName_full.append(inputFileName);
@@ -222,18 +222,19 @@ void makeRatePlots()
   }
 
   std::vector<std::string> pfAlgos;
-  pfAlgos.push_back("WithStripsAndPreselectionPF");
+  //pfAlgos.push_back("WithStripsAndPreselectionPF");
   pfAlgos.push_back("WithStripsWithoutPreselectionPF");
-  pfAlgos.push_back("WithoutStripsWithPreselectionPF");
+  //pfAlgos.push_back("WithoutStripsWithPreselectionPF");
   pfAlgos.push_back("WithoutStripsAndPreselectionPF");
-  pfAlgos.push_back("WithStripsAndPreselectionPuppi");
-  pfAlgos.push_back("WithStripsWithoutPreselectionPuppi");
-  pfAlgos.push_back("WithoutStripsWithPreselectionPuppi");
-  pfAlgos.push_back("WithoutStripsAndPreselectionPuppi");
+  //pfAlgos.push_back("WithStripsAndPreselectionPuppi");
+  //pfAlgos.push_back("WithStripsWithoutPreselectionPuppi");
+  //pfAlgos.push_back("WithoutStripsWithPreselectionPuppi");
+  //pfAlgos.push_back("WithoutStripsAndPreselectionPuppi");
 
   std::vector<std::string> absEtaRanges;
   absEtaRanges.push_back("absEtaLt1p40");
   absEtaRanges.push_back("absEta1p40to2p17");
+  absEtaRanges.push_back("absEta1p40to2p40");
   absEtaRanges.push_back("absEtaLt2p17");
   absEtaRanges.push_back("absEtaLt2p40");
 
@@ -339,7 +340,7 @@ void makeRatePlots()
 	absEtaRange != absEtaRanges.end(); ++absEtaRange ) {
     for ( std::vector<std::string>::const_iterator isolationWP = isolationWPs_isobel.begin();
 	  isolationWP != isolationWPs_isobel.end(); ++isolationWP ) {
-      std::string histogram2dName = Form("%s/numL1PFTaus_vs_ptThreshold_%s_%s", 
+      std::string histogram2dName = Form("%sPF/numL1PFTaus_vs_ptThreshold_%s_%s", 
 	dqmDirectory_isobel.data(), absEtaRange->data(), isolationWP->data());
       TH2* histogram2d = loadHistogram2d(inputFile, histogram2dName);
 

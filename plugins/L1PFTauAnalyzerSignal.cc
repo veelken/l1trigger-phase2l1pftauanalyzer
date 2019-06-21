@@ -69,6 +69,11 @@ void L1PFTauAnalyzerSignal::beginJob()
       efficiencyPlots_.push_back(new efficiencyPlotEntryType(45., 1.e+3,  1.4, 2.172, decayMode, ptThreshold, "Medium")); // Medium
       efficiencyPlots_.push_back(new efficiencyPlotEntryType(45., 1.e+3,  1.4, 2.172, decayMode, ptThreshold, "Tight"));  // Tight
 
+      efficiencyPlots_.push_back(new efficiencyPlotEntryType(45., 1.e+3,  1.4, 2.4,   decayMode, ptThreshold, "vLoose")); // vLoose
+      efficiencyPlots_.push_back(new efficiencyPlotEntryType(45., 1.e+3,  1.4, 2.4,   decayMode, ptThreshold, "Loose"));  // Loose
+      efficiencyPlots_.push_back(new efficiencyPlotEntryType(45., 1.e+3,  1.4, 2.4,   decayMode, ptThreshold, "Medium")); // Medium
+      efficiencyPlots_.push_back(new efficiencyPlotEntryType(45., 1.e+3,  1.4, 2.4,   decayMode, ptThreshold, "Tight"));  // Tight
+
       efficiencyPlots_.push_back(new efficiencyPlotEntryType(45., 1.e+3, -1.,  2.172, decayMode, ptThreshold, "vLoose")); // vLoose
       efficiencyPlots_.push_back(new efficiencyPlotEntryType(45., 1.e+3, -1.,  2.172, decayMode, ptThreshold, "Loose"));  // Loose
       efficiencyPlots_.push_back(new efficiencyPlotEntryType(45., 1.e+3, -1.,  2.172, decayMode, ptThreshold, "Medium")); // Medium

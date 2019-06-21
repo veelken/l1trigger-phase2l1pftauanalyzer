@@ -681,8 +681,10 @@ void makeIsolationPlots()
   pfAlgos.push_back("Puppi");
 
   std::vector<std::string> absEtaRanges;
-  absEtaRanges.push_back("absEtaLt1p00");
   absEtaRanges.push_back("absEtaLt1p40");
+  //absEtaRanges.push_back("absEta1p40to2p17");
+  //absEtaRanges.push_back("absEtaLt2p17");
+  //absEtaRanges.push_back("absEtaLt2p40");
 
   std::vector<std::string> ptThresholds;
   ptThresholds.push_back("ptGt20");
@@ -690,6 +692,8 @@ void makeIsolationPlots()
   ptThresholds.push_back("ptGt30");
   //ptThresholds.push_back("ptGt35");
   ptThresholds.push_back("ptGt40");
+  //ptThresholds.push_back("ptGt45");
+  //ptThresholds.push_back("ptGt50");
 
   std::vector<std::string> binning_absEta;
   binning_absEta.push_back("absEta0p00to0p30");
@@ -721,6 +725,8 @@ void makeIsolationPlots()
   observables.push_back("relCombinedIso_wRhoCorr"); 
   observables.push_back("tauPt");
   observables.push_back("leadTrackPt");
+  observables.push_back("tauMass");
+  observables.push_back("hpsMass");
 
   std::map<std::string, int> mode; // key = observable
   mode["tauPt"]                                  = kGtCut;
@@ -740,6 +746,8 @@ void makeIsolationPlots()
   mode["relCombinedIso_wDeltaBetaCorr"]          = kLtCut;
   mode["relCombinedIso_wRhoCorr"]                = kLtCut;
   mode["sumChargedIsoPileup"]                    = kLtCut;
+  mode["tauMass"]                                = kLtCut;
+  mode["hpsMass"]                                = kLtCut;
 
   std::map<std::string, int> rebin; // key = observable
   rebin["tauPt"]                                 =   5;
@@ -759,6 +767,8 @@ void makeIsolationPlots()
   rebin["relCombinedIso_wDeltaBetaCorr"]         =   2;
   rebin["relCombinedIso_wRhoCorr"]               =   2;
   rebin["sumChargedIsoPileup"]                   =   5;
+  rebin["tauMass"]                               =   1;
+  rebin["hpsMass"]                               =   1;
 
   std::map<std::string, double> xMin; // key = observable
   xMin["tauPt"]                                  =   0.;
@@ -778,6 +788,8 @@ void makeIsolationPlots()
   xMin["relCombinedIso_wDeltaBetaCorr"]          =   0.;  
   xMin["relCombinedIso_wRhoCorr"]                =   0.; 
   xMin["sumChargedIsoPileup"]                    =   0.; 
+  xMin["tauMass"]                                =   1;
+  xMin["hpsMass"]                                =   1;
 
   std::map<std::string, double> xMax; // key = observable
   xMax["tauPt"]                                  = 100.;
@@ -795,7 +807,9 @@ void makeIsolationPlots()
   xMax["relCombinedIso_wDeltaBetaCorr"]          =   1.;
   xMax["relCombinedIso_wRhoCorr"]                =   1.;
   xMax["sumChargedIsoPileup"]                    =  25.;
-  
+  xMax["tauMass"]                                =   5.;
+  xMax["hpsMass"]                                =   5.;
+
   std::map<std::string, std::string> xAxisTitles; // key = observable
   xAxisTitles["tauPt"]                           = "L1 #tau_{h} p_{T} [GeV]";
   xAxisTitles["leadTrackPt"]                     = "L1 lead. track p_{T} [GeV]";
@@ -813,6 +827,8 @@ void makeIsolationPlots()
   xAxisTitles["relCombinedIso"]                  = "L1 #tau I_{cmb} / p_{T}";
   xAxisTitles["relCombinedIso_wDeltaBetaCorr"]   = "#Delta#beta-corrected L1 #tau I_{cmb} / p_{T}";
   xAxisTitles["relCombinedIso_wRhoCorr"]         = "#rho-corrected L1 #tau I_{cmb} / p_{T}";
+  xAxisTitles["tauMass"]                         = "L1 #tau_{h} mass [GeV]";
+  xAxisTitles["hpsMass"]                         = "L1 #tau_{h} HPS mass [GeV]";
 
   std::map<std::string, std::string> legendEntries; // key = observable
   legendEntries["tauPt"]                         = "#tau_{h} p_{T}";
@@ -831,6 +847,8 @@ void makeIsolationPlots()
   legendEntries["relCombinedIso"]                = "I_{cmb}";
   legendEntries["relCombinedIso_wDeltaBetaCorr"] = "I_{cmb}(#Delta#beta-corr.)";
   legendEntries["relCombinedIso_wRhoCorr"]       = "I_{cmb} (#rho-corr.)";
+  legendEntries["tauMass"]                       = "#tau_{h} mass";
+  legendEntries["hpsmass"]                       = "#tau_{h} HPS mass";
 
   std::string dqmDirectory = "DQMData/TallinnL1PFTauIsolationAnalyzerWithStripsWithoutPreselection";
   

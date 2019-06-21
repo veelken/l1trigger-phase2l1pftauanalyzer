@@ -63,21 +63,36 @@ void TallinnL1PFTauAnalyzerSignal::beginJob()
       efficiencyPlots_.push_back(new efficiencyPlotEntryType(45., 1.e+3, -1.,  1.4,   decayMode, ptThreshold, 0.20, -1.)); // Loose
       efficiencyPlots_.push_back(new efficiencyPlotEntryType(45., 1.e+3, -1.,  1.4,   decayMode, ptThreshold, 0.10, -1.)); // Medium
       efficiencyPlots_.push_back(new efficiencyPlotEntryType(45., 1.e+3, -1.,  1.4,   decayMode, ptThreshold, 0.05, -1.)); // Tight
-
+      efficiencyPlots_.push_back(new efficiencyPlotEntryType(45., 1.e+3, -1.,  1.4,   decayMode, ptThreshold, 0.02, -1.)); // vTight
+      efficiencyPlots_.push_back(new efficiencyPlotEntryType(45., 1.e+3, -1.,  1.4,   decayMode, ptThreshold, 0.01, -1.)); // vvTight
+      
       efficiencyPlots_.push_back(new efficiencyPlotEntryType(45., 1.e+3,  1.4, 2.172, decayMode, ptThreshold, 0.40, -1.)); // vLoose
       efficiencyPlots_.push_back(new efficiencyPlotEntryType(45., 1.e+3,  1.4, 2.172, decayMode, ptThreshold, 0.20, -1.)); // Loose
       efficiencyPlots_.push_back(new efficiencyPlotEntryType(45., 1.e+3,  1.4, 2.172, decayMode, ptThreshold, 0.10, -1.)); // Medium
       efficiencyPlots_.push_back(new efficiencyPlotEntryType(45., 1.e+3,  1.4, 2.172, decayMode, ptThreshold, 0.05, -1.)); // Tight
+      efficiencyPlots_.push_back(new efficiencyPlotEntryType(45., 1.e+3,  1.4, 2.172, decayMode, ptThreshold, 0.02, -1.)); // vTight
+      efficiencyPlots_.push_back(new efficiencyPlotEntryType(45., 1.e+3,  1.4, 2.172, decayMode, ptThreshold, 0.01, -1.)); // vvTight
+      
+      efficiencyPlots_.push_back(new efficiencyPlotEntryType(45., 1.e+3,  1.4, 2.4,   decayMode, ptThreshold, 0.40, -1.)); // vLoose
+      efficiencyPlots_.push_back(new efficiencyPlotEntryType(45., 1.e+3,  1.4, 2.4,   decayMode, ptThreshold, 0.20, -1.)); // Loose
+      efficiencyPlots_.push_back(new efficiencyPlotEntryType(45., 1.e+3,  1.4, 2.4,   decayMode, ptThreshold, 0.10, -1.)); // Medium
+      efficiencyPlots_.push_back(new efficiencyPlotEntryType(45., 1.e+3,  1.4, 2.4,   decayMode, ptThreshold, 0.05, -1.)); // Tight
+      efficiencyPlots_.push_back(new efficiencyPlotEntryType(45., 1.e+3,  1.4, 2.4,   decayMode, ptThreshold, 0.02, -1.)); // vTight
+      efficiencyPlots_.push_back(new efficiencyPlotEntryType(45., 1.e+3,  1.4, 2.4,   decayMode, ptThreshold, 0.01, -1.)); // vvTight
 
       efficiencyPlots_.push_back(new efficiencyPlotEntryType(45., 1.e+3, -1.,  2.172, decayMode, ptThreshold, 0.40, -1.)); // vLoose
       efficiencyPlots_.push_back(new efficiencyPlotEntryType(45., 1.e+3, -1.,  2.172, decayMode, ptThreshold, 0.20, -1.)); // Loose
       efficiencyPlots_.push_back(new efficiencyPlotEntryType(45., 1.e+3, -1.,  2.172, decayMode, ptThreshold, 0.10, -1.)); // Medium
       efficiencyPlots_.push_back(new efficiencyPlotEntryType(45., 1.e+3, -1.,  2.172, decayMode, ptThreshold, 0.05, -1.)); // Tight  
+      efficiencyPlots_.push_back(new efficiencyPlotEntryType(45., 1.e+3, -1.,  2.172, decayMode, ptThreshold, 0.02, -1.)); // vTight  
+      efficiencyPlots_.push_back(new efficiencyPlotEntryType(45., 1.e+3, -1.,  2.172, decayMode, ptThreshold, 0.01, -1.)); // vvTight  
 
       efficiencyPlots_.push_back(new efficiencyPlotEntryType(45., 1.e+3, -1.,  2.4,   decayMode, ptThreshold, 0.40, -1.)); // vLoose
       efficiencyPlots_.push_back(new efficiencyPlotEntryType(45., 1.e+3, -1.,  2.4,   decayMode, ptThreshold, 0.20, -1.)); // Loose
       efficiencyPlots_.push_back(new efficiencyPlotEntryType(45., 1.e+3, -1.,  2.4,   decayMode, ptThreshold, 0.10, -1.)); // Medium
-      efficiencyPlots_.push_back(new efficiencyPlotEntryType(45., 1.e+3, -1.,  2.4,   decayMode, ptThreshold, 0.05, -1.)); // Tight      
+      efficiencyPlots_.push_back(new efficiencyPlotEntryType(45., 1.e+3, -1.,  2.4,   decayMode, ptThreshold, 0.05, -1.)); // Tight
+      efficiencyPlots_.push_back(new efficiencyPlotEntryType(45., 1.e+3, -1.,  2.4,   decayMode, ptThreshold, 0.02, -1.)); // vTight
+      efficiencyPlots_.push_back(new efficiencyPlotEntryType(45., 1.e+3, -1.,  2.4,   decayMode, ptThreshold, 0.01, -1.)); // vvTight      
     }
   }
 

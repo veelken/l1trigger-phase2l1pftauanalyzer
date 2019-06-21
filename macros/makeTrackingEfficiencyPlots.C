@@ -223,7 +223,7 @@ void makeTrackingEfficiencyPlots()
   gROOT->SetBatch(true);
 
   std::string inputFilePath = Form("%s/src/L1Trigger/TallinnL1PFTauAnalyzer/test/", gSystem->Getenv("CMSSW_BASE"));
-  std::string inputFileName = "TallinnL1PFTauAnalyzer_signal_2019May31v2.root";
+  std::string inputFileName = "TallinnL1PFTauAnalyzer_signal_qqH_2019Jun18.root";
   std::string inputFileName_full = inputFilePath;
   if ( inputFileName_full.find_last_of("/") != (inputFileName_full.size() - 1) ) inputFileName_full.append("/");
   inputFileName_full.append(inputFileName);
@@ -250,8 +250,9 @@ void makeTrackingEfficiencyPlots()
   observables.push_back("minDeltaR");
 
   std::vector<std::string> absEtaRanges;
-  //absEtaRanges.push_back("absEtaLt1p00");
   absEtaRanges.push_back("absEtaLt1p40");
+  absEtaRanges.push_back("absEta1p40to2p40");
+  absEtaRanges.push_back("absEtaLt2p40");
 
   std::vector<std::string> decayModes;
   decayModes.push_back("oneProng0Pi0");
@@ -326,11 +327,11 @@ void makeTrackingEfficiencyPlots()
 	    decayMode_capitalized[0] = toupper(decayMode_capitalized[0]);
 	    std::string dqmDirectory_full = Form("%s/%s/gen%sTau/%s_%s", 
               dqmDirectory.data(), absEtaRange->data(), decayMode_capitalized.data(), recTrack_type->data(), recTrack_option->data());	    
-	    std::string histogramName_numerator = Form("%s/eff%s_%s_vs_%s_numerator_%s_ptGt1", 
+	    std::string histogramName_numerator = Form("%s/eff%s_%s_vs_%s_numerator_%s_pt1p00to1000p00", 
 	      dqmDirectory_full.data(), recTrack_type_capitalized.data(), recTrack_option->data(), observable->data(), absEtaRange->data());
 	    if ( (*decayMode) != "all" ) histogramName_numerator.append(Form("_gen%sTau", decayMode_capitalized.data()));
 	    TH1* histogram_numerator = loadHistogram(inputFile, histogramName_numerator);
-	    std::string histogramName_denominator = Form("%s/eff%s_%s_vs_%s_denominator_%s_ptGt1", 
+	    std::string histogramName_denominator = Form("%s/eff%s_%s_vs_%s_denominator_%s_pt1p00to1000p00", 
 	      dqmDirectory_full.data(), recTrack_type_capitalized.data(), recTrack_option->data(), observable->data(), absEtaRange->data());
 	    if ( (*decayMode) != "all" ) histogramName_denominator.append(Form("_gen%sTau", decayMode_capitalized.data()));
 	    TH1* histogram_denominator = loadHistogram(inputFile, histogramName_denominator);

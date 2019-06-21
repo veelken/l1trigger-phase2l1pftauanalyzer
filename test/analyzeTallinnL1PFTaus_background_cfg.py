@@ -27,11 +27,8 @@ import os
 import re
 
 inputFilePaths = [
-    '/hdfs/cms/store/user/sbhowmik/NeutrinoGun_E_10GeV/PhaseIIMTDTDRAutumn18MiniAOD_20190524/190524_111617/0000/',
-    '/hdfs/cms/store/user/sbhowmik/NeutrinoGun_E_10GeV/PhaseIIMTDTDRAutumn18MiniAOD_20190524/190524_111617/0001/',
-    '/hdfs/cms/store/user/sbhowmik/NeutrinoGun_E_10GeV/PhaseIIMTDTDRAutumn18MiniAOD_20190524/190524_111617/0002/',
-    '/hdfs/cms/store/user/sbhowmik/NeutrinoGun_E_10GeV/PhaseIIMTDTDRAutumn18MiniAOD_20190524/190524_111617/0003/',
-    '/hdfs/cms/store/user/sbhowmik/NeutrinoGun_E_10GeV/PhaseIIMTDTDRAutumn18MiniAOD_20190524/190524_111617/0004/',
+    '/hdfs/cms/store/user/sbhowmik/NeutrinoGun_E_10GeV/PhaseIIMTDTDRAutumn18MiniAOD_20190617/190618_085348/0000/',
+    '/hdfs/cms/store/user/sbhowmik/NeutrinoGun_E_10GeV/PhaseIIMTDTDRAutumn18MiniAOD_20190617/190618_085348/0001/',
 ]    
 inputFile_regex = r"[a-zA-Z0-9_/:.-]*NTuple_TallinnL1PFTauProducer_[a-zA-Z0-9-_]+.root"
 
@@ -49,7 +46,8 @@ process.source.fileNames = cms.untracked.vstring(inputFileNames)
 #--------------------------------------------------------------------------------
 
 from Configuration.AlCa.GlobalTag import GlobalTag
-process.GlobalTag = GlobalTag(process.GlobalTag, '100X_upgrade2023_realistic_v1', '')
+#process.GlobalTag = GlobalTag(process.GlobalTag, '100X_upgrade2023_realistic_v1', '')
+process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:phase2_realistic', '')
 
 process.analysisSequence = cms.Sequence()
 
@@ -153,7 +151,7 @@ process.analysisSequence += process.analyzeL1PFTauPairsPF
 process.DQMStore = cms.Service("DQMStore")
 
 process.savePlots = cms.EDAnalyzer("DQMSimpleFileSaver",
-    outputFileName = cms.string('TallinnL1PFTauAnalyzer_background_2019Jun12.root')
+    outputFileName = cms.string('TallinnL1PFTauAnalyzer_background_2019Jun21.root')
 )
 
 process.p = cms.Path(process.analysisSequence + process.savePlots)

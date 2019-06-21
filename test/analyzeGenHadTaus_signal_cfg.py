@@ -20,13 +20,22 @@ process.source = cms.Source("PoolSource",
     )
 )
 
+sample = "qqH" # SM VBF Higgs->tautau
+#sample = "ggH" #  SM Higgs->tautau produced via gluon fusion 
+
 #--------------------------------------------------------------------------------
 # set input files
 
 import os
 import re
 
-inputFilePath = '/hdfs/cms/store/user/sbhowmik/VBFHToTauTau_M125_14TeV_powheg_pythia8_correctedGridpack/PhaseIIMTDTDRAutumn18MiniAOD_20190524/190524_111901/0000/'
+inputFilePath = None
+if sample == "qqH":
+    inputFilePath = '/hdfs/cms/store/user/sbhowmik/VBFHToTauTau_M125_14TeV_powheg_pythia8_correctedGridpack/PhaseIIMTDTDRAutumn18MiniAOD_20190617/190618_084235/0000/'
+elif sample == "ggH":
+    inputFilePath = '/hdfs/cms/store/user/sbhowmik/GluGluHToTauTau_M125_14TeV_powheg_pythia8/GluGluHToTauTau_PhaseIIMTDTDRAutumn18MiniAOD_20190617/190618_090007/0000/'
+else:
+    raise ValueError("Invalid sample = '%s' !!" % sample)
 inputFile_regex = r"[a-zA-Z0-9_/:.-]*NTuple_TallinnL1PFTauProducer_[a-zA-Z0-9-_]+.root"
 
 # check if name of inputFile matches regular expression
@@ -42,7 +51,8 @@ process.source.fileNames = cms.untracked.vstring(inputFileNames)
 #--------------------------------------------------------------------------------
 
 from Configuration.AlCa.GlobalTag import GlobalTag
-process.GlobalTag = GlobalTag(process.GlobalTag, '100X_upgrade2023_realistic_v1', '')
+#process.GlobalTag = GlobalTag(process.GlobalTag, '100X_upgrade2023_realistic_v1', '')
+process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:phase2_realistic', '')
 
 process.analysisSequence = cms.Sequence()
 
@@ -110,7 +120,7 @@ process.analysisSequence += process.analyzeOfflineTaus
 process.DQMStore = cms.Service("DQMStore")
 
 process.savePlots = cms.EDAnalyzer("DQMSimpleFileSaver",
-    outputFileName = cms.string('GenHadTauAnalyzer_signal_2019Jun12.root')
+    outputFileName = cms.string('GenHadTauAnalyzer_signal_%s_2019Jun21.root' % sample)
 )
 
 process.p = cms.Path(process.analysisSequence + process.savePlots)

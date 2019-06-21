@@ -55,21 +55,36 @@ void TallinnL1PFTauPairAnalyzer::beginJob()
   efficiency_or_ratePlots_.push_back(new efficiency_or_ratePlotEntryType(-1.,  1.4,   0.20, -1., 0.4)); // Loose
   efficiency_or_ratePlots_.push_back(new efficiency_or_ratePlotEntryType(-1.,  1.4,   0.10, -1., 0.4)); // Medium
   efficiency_or_ratePlots_.push_back(new efficiency_or_ratePlotEntryType(-1.,  1.4,   0.05, -1., 0.4)); // Tight
+  efficiency_or_ratePlots_.push_back(new efficiency_or_ratePlotEntryType(-1.,  1.4,   0.02, -1., 0.4)); // vTight
+  efficiency_or_ratePlots_.push_back(new efficiency_or_ratePlotEntryType(-1.,  1.4,   0.01, -1., 0.4)); // vvTight
 
   efficiency_or_ratePlots_.push_back(new efficiency_or_ratePlotEntryType( 1.4, 2.172, 0.40, -1., 0.4)); // vLoose
   efficiency_or_ratePlots_.push_back(new efficiency_or_ratePlotEntryType( 1.4, 2.172, 0.20, -1., 0.4)); // Loose
   efficiency_or_ratePlots_.push_back(new efficiency_or_ratePlotEntryType( 1.4, 2.172, 0.10, -1., 0.4)); // Medium
   efficiency_or_ratePlots_.push_back(new efficiency_or_ratePlotEntryType( 1.4, 2.172, 0.05, -1., 0.4)); // Tight
+  efficiency_or_ratePlots_.push_back(new efficiency_or_ratePlotEntryType( 1.4, 2.172, 0.02, -1., 0.4)); // vTight
+  efficiency_or_ratePlots_.push_back(new efficiency_or_ratePlotEntryType( 1.4, 2.172, 0.01, -1., 0.4)); // vvTight
+
+  efficiency_or_ratePlots_.push_back(new efficiency_or_ratePlotEntryType( 1.4, 2.4,   0.40, -1., 0.4)); // vLoose
+  efficiency_or_ratePlots_.push_back(new efficiency_or_ratePlotEntryType( 1.4, 2.4,   0.20, -1., 0.4)); // Loose
+  efficiency_or_ratePlots_.push_back(new efficiency_or_ratePlotEntryType( 1.4, 2.4,   0.10, -1., 0.4)); // Medium
+  efficiency_or_ratePlots_.push_back(new efficiency_or_ratePlotEntryType( 1.4, 2.4,   0.05, -1., 0.4)); // Tight
+  efficiency_or_ratePlots_.push_back(new efficiency_or_ratePlotEntryType( 1.4, 2.4,   0.02, -1., 0.4)); // vTight
+  efficiency_or_ratePlots_.push_back(new efficiency_or_ratePlotEntryType( 1.4, 2.4,   0.01, -1., 0.4)); // vvTight
 
   efficiency_or_ratePlots_.push_back(new efficiency_or_ratePlotEntryType(-1.,  2.172, 0.40, -1., 0.4)); // vLoose
   efficiency_or_ratePlots_.push_back(new efficiency_or_ratePlotEntryType(-1.,  2.172, 0.20, -1., 0.4)); // Loose
   efficiency_or_ratePlots_.push_back(new efficiency_or_ratePlotEntryType(-1.,  2.172, 0.10, -1., 0.4)); // Medium
   efficiency_or_ratePlots_.push_back(new efficiency_or_ratePlotEntryType(-1.,  2.172, 0.05, -1., 0.4)); // Tight
+  efficiency_or_ratePlots_.push_back(new efficiency_or_ratePlotEntryType(-1.,  2.172, 0.02, -1., 0.4)); // vTight
+  efficiency_or_ratePlots_.push_back(new efficiency_or_ratePlotEntryType(-1.,  2.172, 0.01, -1., 0.4)); // vvTight
 
   efficiency_or_ratePlots_.push_back(new efficiency_or_ratePlotEntryType(-1.,  2.4,   0.40, -1., 0.4)); // vLoose
   efficiency_or_ratePlots_.push_back(new efficiency_or_ratePlotEntryType(-1.,  2.4,   0.20, -1., 0.4)); // Loose
   efficiency_or_ratePlots_.push_back(new efficiency_or_ratePlotEntryType(-1.,  2.4,   0.10, -1., 0.4)); // Medium
   efficiency_or_ratePlots_.push_back(new efficiency_or_ratePlotEntryType(-1.,  2.4,   0.05, -1., 0.4)); // Tight
+  efficiency_or_ratePlots_.push_back(new efficiency_or_ratePlotEntryType(-1.,  2.4,   0.02, -1., 0.4)); // vTight
+  efficiency_or_ratePlots_.push_back(new efficiency_or_ratePlotEntryType(-1.,  2.4,   0.01, -1., 0.4)); // vvTight
 
   for ( auto efficiency_or_ratePlot : efficiency_or_ratePlots_ ) 
   {

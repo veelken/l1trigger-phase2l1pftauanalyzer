@@ -45,6 +45,11 @@ void L1PFTauAnalyzerBackground::beginJob()
   ratePlots_.push_back(new ratePlotEntryType( 1.4, 2.172, "Medium")); // Medium
   ratePlots_.push_back(new ratePlotEntryType( 1.4, 2.172, "Tight"));  // Tight
 
+  ratePlots_.push_back(new ratePlotEntryType( 1.4, 2.4,   "vLoose")); // vLoose
+  ratePlots_.push_back(new ratePlotEntryType( 1.4, 2.4,   "Loose"));  // Loose
+  ratePlots_.push_back(new ratePlotEntryType( 1.4, 2.4,   "Medium")); // Medium
+  ratePlots_.push_back(new ratePlotEntryType( 1.4, 2.4,   "Tight"));  // Tight
+
   ratePlots_.push_back(new ratePlotEntryType(-1.,  2.172, "vLoose")); // vLoose
   ratePlots_.push_back(new ratePlotEntryType(-1.,  2.172, "Loose"));  // Loose
   ratePlots_.push_back(new ratePlotEntryType(-1.,  2.172, "Medium")); // Medium

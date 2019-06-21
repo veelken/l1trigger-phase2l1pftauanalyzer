@@ -105,6 +105,10 @@ class TallinnL1PFTauIsolationAnalyzer : public edm::EDAnalyzer
       , histogram_tauPt_(nullptr)
       , me_leadTrackPt_(nullptr)
       , histogram_leadTrackPt_(nullptr)
+      , me_tauMass_(nullptr)
+      , histogram_tauMass_(nullptr)
+      , me_hpsMass_(nullptr)
+      , histogram_hpsMass_(nullptr)
       , min_pt_(min_pt)
       , max_pt_(max_pt)
       , min_absEta_(min_absEta)
@@ -228,6 +232,16 @@ class TallinnL1PFTauIsolationAnalyzer : public edm::EDAnalyzer
       me_leadTrackPt_ = dqmStore.book1D(histogramName_leadTrackPt.Data(), histogramName_leadTrackPt.Data(), 250, 0., 250.);
       histogram_leadTrackPt_ = me_leadTrackPt_->getTH1();
       assert(histogram_leadTrackPt_);
+
+      TString histogramName_tauMass = Form("tauMass_%s", histogramName_suffix.Data());
+      me_tauMass_ = dqmStore.book1D(histogramName_tauMass.Data(), histogramName_tauMass.Data(), 50, 0., 5.);
+      histogram_tauMass_ = me_tauMass_->getTH1();
+      assert(histogram_tauMass_);
+
+      TString histogramName_hpsMass = Form("hpsMass_%s", histogramName_suffix.Data());
+      me_hpsMass_ = dqmStore.book1D(histogramName_hpsMass.Data(), histogramName_hpsMass.Data(), 50, 0., 5.);
+      histogram_hpsMass_ = me_hpsMass_->getTH1();
+      assert(histogram_hpsMass_);
     }
     void fillHistograms(const l1t::TallinnL1PFTau& l1PFTau, double rhoCorr, double evtWeight)
     {
@@ -277,6 +291,50 @@ class TallinnL1PFTauIsolationAnalyzer : public edm::EDAnalyzer
 	  leadTrackPt = l1PFTau.leadChargedPFCand()->pfTrack()->pt(); 
 	}
 	fillWithOverFlow(histogram_leadTrackPt_, leadTrackPt, evtWeight);
+
+	reco::Particle::LorentzVector tauP4;
+	reco::Particle::LorentzVector hpsP4_part1;
+	reco::Particle::LorentzVector hpsP4_part2;
+	if ( l1PFTau.leadChargedPFCand().isNonnull() && l1PFTau.leadChargedPFCand()->pfTrack().isNonnull() ) 
+	{
+	  const l1t::PFCandidateRefVector& signalAllL1PFCandidates = l1PFTau.signalAllL1PFCandidates();
+	  for ( l1t::PFCandidateRefVector::const_iterator l1PFCand = signalAllL1PFCandidates.begin(); l1PFCand != signalAllL1PFCandidates.end(); ++l1PFCand )
+	  {
+	    if ( (*l1PFCand)->id() == l1t::PFCandidate::ChargedHadron ||
+	         (*l1PFCand)->id() == l1t::PFCandidate::Electron      ||
+	         (*l1PFCand)->id() == l1t::PFCandidate::Photon        ||
+	         (*l1PFCand)->id() == l1t::PFCandidate::Muon          )
+	    {
+	      tauP4 += (*l1PFCand)->p4();
+	      double dR = reco::deltaR((*l1PFCand)->eta(), (*l1PFCand)->phi(), l1PFTau.leadChargedPFCand()->eta(), l1PFTau.leadChargedPFCand()->phi());
+	      if ( dR <= l1PFTau.signalConeSize() )
+	      {
+	        hpsP4_part1 += (*l1PFCand)->p4();
+	      }
+	    }
+	  } 
+
+  	  const l1t::PFCandidateRefVector& stripAllL1PFCandidates = l1PFTau.stripAllL1PFCandidates();
+	  for ( l1t::PFCandidateRefVector::const_iterator l1PFCand = stripAllL1PFCandidates.begin(); l1PFCand != stripAllL1PFCandidates.end(); ++l1PFCand )
+ 	  {
+	    if ( (*l1PFCand)->id() == l1t::PFCandidate::Electron ||
+	         (*l1PFCand)->id() == l1t::PFCandidate::Photon   )
+	    {
+	      double dR = reco::deltaR((*l1PFCand)->eta(), (*l1PFCand)->phi(), l1PFTau.leadChargedPFCand()->eta(), l1PFTau.leadChargedPFCand()->phi());
+	      if ( dR <= l1PFTau.signalConeSize() ) continue;
+	      double dEta = TMath::Abs((*l1PFCand)->eta() - l1PFTau.leadChargedPFCand()->eta());
+	      double dPhi = TMath::Abs((*l1PFCand)->phi() - l1PFTau.leadChargedPFCand()->phi());
+	      if ( dEta < 0.05 && dPhi < 0.20 )
+	      { 
+	        hpsP4_part2 += (*l1PFCand)->p4();
+	      }
+	    }
+	  }
+	}
+	fillWithOverFlow(histogram_hpsMass_, tauP4.mass(), evtWeight);
+	const double neutralPionMass = 0.135; // GeV
+	reco::Particle::LorentzVector hpsP4 = hpsP4_part1 + reco::Particle::PolarLorentzVector(hpsP4_part2.pt(), hpsP4_part2.eta(), hpsP4_part2.phi(), neutralPionMass);
+	fillWithOverFlow(histogram_hpsMass_, hpsP4.mass(), evtWeight);
       }
     }
     void fillHistograms_woGenMatching(const l1t::TallinnL1PFTau& l1PFTau, double rhoCorr, double evtWeight)
@@ -330,6 +388,10 @@ class TallinnL1PFTauIsolationAnalyzer : public edm::EDAnalyzer
     TH1* histogram_tauPt_;    
     MonitorElement* me_leadTrackPt_;
     TH1* histogram_leadTrackPt_;    
+    MonitorElement* me_tauMass_;
+    TH1* histogram_tauMass_;    
+    MonitorElement* me_hpsMass_;
+    TH1* histogram_hpsMass_; 
     double min_pt_;
     double max_pt_;
     double min_absEta_;

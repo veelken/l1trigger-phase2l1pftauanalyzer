@@ -20,13 +20,22 @@ process.source = cms.Source("PoolSource",
     )
 )
 
+sample = "qqH" # SM VBF Higgs->tautau
+#sample = "ggH" #  SM Higgs->tautau produced via gluon fusion 
+
 #--------------------------------------------------------------------------------
 # set input files
 
 import os
 import re
 
-inputFilePath = '/hdfs/cms/store/user/sbhowmik/VBFHToTauTau_M125_14TeV_powheg_pythia8_correctedGridpack/PhaseIIMTDTDRAutumn18MiniAOD_20190524/190524_111901/0000/'
+inputFilePath = None
+if sample == "qqH":
+    inputFilePath = '/hdfs/cms/store/user/sbhowmik/VBFHToTauTau_M125_14TeV_powheg_pythia8_correctedGridpack/PhaseIIMTDTDRAutumn18MiniAOD_20190617/190618_084235/0000/'
+elif sample == "ggH":
+    inputFilePath = '/hdfs/cms/store/user/sbhowmik/GluGluHToTauTau_M125_14TeV_powheg_pythia8/GluGluHToTauTau_PhaseIIMTDTDRAutumn18MiniAOD_20190617/190618_090007/0000/'
+else:
+    raise ValueError("Invalid sample = '%s' !!" % sample)
 inputFile_regex = r"[a-zA-Z0-9_/:.-]*NTuple_TallinnL1PFTauProducer_[a-zA-Z0-9-_]+.root"
 
 # check if name of inputFile matches regular expression
@@ -42,14 +51,15 @@ process.source.fileNames = cms.untracked.vstring(inputFileNames)
 #--------------------------------------------------------------------------------
 
 from Configuration.AlCa.GlobalTag import GlobalTag
-process.GlobalTag = GlobalTag(process.GlobalTag, '100X_upgrade2023_realistic_v1', '')
+#process.GlobalTag = GlobalTag(process.GlobalTag, '100X_upgrade2023_realistic_v1', '')
+process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:phase2_realistic', '')
 
 process.analysisSequence = cms.Sequence()
 
 #--------------------------------------------------------------------------------
 process.selectedGenHadTaus = cms.EDFilter("GenJetSelector",
   src = cms.InputTag('tauGenJetsSelectorAllHadrons'),
-  cut = cms.string('pt > 20. & abs(eta) < 1.4'),
+  cut = cms.string('pt > 20. & abs(eta) < 2.4'),
   filter = cms.bool(False)
 )
 process.analysisSequence += process.selectedGenHadTaus
@@ -65,7 +75,7 @@ process.analysisSequence += process.genMatchedOfflinePFTaus
 
 process.selectedOfflinePFTaus = cms.EDFilter("PATTauSelector",
   src = cms.InputTag('genMatchedOfflinePFTaus'),
-  cut = cms.string("pt > 20. & abs(eta) < 1.4 & tauID('decayModeFinding') > 0.5 & tauID('byLooseCombinedIsolationDeltaBetaCorr3Hits') > 0.5")
+  cut = cms.string("pt > 20. & abs(eta) < 2.4 & tauID('decayModeFinding') > 0.5 & tauID('byLooseCombinedIsolationDeltaBetaCorr3Hits') > 0.5")
 )
 process.analysisSequence += process.selectedOfflinePFTaus
 
@@ -143,7 +153,7 @@ for useStrips in [ True, False ]:
         modulePF_TallinnL1PFTauPairAnalyzerWrtGenHadTaus = cms.EDAnalyzer("TallinnL1PFTauPairAnalyzer",
           srcL1PFTaus = cms.InputTag(moduleNameBase + moduleLabel + "PF"),
           srcRefTaus = cms.InputTag('offlineMatchedGenHadTaus'),
-          min_refTau_pt = cms.double(30.),
+          min_refTau_pt = cms.double(20.),
           max_refTau_pt = cms.double(1.e+3),                                                                
           min_refTau_absEta = cms.double(-1.),
           max_refTau_absEta = cms.double(2.4),                                                                
@@ -166,7 +176,7 @@ for useStrips in [ True, False ]:
         modulePF_TallinnL1PFTauPairAnalyzerWrtOfflineTaus = cms.EDAnalyzer("TallinnL1PFTauPairAnalyzer",
           srcL1PFTaus = cms.InputTag(moduleNameBase + moduleLabel + "PF"),
           srcRefTaus = cms.InputTag('selectedOfflinePFTaus'),
-          min_refTau_pt = cms.double(30.),
+          min_refTau_pt = cms.double(20.),
           max_refTau_pt = cms.double(1.e+3),                                                                
           min_refTau_absEta = cms.double(-1.),
           max_refTau_absEta = cms.double(2.4),
@@ -205,7 +215,7 @@ for useStrips in [ True, False ]:
         modulePuppi_TallinnL1PFTauPairAnalyzerWrtGenHadTaus = cms.EDAnalyzer("TallinnL1PFTauPairAnalyzer",
           srcL1PFTaus = cms.InputTag(moduleNameBase + moduleLabel + "Puppi"),
           srcRefTaus = cms.InputTag('offlineMatchedGenHadTaus'),
-          min_refTau_pt = cms.double(30.),
+          min_refTau_pt = cms.double(20.),
           max_refTau_pt = cms.double(1.e+3),                                                                
           min_refTau_absEta = cms.double(-1.),
           max_refTau_absEta = cms.double(2.4),
@@ -228,7 +238,7 @@ for useStrips in [ True, False ]:
         modulePuppi_TallinnL1PFTauPairAnalyzerWrtOfflineTaus = cms.EDAnalyzer("TallinnL1PFTauPairAnalyzer",
           srcL1PFTaus = cms.InputTag(moduleNameBase + moduleLabel + "Puppi"),
           srcRefTaus = cms.InputTag('selectedOfflinePFTaus'),
-          min_refTau_pt = cms.double(30.),
+          min_refTau_pt = cms.double(20.),
           max_refTau_pt = cms.double(1.e+3),                                                                
           min_refTau_absEta = cms.double(-1.),
           max_refTau_absEta = cms.double(2.4),
@@ -253,26 +263,26 @@ for useStrips in [ True, False ]:
         process.analysisSequence += getattr(process, moduleNamePuppi_TallinnL1PFTauIsolationAnalyzer)
 
 # L1PFTaus built from PFCandidates using Isobel's algorithm
-process.analyzeTallinnL1PFTausPFWrtGenHadTaus = cms.EDAnalyzer("L1PFTauAnalyzerSignal",
+process.analyzeL1PFTausPFWrtGenHadTaus = cms.EDAnalyzer("L1PFTauAnalyzerSignal",
   srcNumerator = cms.InputTag('L1PFTauProducer:L1PFTaus'),                                                              
   srcDenominator = cms.InputTag('offlineMatchedGenHadTaus'),
   typeDenominator = cms.string("gen"),                                                                            
   dqmDirectory = cms.string("L1PFTauAnalyzerSignalPF_wrtGenHadTaus")
 )
-process.analysisSequence += process.analyzeTallinnL1PFTausPFWrtGenHadTaus
+process.analysisSequence += process.analyzeL1PFTausPFWrtGenHadTaus
 
-process.analyzeTallinnL1PFTausPFWrtOfflineTaus = cms.EDAnalyzer("L1PFTauAnalyzerSignal",
+process.analyzeL1PFTausPFWrtOfflineTaus = cms.EDAnalyzer("L1PFTauAnalyzerSignal",
   srcNumerator = cms.InputTag('L1PFTauProducer:L1PFTaus'),                                                              
   srcDenominator = cms.InputTag('selectedOfflinePFTaus'),
   typeDenominator = cms.string("offline"),                                                                            
-  dqmDirectory = cms.string("L1PFTauAnalyzerSignalPF_wrtGenHadTaus")
+  dqmDirectory = cms.string("L1PFTauAnalyzerSignalPF_wrtOfflineTaus")
 )
-process.analysisSequence += process.analyzeTallinnL1PFTausPFWrtOfflineTaus
+process.analysisSequence += process.analyzeL1PFTausPFWrtOfflineTaus
 
 process.analyzeL1PFTauPairsPFWrtGenHadTaus = cms.EDAnalyzer("L1PFTauPairAnalyzer",
   srcL1PFTaus = cms.InputTag('L1PFTauProducer:L1PFTaus'),
   srcRefTaus = cms.InputTag('offlineMatchedGenHadTaus'),
-  min_refTau_pt = cms.double(30.),
+  min_refTau_pt = cms.double(20.),
   max_refTau_pt = cms.double(1.e+3),                                                                
   min_refTau_absEta = cms.double(-1.),
   max_refTau_absEta = cms.double(2.4),
@@ -283,7 +293,7 @@ process.analysisSequence += process.analyzeL1PFTauPairsPFWrtGenHadTaus
 process.analyzeL1PFTauPairsPFWrtOfflineTaus = cms.EDAnalyzer("L1PFTauPairAnalyzer",
   srcL1PFTaus = cms.InputTag('L1PFTauProducer:L1PFTaus'),
   srcRefTaus = cms.InputTag('selectedOfflinePFTaus'),
-  min_refTau_pt = cms.double(30.),
+  min_refTau_pt = cms.double(20.),
   max_refTau_pt = cms.double(1.e+3),                                                                
   min_refTau_absEta = cms.double(-1.),
   max_refTau_absEta = cms.double(2.4),
@@ -295,7 +305,7 @@ process.analysisSequence += process.analyzeL1PFTauPairsPFWrtOfflineTaus
 process.DQMStore = cms.Service("DQMStore")
 
 process.savePlots = cms.EDAnalyzer("DQMSimpleFileSaver",
-    outputFileName = cms.string('TallinnL1PFTauAnalyzer_signal_2019Jun12v2.root')
+    outputFileName = cms.string('TallinnL1PFTauAnalyzer_signal_%s_2019Jun21.root' % sample)
 )
 
 process.p = cms.Path(process.analysisSequence + process.savePlots)

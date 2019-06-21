@@ -95,8 +95,8 @@ void L1TrackAnalyzer::beginJob()
   DQMStore& dqmStore = (*edm::Service<DQMStore>());
 
   std::vector<std::string> genTau_decayModes = { "oneProng0Pi0", "oneProng1Pi0", "oneProng2Pi0", "threeProng0Pi0", "threeProng1Pi0", "all" };
-  std::vector<double> genChargedHadron_min_absEtaValues = { -1.,   1.4, -1.  };
-  std::vector<double> genChargedHadron_max_absEtaValues = {  1.4,  2.4,  2.4 };
+  std::vector<double> genChargedHadron_min_absEtaValues = { -1.,   1.4,   1.4, -1.,    -1.  };
+  std::vector<double> genChargedHadron_max_absEtaValues = {  1.4,  2.172, 2.4,  2.172,  2.4 };
   assert(genChargedHadron_min_absEtaValues.size() == genChargedHadron_max_absEtaValues.size());
   size_t numAbsEtaRanges = genChargedHadron_min_absEtaValues.size();
   for ( size_t idxAbsEtaRange = 0; idxAbsEtaRange < numAbsEtaRanges; ++idxAbsEtaRange )
