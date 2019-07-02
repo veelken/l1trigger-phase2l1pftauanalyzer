@@ -195,6 +195,10 @@ class L1TrackAnalyzer : public edm::EDAnalyzer
       , histogram_minDeltaR_numerator_(nullptr)
       , me_minDeltaR_denominator_(nullptr)
       , histogram_minDeltaR_denominator_(nullptr)
+      , me_pt_vs_absEta_numerator_(nullptr)
+      , histogram_pt_vs_absEta_numerator_(nullptr)
+      , me_pt_vs_absEta_denominator_(nullptr)
+      , histogram_pt_vs_absEta_denominator_(nullptr)
       , me_resolution_(nullptr)
       , histogram_resolution_(nullptr)
       , recTrack_type_(recTrack_type)
@@ -250,17 +254,17 @@ class L1TrackAnalyzer : public edm::EDAnalyzer
       }
       histogramName_suffix = histogramName_suffix.ReplaceAll(".", "p");
 
-      const int numBins_pt = 19;
-      float binning_pt[numBins_pt + 1] = { 
+      const int numBins_ptL = 19;
+      float binning_ptL[numBins_ptL + 1] = { 
         0., 1., 2., 3., 4., 5., 6., 7., 8., 9., 10., 12.5, 15., 17.5, 20., 25., 30., 40., 60., 100.
       };
 
       TString histogramName_pt_numerator = Form("eff%s_vs_pt_numerator%s", recTrack_type_capitalized_.data(), histogramName_suffix.Data());
-      me_pt_numerator_ = dqmStore.book1D(histogramName_pt_numerator.Data(), histogramName_pt_numerator.Data(), numBins_pt, binning_pt);
+      me_pt_numerator_ = dqmStore.book1D(histogramName_pt_numerator.Data(), histogramName_pt_numerator.Data(), numBins_ptL, binning_ptL);
       histogram_pt_numerator_ = me_pt_numerator_->getTH1();
       assert(histogram_pt_numerator_);
       TString histogramName_pt_denominator = Form("eff%s_vs_pt_denominator%s", recTrack_type_capitalized_.data(), histogramName_suffix.Data());
-      me_pt_denominator_ = dqmStore.book1D(histogramName_pt_denominator.Data(), histogramName_pt_denominator.Data(), numBins_pt, binning_pt);
+      me_pt_denominator_ = dqmStore.book1D(histogramName_pt_denominator.Data(), histogramName_pt_denominator.Data(), numBins_ptL, binning_ptL);
       histogram_pt_denominator_ = me_pt_denominator_->getTH1();
       assert(histogram_pt_denominator_);
 
@@ -290,6 +294,25 @@ class L1TrackAnalyzer : public edm::EDAnalyzer
       me_minDeltaR_denominator_ = dqmStore.book1D(histogramName_minDeltaR_denominator.Data(), histogramName_minDeltaR_denominator.Data(), 200, 0., 0.05);
       histogram_minDeltaR_denominator_ = me_minDeltaR_denominator_->getTH1();
       assert(histogram_minDeltaR_denominator_);
+
+      const int numBins_absEta = 12;
+      float binning_absEta[numBins_absEta + 1] = { 
+        0., 0.2, 0.4, 0.6, 0.8, 1.0, 1.2, 1.4, 1.6, 1.8, 2.0, 2.2, 2.4
+      };
+
+      const int numBins_ptS = 11;
+      float binning_ptS[numBins_ptS + 1] = { 
+        0., 2., 4., 6., 8., 10., 15., 20., 30., 40., 60., 100.
+      };
+
+      TString histogramName_pt_vs_absEta_numerator = Form("eff%s_vs_pt_vs_absEta_numerator%s", recTrack_type_capitalized_.data(), histogramName_suffix.Data());
+      me_pt_vs_absEta_numerator_ = dqmStore.book2D(histogramName_pt_vs_absEta_numerator.Data(), histogramName_pt_vs_absEta_numerator.Data(), numBins_absEta, binning_absEta, numBins_ptS, binning_ptS);
+      histogram_pt_vs_absEta_numerator_ = dynamic_cast<TH2*>(me_pt_vs_absEta_numerator_->getTH1());
+      assert(histogram_pt_vs_absEta_numerator_);
+      TString histogramName_pt_vs_absEta_denominator = Form("eff%s_vs_pt_vs_absEta_denominator%s", recTrack_type_capitalized_.data(), histogramName_suffix.Data());
+      me_pt_vs_absEta_denominator_ = dqmStore.book2D(histogramName_pt_vs_absEta_denominator.Data(), histogramName_pt_vs_absEta_denominator.Data(), numBins_absEta, binning_absEta, numBins_ptS, binning_ptS);
+      histogram_pt_vs_absEta_denominator_ = dynamic_cast<TH2*>(me_pt_vs_absEta_denominator_->getTH1());
+      assert(histogram_pt_vs_absEta_denominator_);
 
       TString histogramName_resolution = Form("resolution%s%s", recTrack_type_capitalized_.data(), histogramName_suffix.Data());
       me_resolution_ = dqmStore.book1D(histogramName_resolution.Data(), histogramName_resolution.Data(), 100, -0.05, +0.05);  
@@ -333,6 +356,7 @@ class L1TrackAnalyzer : public edm::EDAnalyzer
 	    histogram_eta_numerator_->Fill(match->genChargedHadron_eta(), evtWeight);
 	    histogram_phi_numerator_->Fill(match->genChargedHadron_phi(), evtWeight);
 	    histogram_minDeltaR_numerator_->Fill(minDeltaR, evtWeight);
+	    histogram_pt_vs_absEta_numerator_->Fill(match->genChargedHadron_eta(), match->genChargedHadron_pt(), evtWeight);
 	  }
 
 	  //std::cout << " filling denominator histograms" << std::endl; 
@@ -340,6 +364,7 @@ class L1TrackAnalyzer : public edm::EDAnalyzer
 	  histogram_eta_denominator_->Fill(match->genChargedHadron_eta(), evtWeight);
 	  histogram_phi_denominator_->Fill(match->genChargedHadron_phi(), evtWeight);
 	  histogram_minDeltaR_denominator_->Fill(minDeltaR, evtWeight);
+	  histogram_pt_vs_absEta_denominator_->Fill(match->genChargedHadron_eta(), match->genChargedHadron_pt(), evtWeight);
 
 	  if ( match->hasRecTrack() )
   	  {
@@ -364,6 +389,10 @@ class L1TrackAnalyzer : public edm::EDAnalyzer
     TH1* histogram_minDeltaR_numerator_;
     MonitorElement* me_minDeltaR_denominator_;
     TH1* histogram_minDeltaR_denominator_;
+    MonitorElement* me_pt_vs_absEta_numerator_;
+    TH2* histogram_pt_vs_absEta_numerator_;
+    MonitorElement* me_pt_vs_absEta_denominator_;
+    TH2* histogram_pt_vs_absEta_denominator_;
     MonitorElement* me_resolution_;
     TH1* histogram_resolution_;
     std::string recTrack_type_;
