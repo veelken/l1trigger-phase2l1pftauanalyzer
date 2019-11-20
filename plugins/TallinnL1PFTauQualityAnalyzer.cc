@@ -55,15 +55,15 @@ void TallinnL1PFTauQualityAnalyzer::beginJob()
       TString dqmDirectory = dqmDirectory_.data();
       if ( min_pt >= 0. && max_pt > 0. ) 
       { 
-	dqmDirectory.Append(Form("/pt%1.2fto%1.2f", min_pt, max_pt));
+	dqmDirectory.Append(Form("/pt%1.0fto%1.0f", min_pt, max_pt));
       }
       else if ( min_pt >= 0. ) 
       {
-	dqmDirectory.Append(Form("/ptGt%1.2f", min_pt));
+	dqmDirectory.Append(Form("/ptGt%1.0f", min_pt));
       }
       else if ( max_pt > 0. ) 
       {
-	dqmDirectory.Append(Form("/ptLt%1.2f", max_pt));
+	dqmDirectory.Append(Form("/ptLt%1.0f", max_pt));
       }
       if ( min_absEta >= 0. && max_absEta > 0. ) 
       { 
