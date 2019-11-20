@@ -65,50 +65,115 @@ process.selectedGenHadTaus = cms.EDFilter("GenJetSelector",
 )
 process.analysisSequence += process.selectedGenHadTaus
 
+#process.selectedGenHadTauFilter = cms.EDFilter("CandViewCountFilter",
+#  src = cms.InputTag('selectedGenHadTaus'),
+#  minNumber = cms.uint32(2)
+#)
+#process.analysisSequence += process.selectedGenHadTauFilter
+
 process.genMatchedOfflinePFTaus = cms.EDFilter("PATTauAntiOverlapSelector",
   src = cms.InputTag('slimmedTaus'),
   srcNotToBeFiltered = cms.VInputTag('selectedGenHadTaus'),
   dRmin = cms.double(0.3),
   invert = cms.bool(True),
-  filter = cms.bool(True)                                                          
+  filter = cms.bool(False)                                                          
 )
 process.analysisSequence += process.genMatchedOfflinePFTaus
 
 process.selectedOfflinePFTaus = cms.EDFilter("PATTauSelector",
   src = cms.InputTag('genMatchedOfflinePFTaus'),
   # CV: apply relaxed pT and eta cuts to see full pT and eta distributions
-  cut = cms.string("pt > 1. & abs(eta) < 3. & tauID('decayModeFinding') > 0.5 & tauID('byLooseCombinedIsolationDeltaBetaCorr3Hits') > 0.5")
+  cut = cms.string("pt > 1. & abs(eta) < 3. & tauID('decayModeFinding') > 0.5 & tauID('chargedIsoPtSum') < 1.5")
 )
 process.analysisSequence += process.selectedOfflinePFTaus
 
-process.selectedOfflinePFTauFilter = cms.EDFilter("CandViewCountFilter",
-  src = cms.InputTag('selectedOfflinePFTaus'),
-  minNumber = cms.uint32(1)
-)
-process.analysisSequence += process.selectedOfflinePFTauFilter
+#process.selectedOfflinePFTauFilter = cms.EDFilter("CandViewCountFilter",
+#  src = cms.InputTag('selectedOfflinePFTaus'),
+#  minNumber = cms.uint32(2)
+#)
+#process.analysisSequence += process.selectedOfflinePFTauFilter
 
 process.offlineMatchedGenHadTaus = cms.EDFilter("GenJetAntiOverlapSelector",
   src = cms.InputTag('selectedGenHadTaus'),
   srcNotToBeFiltered = cms.VInputTag('selectedOfflinePFTaus'),
   dRmin = cms.double(0.3),
   invert = cms.bool(True),
-  filter = cms.bool(True)                                                          
+  filter = cms.bool(False)                                                          
 )
 process.analysisSequence += process.offlineMatchedGenHadTaus
 
-process.analyzeGenHadTaus = cms.EDAnalyzer("GenTauAnalyzer",
+#process.offlineMatchedGenHadTauFilter = cms.EDFilter("CandViewCountFilter",
+#  src = cms.InputTag('offlineMatchedGenHadTaus'),
+#  minNumber = cms.uint32(2)
+#)
+#process.analysisSequence += process.offlineMatchedGenHadTauFilter
+
+process.analyzeGenHadTaus = cms.EDAnalyzer("GenHadTauAnalyzer",
+  src = cms.InputTag('selectedGenHadTaus'),
+  min_pt = cms.double(20.),
+  max_pt = cms.double(1.e+3),
+  min_absEta = cms.double(-1.),                                          
+  max_absEta = cms.double(2.4),
+  dqmDirectory = cms.string("GenHadTauAnalyzer")
+)
+process.analysisSequence += process.analyzeGenHadTaus
+
+process.analyzeGenHadTausOfflineMatched = cms.EDAnalyzer("GenHadTauAnalyzer",
   src = cms.InputTag('offlineMatchedGenHadTaus'),
-  min_pt = cms.double(30.),
+  min_pt = cms.double(20.),
+  max_pt = cms.double(1.e+3),
+  min_absEta = cms.double(-1.),                                          
+  max_absEta = cms.double(2.4),
+  dqmDirectory = cms.string("GenHadTauAnalyzer_offlineMatched")
+)
+process.analysisSequence += process.analyzeGenHadTausOfflineMatched
+
+process.prunedGenTaus = cms.EDFilter("GenParticleSelector",
+  src = cms.InputTag('prunedGenParticles'),
+  cut = cms.string("abs(pdgId) = 15"),                         
+  stableOnly = cms.bool(False),
+  filter = cms.bool(False)
+)
+process.analysisSequence += process.prunedGenTaus
+
+process.offlineMatchedGenTaus = cms.EDFilter("GenParticleAntiOverlapSelector",
+  src = cms.InputTag('prunedGenTaus'),
+  srcNotToBeFiltered = cms.VInputTag('selectedOfflinePFTaus'),
+  dRmin = cms.double(0.3),
+  invert = cms.bool(True),
+  filter = cms.bool(True)                                                          
+)
+process.analysisSequence += process.offlineMatchedGenTaus
+
+#process.offlineMatchedGenTauFilter = cms.EDFilter("CandViewCountFilter",
+#  src = cms.InputTag('offlineMatchedGenTaus'),
+#  minNumber = cms.uint32(2)
+#)
+#process.analysisSequence += process.offlineMatchedGenTauFilter
+
+process.analyzeGenTaus = cms.EDAnalyzer("GenTauAnalyzer",
+  src = cms.InputTag('prunedGenTaus'),
+  min_pt = cms.double(20.),
   max_pt = cms.double(1.e+3),
   min_absEta = cms.double(-1.),                                          
   max_absEta = cms.double(2.4),
   dqmDirectory = cms.string("GenTauAnalyzer")
 )
-process.analysisSequence += process.analyzeGenHadTaus
+process.analysisSequence += process.analyzeGenTaus
+
+process.analyzeGenTausOfflineMatched = cms.EDAnalyzer("GenTauAnalyzer",
+  src = cms.InputTag('offlineMatchedGenTaus'),
+  min_pt = cms.double(20.),
+  max_pt = cms.double(1.e+3),
+  min_absEta = cms.double(-1.),                                          
+  max_absEta = cms.double(2.4),
+  dqmDirectory = cms.string("GenTauAnalyzer_offlineMatched")
+)
+process.analysisSequence += process.analyzeGenTausOfflineMatched
 
 process.analyzeOfflineTaus = cms.EDAnalyzer("PATTauAnalyzer",
   src = cms.InputTag('selectedOfflinePFTaus'),
-  min_pt = cms.double(30.),
+  min_pt = cms.double(20.),
   max_pt = cms.double(1.e+3),
   min_absEta = cms.double(-1.),                                          
   max_absEta = cms.double(2.4),                                             
@@ -120,7 +185,7 @@ process.analysisSequence += process.analyzeOfflineTaus
 process.DQMStore = cms.Service("DQMStore")
 
 process.savePlots = cms.EDAnalyzer("DQMSimpleFileSaver",
-    outputFileName = cms.string('GenHadTauAnalyzer_signal_%s_2019Jun21.root' % sample)
+    outputFileName = cms.string('GenHadTauAnalyzer_signal_%s_2019Oct16.root' % sample)
 )
 
 process.p = cms.Path(process.analysisSequence + process.savePlots)

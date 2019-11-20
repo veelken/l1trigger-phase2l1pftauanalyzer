@@ -109,34 +109,38 @@ void compEfficiency_and_Rate()
   gROOT->SetBatch(true);
 
   std::string inputFilePath = Form("%s/src/L1Trigger/TallinnL1PFTauAnalyzer/test/", gSystem->Getenv("CMSSW_BASE"));
-  std::string inputFileName_signal = "TallinnL1PFTauAnalyzer_signal_2019Jun12.root";
+  std::string inputFileName_signal = "TallinnL1PFTauAnalyzer_signal_qqH_2019Jun18.root";
   TFile* inputFile_signal = openFile(inputFilePath, inputFileName_signal);
-  std::string inputFileName_background = "TallinnL1PFTauAnalyzer_background_2019Jun12.root";
+  std::string inputFileName_background = "TallinnL1PFTauAnalyzer_background_2019Jun18.root";
   TFile* inputFile_background = openFile(inputFilePath, inputFileName_background);
 
   std::vector<std::string> pfAlgos;
-  pfAlgos.push_back("WithStripsAndPreselectionPF");
+  //pfAlgos.push_back("WithStripsAndPreselectionPF");
   pfAlgos.push_back("WithStripsWithoutPreselectionPF");
-  pfAlgos.push_back("WithoutStripsWithPreselectionPF");
+  //pfAlgos.push_back("WithoutStripsWithPreselectionPF");
   pfAlgos.push_back("WithoutStripsAndPreselectionPF");
-  pfAlgos.push_back("WithStripsAndPreselectionPuppi");
-  pfAlgos.push_back("WithStripsWithoutPreselectionPuppi");
-  pfAlgos.push_back("WithoutStripsWithPreselectionPuppi");
-  pfAlgos.push_back("WithoutStripsAndPreselectionPuppi");
+  //pfAlgos.push_back("WithStripsAndPreselectionPuppi");
+  //pfAlgos.push_back("WithStripsWithoutPreselectionPuppi");
+  //pfAlgos.push_back("WithoutStripsWithPreselectionPuppi");
+  //pfAlgos.push_back("WithoutStripsAndPreselectionPuppi");
 
   std::vector<std::string> absEtaRanges;
-  absEtaRanges.push_back("absEtaLt1p40");
-  absEtaRanges.push_back("absEta1p40to2p40");
+  //absEtaRanges.push_back("absEtaLt1p40");
+  //absEtaRanges.push_back("absEta1p40to2p17");
+  absEtaRanges.push_back("absEtaLt2p17");
   absEtaRanges.push_back("absEtaLt2p40");
 
   std::vector<std::string> isolationWPs;
-  isolationWPs.push_back("relChargedIsoLt0p40");
-  isolationWPs.push_back("relChargedIsoLt0p20");
-  isolationWPs.push_back("relChargedIsoLt0p10");
-  isolationWPs.push_back("relChargedIsoLt0p05");
+  isolationWPs.push_back("relChargedIsoLt0p40"); // vLoose
+  isolationWPs.push_back("relChargedIsoLt0p20"); // Loose
+  isolationWPs.push_back("relChargedIsoLt0p10"); // Medium
+  isolationWPs.push_back("relChargedIsoLt0p05"); // Tight
+  isolationWPs.push_back("relChargedIsoLt0p02"); // vTight
+  isolationWPs.push_back("relChargedIsoLt0p01"); // vvTight
 
   double rate_target        = 12.e+3; // 12 kHz
-  double rate_accCorrFactor =  4.;    // extrapolation from |eta| < 1.4 to full HL-LHC tracking acceptance (squared for ditau trigger)
+  //double rate_accCorrFactor =  4.;    // extrapolation from |eta| < 1.4 to full HL-LHC tracking acceptance (squared for ditau trigger)
+  double rate_accCorrFactor =  1.;    // no extrapolation
 
   std::string dqmDirectory = "DQMData/TallinnL1PFTauPairAnalyzer";
 
@@ -152,7 +156,9 @@ void compEfficiency_and_Rate()
 	  absEtaRange != absEtaRanges.end(); ++absEtaRange ) {
       for ( std::vector<std::string>::const_iterator isolationWP = isolationWPs.begin();
 	    isolationWP != isolationWPs.end(); ++isolationWP ) {
-	std::string histogram2dName_signal = Form("%s%s_wrtOfflineTaus/efficiency_or_rate_%s_%s", 
+	//std::string histogram2dName_signal = Form("%s%s_wrtOfflineTaus/efficiency_or_rate_%s_%s", 
+        //  dqmDirectory.data(), pfAlgo->data(), absEtaRange->data(), isolationWP->data());
+	std::string histogram2dName_signal = Form("%s%s_wrtGenHadTaus/efficiency_or_rate_%s_%s", 
           dqmDirectory.data(), pfAlgo->data(), absEtaRange->data(), isolationWP->data());
         TH2* histogram2d_signal = loadHistogram2d(inputFile_signal, histogram2dName_signal);
 	std::string histogram2dName_background = Form("%s%s/efficiency_or_rate_%s_%s", 
@@ -178,7 +184,9 @@ void compEfficiency_and_Rate()
 	absEtaRange != absEtaRanges.end(); ++absEtaRange ) {
     for ( std::vector<std::string>::const_iterator isolationWP = isolationWPs_isobel.begin();
 	  isolationWP != isolationWPs_isobel.end(); ++isolationWP ) {
-      std::string histogram2dName_signal = Form("%sPF_wrtOfflineTaus/efficiency_or_rate_%s_%s", 
+      //std::string histogram2dName_signal = Form("%sPF_wrtOfflineTaus/efficiency_or_rate_%s_%s", 
+      //  dqmDirectory_isobel.data(), absEtaRange->data(), isolationWP->data());
+      std::string histogram2dName_signal = Form("%sPF_wrtGenHadTaus/efficiency_or_rate_%s_%s", 
         dqmDirectory_isobel.data(), absEtaRange->data(), isolationWP->data());
       TH2* histogram2d_signal = loadHistogram2d(inputFile_signal, histogram2dName_signal);
       std::string histogram2dName_background = Form("%sPF/efficiency_or_rate_%s_%s", 

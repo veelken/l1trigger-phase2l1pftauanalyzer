@@ -51,6 +51,11 @@ void PATTauAnalyzer::beginJob()
   {
     plot->bookHistograms(dqmStore);
   }
+
+  TString histogramName_deltaR = "deltaR";
+  me_deltaR_ = dqmStore.book1D(histogramName_deltaR.Data(), histogramName_deltaR.Data(), 50, 0., 5.); 
+  histogram_deltaR_ = me_deltaR_->getTH1();
+  assert(histogram_deltaR_);
 }
 
 namespace
@@ -79,6 +84,11 @@ void PATTauAnalyzer::analyze(const edm::Event& evt, const edm::EventSetup& es)
   {    
     plot->fillHistograms(offlineTaus_sorted, evtWeight);
   }
+
+  const pat::Tau& offlineTau_lead = offlineTaus_sorted[0];
+  const pat::Tau& offlineTau_sublead = offlineTaus_sorted[1];
+  double dR = reco::deltaR(offlineTau_lead.eta(), offlineTau_lead.phi(), offlineTau_sublead.eta(), offlineTau_sublead.phi());
+  histogram_deltaR_->Fill(dR, evtWeight);
 }
 
 void PATTauAnalyzer::endJob()

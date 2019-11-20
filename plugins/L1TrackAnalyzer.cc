@@ -18,8 +18,32 @@ L1TrackAnalyzer::L1TrackAnalyzer(const edm::ParameterSet& cfg)
   src_genTaus_ = cfg.getParameter<edm::InputTag>("srcGenTaus");
   token_genTaus_ = consumes<reco::GenJetCollection>(src_genTaus_);
 
-  src_offlineVertices_ = cfg.getParameter<edm::InputTag>("srcOfflineVertices");
-  token_offlineVertices_ = consumes<reco::VertexCollection>(src_offlineVertices_);
+  std::string vtxMode_string = cfg.getParameter<std::string>("vtxMode");
+  if ( vtxMode_string == "genVtx" ) 
+  {
+    vtxMode_ = kGenVtx;
+
+    src_genVertex_position_ = cfg.getParameter<edm::InputTag>("srcGenVertex_position");
+    token_genVertex_position_ = consumes<reco::TrackBase::Point>(src_genVertex_position_);
+  }
+  else if ( vtxMode_string == "recVtx" ) 
+  {
+    vtxMode_ = kRecVtx;
+
+    src_offlineVertices_ = cfg.getParameter<edm::InputTag>("srcOfflineVertices");
+    token_offlineVertices_ = consumes<reco::VertexCollection>(src_offlineVertices_);
+
+    src_l1Vertices_ = cfg.getParameter<edm::InputTag>("srcL1Vertices");
+    token_l1Vertices_ = consumes<l1t::VertexCollection>(src_l1Vertices_);
+
+    src_l1PFVertex_z_ = cfg.getParameter<edm::InputTag>("srcL1PFVertex_z");
+    token_l1PFVertex_z_ = consumes<float>(src_l1PFVertex_z_);
+  }
+  else
+  {
+    throw cms::Exception("L1TrackAnalyzer") 
+      << " Invalid Configuration parameter 'vtxMode' = " << vtxMode_string << " !!\n";;
+  }
 
   src_offlineTracks_ = cfg.getParameter<edm::InputTag>("srcOfflineTracks");
   token_offlineTracks_ = consumes<reco::TrackCollection>(src_offlineTracks_);
@@ -27,14 +51,8 @@ L1TrackAnalyzer::L1TrackAnalyzer(const edm::ParameterSet& cfg)
   src_offlinePFCands_ = cfg.getParameter<edm::InputTag>("srcOfflinePFCands");
   token_offlinePFCands_ = consumes<reco::PFCandidateCollection>(src_offlinePFCands_);
 
-  src_l1Vertices_ = cfg.getParameter<edm::InputTag>("srcL1Vertices");
-  token_l1Vertices_ = consumes<l1t::VertexCollection>(src_l1Vertices_);
-
   src_l1Tracks_ = cfg.getParameter<edm::InputTag>("srcL1Tracks");
   token_l1Tracks_ = consumes<l1t::TrackCollection>(src_l1Tracks_);
-
-  src_l1PFVertex_z_ = cfg.getParameter<edm::InputTag>("srcL1PFVertex_z");
-  token_l1PFVertex_z_ = consumes<float>(src_l1PFVertex_z_);
 
   src_l1PFCands_ = cfg.getParameter<edm::InputTag>("srcL1PFCands");
   token_l1PFCands_ = consumes<l1t::PFCandidateCollection>(src_l1PFCands_);
@@ -177,14 +195,19 @@ void L1TrackAnalyzer::beginJob()
 namespace
 {
   // auxiliary function to select offline reconstructed tracks of "good quality" 
+  bool passesOfflineTrackQualityCuts(const reco::Track& track, const reco::TrackBase::Point& primaryVertex_position)
+  {    
+    bool passesQualityCuts = ( TMath::Abs(track.dz(primaryVertex_position))  <   0.4  &&
+			       track.hitPattern().numberOfValidPixelHits()   >=  0    &&
+			       track.hitPattern().numberOfValidHits()        >=  3    &&
+			       TMath::Abs(track.dxy(primaryVertex_position)) <   0.03 &&
+			       track.normalizedChi2()                        < 100.   ) ? true : false;
+    return passesQualityCuts;
+  }
+
   bool passesOfflineTrackQualityCuts(const reco::Track& track, const reco::Vertex* primaryVertex)
   {    
-    bool passesQualityCuts = ( primaryVertex                                             && 
-			       TMath::Abs(track.dz(primaryVertex->position()))  <   0.4  &&
-			       track.hitPattern().numberOfValidPixelHits()      >=  0    &&
-			       track.hitPattern().numberOfValidHits()           >=  3    &&
-			       TMath::Abs(track.dxy(primaryVertex->position())) <   0.03 &&
-			       track.normalizedChi2()                           < 100.   ) ? true : false;
+    bool passesQualityCuts = ( primaryVertex && passesOfflineTrackQualityCuts(track, primaryVertex->position()) ) ? true : false;
     return passesQualityCuts;
   }
 
@@ -364,9 +387,18 @@ void L1TrackAnalyzer::analyze(const edm::Event& evt, const edm::EventSetup& es)
   const double evtWeight = 1.;
 
   //-----------------------------------------------------------------------------
+  // process generator-level event vertex
+  edm::Handle<reco::TrackBase::Point> genPrimaryVertex_position;
+  if ( vtxMode_ == kGenVtx ) 
+  {
+    evt.getByToken(token_genVertex_position_, genPrimaryVertex_position);    
+  }
+  //-----------------------------------------------------------------------------
+
+  //-----------------------------------------------------------------------------
   // process offline reconstructed vertices
   const reco::Vertex* offlinePrimaryVertex = nullptr;
-  if ( src_offlineVertices_.label() != "" ) 
+  if ( vtxMode_ == kRecVtx && src_offlineVertices_.label() != "" ) 
   {
     edm::Handle<reco::VertexCollection> offlineVertices;
     evt.getByToken(token_offlineVertices_, offlineVertices);    
@@ -385,8 +417,9 @@ void L1TrackAnalyzer::analyze(const edm::Event& evt, const edm::EventSetup& es)
       std::vector<const reco::Track*> selectedOfflineTracks;
       for ( reco::TrackCollection::const_iterator recTrack = offlineTracks->begin(); recTrack != offlineTracks->end(); ++recTrack )
       {
-        if (  idxQualityCuts == kQualityCuts_disabled                                                                    ||
-	     (idxQualityCuts == kQualityCuts_enabled  && passesOfflineTrackQualityCuts(*recTrack, offlinePrimaryVertex)) )
+        if (  idxQualityCuts == kQualityCuts_disabled                                                      ||
+	     (vtxMode_ == kGenVtx && passesOfflineTrackQualityCuts(*recTrack, *genPrimaryVertex_position)) ||
+	     (vtxMode_ == kRecVtx && passesOfflineTrackQualityCuts(*recTrack, offlinePrimaryVertex))       )
 	{
 	  selectedOfflineTracks.push_back(&(*recTrack));
 	}
@@ -423,8 +456,8 @@ void L1TrackAnalyzer::analyze(const edm::Event& evt, const edm::EventSetup& es)
       }
 
       const std::vector<efficiencyPlotEntryType*>* efficiencyPlots = nullptr;
-      if      ( idxQualityCuts == kQualityCuts_disabled )  efficiencyPlots = &efficiencyPlots_offlineTracks_woQualityCuts_;
-      else if ( idxQualityCuts == kQualityCuts_enabled  )  efficiencyPlots = &efficiencyPlots_offlineTracks_wQualityCuts_;
+      if      ( idxQualityCuts == kQualityCuts_disabled ) efficiencyPlots = &efficiencyPlots_offlineTracks_woQualityCuts_;
+      else if ( idxQualityCuts == kQualityCuts_enabled  ) efficiencyPlots = &efficiencyPlots_offlineTracks_wQualityCuts_;
       else assert(0);
       for ( auto efficiencyPlot : *efficiencyPlots )
       {
@@ -453,8 +486,9 @@ void L1TrackAnalyzer::analyze(const edm::Event& evt, const edm::EventSetup& es)
 	  else if ( recPFCand->gsfTrackRef().isNonnull() ) recTrack = recPFCand->gsfTrackRef().get();
 	  if ( !recTrack ) continue;
 
-          if (  idxQualityCuts == kQualityCuts_disabled                                                                     ||
-	       (idxQualityCuts == kQualityCuts_enabled  && passesOfflineTrackQualityCuts(*recTrack, offlinePrimaryVertex)) )
+          if (  idxQualityCuts == kQualityCuts_disabled                                                      ||
+	       (vtxMode_ == kGenVtx && passesOfflineTrackQualityCuts(*recTrack, *genPrimaryVertex_position)) ||
+	       (vtxMode_ == kRecVtx && passesOfflineTrackQualityCuts(*recTrack, offlinePrimaryVertex))       )
   	  {
 	    selectedOfflineTracks.push_back(&(*recTrack));
 	  }
@@ -470,8 +504,8 @@ void L1TrackAnalyzer::analyze(const edm::Event& evt, const edm::EventSetup& es)
 	debug_);     
 
       const std::vector<efficiencyPlotEntryType*>* efficiencyPlots = nullptr;
-      if      ( idxQualityCuts == kQualityCuts_disabled )  efficiencyPlots = &efficiencyPlots_offlinePFCandTracks_woQualityCuts_;
-      else if ( idxQualityCuts == kQualityCuts_enabled  )  efficiencyPlots = &efficiencyPlots_offlinePFCandTracks_wQualityCuts_;
+      if      ( idxQualityCuts == kQualityCuts_disabled ) efficiencyPlots = &efficiencyPlots_offlinePFCandTracks_woQualityCuts_;
+      else if ( idxQualityCuts == kQualityCuts_enabled  ) efficiencyPlots = &efficiencyPlots_offlinePFCandTracks_wQualityCuts_;
       else assert(0);
       for ( auto efficiencyPlot : *efficiencyPlots )
       {
@@ -483,45 +517,52 @@ void L1TrackAnalyzer::analyze(const edm::Event& evt, const edm::EventSetup& es)
 
   //-----------------------------------------------------------------------------
   // process tracks reconstructed on L1 trigger level
-  if ( src_l1Vertices_.label() != "" && src_l1Tracks_.label() != "" )
+  if ( src_l1Tracks_.label() != "" )
   {
-    edm::Handle<l1t::VertexCollection> l1Vertices;
-    evt.getByToken(token_l1Vertices_, l1Vertices);
-    if ( l1Vertices->size() > 0 ) 
+    double l1PrimaryVertex_z = 0.;
+    bool l1PrimaryVertex_found = false;
+    if ( vtxMode_ == kRecVtx && src_l1Vertices_.label() != "" ) 
     {
-      double l1PrimaryVertex_z = l1Vertices->at(0).z0();
-
-      edm::Handle<l1t::TrackCollection> l1Tracks;
-      evt.getByToken(token_l1Tracks_, l1Tracks);
-  
-      for ( int idxQualityCuts = kQualityCuts_disabled; idxQualityCuts <= kQualityCuts_enabled; ++idxQualityCuts )
+      edm::Handle<l1t::VertexCollection> l1Vertices;
+      evt.getByToken(token_l1Vertices_, l1Vertices);
+      if ( l1Vertices->size() > 0 ) 
       {
-        std::vector<const l1t::Track*> selectedL1Tracks;
-        for ( l1t::TrackCollection::const_iterator recTrack = l1Tracks->begin(); recTrack != l1Tracks->end(); ++recTrack )
-        {
-          if (  idxQualityCuts == kQualityCuts_disabled                                                            ||
-	       (idxQualityCuts == kQualityCuts_enabled  && passesL1TrackQualityCuts(*recTrack, l1PrimaryVertex_z)) )
-  	  {
-	    selectedL1Tracks.push_back(&(*recTrack));
-	  }
-	}
-      
-        std::vector<GenChargedHadronToL1TrackMatch_and_genTau_decayMode> genChargedHadronToTrackMatches = getGenChargedHadronToL1TrackMatches(
-  	  genTauChargedHadrons,
-          selectedL1Tracks,
-	  debug_);     
-        std::vector<const GenChargedHadronToL1TrackMatch_and_genTau_decayMode*> cleanedGenChargedHadronToTrackMatches = cleanGenChargedHadronToTrackMatches(
-          genChargedHadronToTrackMatches,
-	  debug_);     
+        l1PrimaryVertex_z = l1Vertices->at(0).z0();
+	l1PrimaryVertex_found = true;
+      }
+    }
 
-        const std::vector<efficiencyPlotEntryType*>* efficiencyPlots = nullptr;
-        if      ( idxQualityCuts == kQualityCuts_disabled )  efficiencyPlots = &efficiencyPlots_l1Tracks_woQualityCuts_;
-        else if ( idxQualityCuts == kQualityCuts_enabled  )  efficiencyPlots = &efficiencyPlots_l1Tracks_wQualityCuts_;
-        else assert(0);
-        for ( auto efficiencyPlot : *efficiencyPlots )
-        {
-	  efficiencyPlot->fillHistograms(cleanedGenChargedHadronToTrackMatches, evtWeight);
-        }
+    edm::Handle<l1t::TrackCollection> l1Tracks;
+    evt.getByToken(token_l1Tracks_, l1Tracks);
+  
+    for ( int idxQualityCuts = kQualityCuts_disabled; idxQualityCuts <= kQualityCuts_enabled; ++idxQualityCuts )
+    {
+      std::vector<const l1t::Track*> selectedL1Tracks;
+      for ( l1t::TrackCollection::const_iterator recTrack = l1Tracks->begin(); recTrack != l1Tracks->end(); ++recTrack )
+      {
+	if (  idxQualityCuts == kQualityCuts_disabled                                                                                 ||
+	     (vtxMode_ == kGenVtx &&  passesL1TrackQualityCuts(*recTrack, genPrimaryVertex_position->z()))                            ||
+	     (vtxMode_ == kRecVtx && (passesL1TrackQualityCuts(*recTrack, l1PrimaryVertex_z)              || !l1PrimaryVertex_found)) )
+  	{
+	  selectedL1Tracks.push_back(&(*recTrack));
+	}
+      }
+      
+      std::vector<GenChargedHadronToL1TrackMatch_and_genTau_decayMode> genChargedHadronToTrackMatches = getGenChargedHadronToL1TrackMatches(
+        genTauChargedHadrons,
+	selectedL1Tracks,
+	debug_);     
+      std::vector<const GenChargedHadronToL1TrackMatch_and_genTau_decayMode*> cleanedGenChargedHadronToTrackMatches = cleanGenChargedHadronToTrackMatches(
+        genChargedHadronToTrackMatches,
+	debug_);     
+
+      const std::vector<efficiencyPlotEntryType*>* efficiencyPlots = nullptr;
+      if      ( idxQualityCuts == kQualityCuts_disabled ) efficiencyPlots = &efficiencyPlots_l1Tracks_woQualityCuts_;
+      else if ( idxQualityCuts == kQualityCuts_enabled  ) efficiencyPlots = &efficiencyPlots_l1Tracks_wQualityCuts_;
+      else assert(0);
+      for ( auto efficiencyPlot : *efficiencyPlots )
+      {
+	efficiencyPlot->fillHistograms(cleanedGenChargedHadronToTrackMatches, evtWeight);
       }
     }
   }
@@ -529,10 +570,13 @@ void L1TrackAnalyzer::analyze(const edm::Event& evt, const edm::EventSetup& es)
 
   //-----------------------------------------------------------------------------
   // process tracks associated to PF candidates reconstructed on L1 trigger level
-  if ( src_l1PFVertex_z_.label() != "" && src_l1PFCands_.label() != "" )
-  {
+  if ( src_l1PFCands_.label() != "" )
+  {    
     edm::Handle<float> l1PrimaryVertex_z;
-    evt.getByToken(token_l1PFVertex_z_, l1PrimaryVertex_z);
+    if ( vtxMode_ == kRecVtx && src_l1PFVertex_z_.label() != "" )
+    {
+      evt.getByToken(token_l1PFVertex_z_, l1PrimaryVertex_z);
+    }
 
     edm::Handle<l1t::PFCandidateCollection> l1PFCands;
     evt.getByToken(token_l1PFCands_, l1PFCands);
@@ -552,8 +596,10 @@ void L1TrackAnalyzer::analyze(const edm::Event& evt, const edm::EventSetup& es)
 	  if ( recPFTrack->track().isNonnull() ) recTrack = recPFTrack->track().get();
 	  if ( !recTrack ) continue;
 
-          if (  idxQualityCuts == kQualityCuts_disabled                                                               ||
-	       (idxQualityCuts == kQualityCuts_enabled  && passesL1TrackQualityCuts(*recPFTrack, *l1PrimaryVertex_z)) ) // CV: apply dz cut using l1t::PFTrack
+	  // CV: apply dz cut using l1t::PFTrack
+          if (  idxQualityCuts == kQualityCuts_disabled                                                       ||
+	       (vtxMode_ == kGenVtx && passesL1TrackQualityCuts(*recPFTrack, genPrimaryVertex_position->z())) ||	
+	       (vtxMode_ == kRecVtx && passesL1TrackQualityCuts(*recPFTrack, *l1PrimaryVertex_z))             ) 
 	  {
 	    selectedL1Tracks.push_back(&(*recTrack));
 	  }
@@ -569,8 +615,8 @@ void L1TrackAnalyzer::analyze(const edm::Event& evt, const edm::EventSetup& es)
 	debug_);     
 
       const std::vector<efficiencyPlotEntryType*>* efficiencyPlots = nullptr;
-      if      ( idxQualityCuts == kQualityCuts_disabled )  efficiencyPlots = &efficiencyPlots_l1PFCandTracks_woQualityCuts_;
-      else if ( idxQualityCuts == kQualityCuts_enabled  )  efficiencyPlots = &efficiencyPlots_l1PFCandTracks_wQualityCuts_;
+      if      ( idxQualityCuts == kQualityCuts_disabled ) efficiencyPlots = &efficiencyPlots_l1PFCandTracks_woQualityCuts_;
+      else if ( idxQualityCuts == kQualityCuts_enabled  ) efficiencyPlots = &efficiencyPlots_l1PFCandTracks_wQualityCuts_;
       else assert(0);
       for ( auto efficiencyPlot : *efficiencyPlots )
       {

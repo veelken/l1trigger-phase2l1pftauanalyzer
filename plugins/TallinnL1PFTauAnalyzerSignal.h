@@ -19,6 +19,7 @@
 #include "DataFormats/TauReco/interface/PFTau.h"                     // reco::PFTau::kOneProng0PiZero, reco::PFTau::kOneProng1PiZero,...
 
 #include <TH1.h>     // TH1
+#include <TH2.h>     // TH2
 #include <TString.h> // TString, Form()
 #include <TMath.h>   // TMath::Abs(), TMath::Pi()
 
@@ -71,6 +72,10 @@ class TallinnL1PFTauAnalyzerSignal : public edm::EDAnalyzer
       , histogram_minDeltaR_numerator_(nullptr)
       , me_minDeltaR_denominator_(nullptr)
       , histogram_minDeltaR_denominator_(nullptr)
+      , me_pt_vs_absEta_numerator_(nullptr)
+      , histogram_pt_vs_absEta_numerator_(nullptr)
+      , me_pt_vs_absEta_denominator_(nullptr)
+      , histogram_pt_vs_absEta_denominator_(nullptr)
       , min_pt_(min_pt)
       , max_pt_(max_pt)
       , min_absEta_(min_absEta)
@@ -129,6 +134,25 @@ class TallinnL1PFTauAnalyzerSignal : public edm::EDAnalyzer
       me_minDeltaR_denominator_ = dqmStore.book1D(histogramName_minDeltaR_denominator.Data(), histogramName_minDeltaR_denominator.Data(), 50, 0., 5.); 
       histogram_minDeltaR_denominator_ = me_minDeltaR_denominator_->getTH1();
       assert(histogram_minDeltaR_denominator_);
+
+      const int numBins_absEta = 6;
+      float binning_absEta[numBins_absEta + 1] = { 
+        0., 0.4, 0.8, 1.2, 1.6, 2.0, 2.4
+      };
+
+      const int numBins_pt = 8;
+      float binning_pt[numBins_pt + 1] = { 
+        20., 25., 30., 35., 40., 50., 60., 80., 100.
+      };
+
+      TString histogramName_pt_vs_absEta_numerator = Form("effL1PFTau_vs_pt_vs_absEta_numerator_%s", histogramName_suffix.Data());
+      me_pt_vs_absEta_numerator_ = dqmStore.book2D(histogramName_pt_vs_absEta_numerator.Data(), histogramName_pt_vs_absEta_numerator.Data(), numBins_absEta, binning_absEta, numBins_pt, binning_pt);
+      histogram_pt_vs_absEta_numerator_ = dynamic_cast<TH2*>(me_pt_vs_absEta_numerator_->getTH1());
+      assert(histogram_pt_vs_absEta_numerator_);
+      TString histogramName_pt_vs_absEta_denominator = Form("effL1PFTau_vs_pt_vs_absEta_denominator_%s", histogramName_suffix.Data());
+      me_pt_vs_absEta_denominator_ = dqmStore.book2D(histogramName_pt_vs_absEta_denominator.Data(), histogramName_pt_vs_absEta_denominator.Data(), numBins_absEta, binning_absEta, numBins_pt, binning_pt);
+      histogram_pt_vs_absEta_denominator_ = dynamic_cast<TH2*>(me_pt_vs_absEta_denominator_->getTH1());
+      assert(histogram_pt_vs_absEta_denominator_);
     }
     void fillHistograms(const l1t::TallinnL1PFTauCollection& numeratorTaus, const reco::GenJetCollection& denominatorTaus, double evtWeight)
     {
@@ -182,6 +206,8 @@ class TallinnL1PFTauAnalyzerSignal : public edm::EDAnalyzer
 	  histogram_minDeltaR_denominator_->Fill(minDeltaR, evtWeight);
 	  if ( isMatched ) histogram_minDeltaR_numerator_->Fill(minDeltaR, evtWeight);
 	}
+	histogram_pt_vs_absEta_denominator_->Fill(denominatorTau_absEta, denominatorTau.pt(), evtWeight);
+	if ( isMatched ) histogram_pt_vs_absEta_numerator_->Fill(denominatorTau_absEta, denominatorTau.pt(), evtWeight);
       }
     }
     void fillHistograms(const l1t::TallinnL1PFTauCollection& numeratorTaus, const pat::TauCollection& denominatorTaus, double evtWeight)
@@ -239,6 +265,8 @@ class TallinnL1PFTauAnalyzerSignal : public edm::EDAnalyzer
 	  histogram_minDeltaR_denominator_->Fill(minDeltaR, evtWeight);
 	  if ( isMatched ) histogram_minDeltaR_numerator_->Fill(minDeltaR, evtWeight);
 	}
+	histogram_pt_vs_absEta_denominator_->Fill(denominatorTau_absEta, denominatorTau.pt(), evtWeight);
+	if ( isMatched ) histogram_pt_vs_absEta_numerator_->Fill(denominatorTau_absEta, denominatorTau.pt(), evtWeight);
       }
     }
     MonitorElement* me_pt_numerator_;
@@ -257,6 +285,10 @@ class TallinnL1PFTauAnalyzerSignal : public edm::EDAnalyzer
     TH1* histogram_minDeltaR_numerator_;
     MonitorElement* me_minDeltaR_denominator_;
     TH1* histogram_minDeltaR_denominator_;
+    MonitorElement* me_pt_vs_absEta_numerator_;
+    TH2* histogram_pt_vs_absEta_numerator_;
+    MonitorElement* me_pt_vs_absEta_denominator_;
+    TH2* histogram_pt_vs_absEta_denominator_;
     // cuts applied to offline and generator-level taus in denominator 
     double min_pt_;
     double max_pt_;

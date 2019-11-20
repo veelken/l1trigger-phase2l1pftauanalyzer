@@ -109,19 +109,39 @@ process.analyzeVertices = cms.EDAnalyzer("L1VertexAnalyzer",
 )
 process.analysisSequence += process.analyzeVertices
 
-process.analyzeTracks = cms.EDAnalyzer("L1TrackAnalyzer",
+process.analyzeTracksWrtRecVertex = cms.EDAnalyzer("L1TrackAnalyzer",
   srcGenTaus = cms.InputTag('selectedGenHadTaus'),
-  srcOfflineVertices = cms.InputTag('offlineSlimmedPrimaryVertices'),
-  srcOfflineTracks = cms.InputTag('generalTracks'),
+  vtxMode = cms.string("recVtx"),
+  srcOfflineVertices = cms.InputTag('offlineSlimmedPrimaryVertices'),                                       
+  srcOfflineTracks = cms.InputTag('generalTracks'),                                                     
   srcOfflinePFCands = cms.InputTag('particleFlow'),
-  srcL1Vertices = cms.InputTag('VertexProducer:l1vertextdr'),                           
+  srcL1Vertices = cms.InputTag('VertexProducer:l1vertextdr'),                                                  
   srcL1Tracks = cms.InputTag('TTTracksFromTracklet:Level1TTTracks'),
-  srcL1PFVertex_z = cms.InputTag('l1pfProducerBarrel:z0'),
+  srcL1PFVertex_z = cms.InputTag('l1pfProducerBarrel:z0'),                                                     
   srcL1PFCands = cms.InputTag('l1pfCandidates:PF'),
-  dqmDirectory = cms.string("L1TrackAnalyzer"),
+  dqmDirectory = cms.string("L1TrackAnalyzerWrtRecVertex"),
   debug = cms.bool(False)                                     
 )
-process.analysisSequence += process.analyzeTracks
+process.analysisSequence += process.analyzeTracksWrtRecVertex
+
+process.genVertex = cms.EDProducer("GenVertexProducer",
+  src = cms.InputTag('prunedGenParticles'),
+  pdgIds = cms.vint32(-15, +15) # CV: use { -15, +15 } for signal, empty list for background                                    
+) 
+process.analysisSequence += process.genVertex
+
+process.analyzeTracksWrtGenVertex = cms.EDAnalyzer("L1TrackAnalyzer",
+  srcGenTaus = cms.InputTag('selectedGenHadTaus'),
+  vtxMode = cms.string("genVtx"),
+  srcGenVertex_position = cms.InputTag('genVertex:position'),                                                   
+  srcOfflineTracks = cms.InputTag('generalTracks'),
+  srcOfflinePFCands = cms.InputTag('particleFlow'),
+  srcL1Tracks = cms.InputTag('TTTracksFromTracklet:Level1TTTracks'),
+  srcL1PFCands = cms.InputTag('l1pfCandidates:PF'),                                                       
+  dqmDirectory = cms.string("L1TrackAnalyzerWrtGenVertex"),
+  debug = cms.bool(False)                                     
+)
+process.analysisSequence += process.analyzeTracksWrtGenVertex
 
 for useStrips in [ True, False ]:
     for applyPreselection in [ True, False ]:
@@ -305,7 +325,7 @@ process.analysisSequence += process.analyzeL1PFTauPairsPFWrtOfflineTaus
 process.DQMStore = cms.Service("DQMStore")
 
 process.savePlots = cms.EDAnalyzer("DQMSimpleFileSaver",
-    outputFileName = cms.string('TallinnL1PFTauAnalyzer_signal_%s_2019Jun21.root' % sample)
+    outputFileName = cms.string('TallinnL1PFTauAnalyzer_signal_%s_2019Jul05.root' % sample)
 )
 
 process.p = cms.Path(process.analysisSequence + process.savePlots)

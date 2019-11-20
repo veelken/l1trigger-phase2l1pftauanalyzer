@@ -80,7 +80,7 @@ class PATTauAnalyzer : public edm::EDAnalyzer
       histogramName_suffix = histogramName_suffix.ReplaceAll(".", "p");
 
       TString histogramName_pt = Form("%s_pt_%s", histogramName_prefix.Data(), histogramName_suffix.Data());
-      me_pt_ = dqmStore.book1D(histogramName_pt.Data(), histogramName_pt.Data(), 40, 0., 100.);
+      me_pt_ = dqmStore.book1D(histogramName_pt.Data(), histogramName_pt.Data(), 40, 0., 200.);
       histogram_pt_ = me_pt_->getTH1();
       assert(histogram_pt_);
 
@@ -134,6 +134,9 @@ class PATTauAnalyzer : public edm::EDAnalyzer
     int idx_;
   };
   std::vector<plotEntryType*> plots_;
+
+  MonitorElement* me_deltaR_;
+  TH1* histogram_deltaR_;
 };
 
 #endif   

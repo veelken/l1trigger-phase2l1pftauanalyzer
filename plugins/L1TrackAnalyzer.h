@@ -17,6 +17,7 @@
 #include "DataFormats/VertexReco/interface/VertexFwd.h"                              // reco::VertexCollection
 #include "DataFormats/TrackReco/interface/Track.h"                                   // reco::Track
 #include "DataFormats/TrackReco/interface/TrackFwd.h"                                // reco::TrackCollection
+#include "DataFormats/TrackReco/interface/TrackBase.h"                               // reco::TrackBase::Point
 #include "DataFormats/ParticleFlowCandidate/interface/PFCandidate.h"                 // reco::PFCandidate
 #include "DataFormats/ParticleFlowCandidate/interface/PFCandidateFwd.h"              // reco::PFCandidateCollection  
 #include "DataFormats/JetReco/interface/GenJet.h"                                    // reco::GenJet
@@ -48,11 +49,12 @@ namespace
     ~GenChargedHadron_and_genTau_decayMode()
     {}
 
-    const reco::GenParticle* genChargedHadron()     const { return genChargedHadron_;        }          
-    double                   genChargedHadron_pt()  const { return genChargedHadron_->pt();  }
-    double                   genChargedHadron_eta() const { return genChargedHadron_->eta(); }
-    double                   genChargedHadron_phi() const { return genChargedHadron_->phi(); }
-    const std::string&       genTau_decayMode()     const { return genTau_decayMode_;        }
+    const reco::GenParticle* genChargedHadron()        const { return genChargedHadron_;                    }          
+    double                   genChargedHadron_pt()     const { return genChargedHadron_->pt();              }
+    double                   genChargedHadron_eta()    const { return genChargedHadron_->eta();             }
+    double                   genChargedHadron_absEta() const { return TMath::Abs(genChargedHadron_->eta()); }
+    double                   genChargedHadron_phi()    const { return genChargedHadron_->phi();             }
+    const std::string&       genTau_decayMode()        const { return genTau_decayMode_;                    }
 
    private:
     const reco::GenParticle* genChargedHadron_;
@@ -72,19 +74,21 @@ namespace
     ~GenChargedHadronToTrackMatch_and_genTau_decayMode()
     {}
 
-    const reco::Candidate* genChargedHadron()             const { return genChargedHadronToTrackMatch_.genChargedHadron();     }
-    bool                   hasGenChargedHadron()          const { return genChargedHadronToTrackMatch_.hasGenChargedHadron();  }
-    double                 genChargedHadron_pt()          const { return genChargedHadronToTrackMatch_.genChargedHadron_pt();  }
-    double                 genChargedHadron_eta()         const { return genChargedHadronToTrackMatch_.genChargedHadron_eta(); }
-    double                 genChargedHadron_phi()         const { return genChargedHadronToTrackMatch_.genChargedHadron_phi(); }
-    const T1*              recTrack()                     const { return genChargedHadronToTrackMatch_.recTrack();             }
-    bool                   hasRecTrack()                  const { return genChargedHadronToTrackMatch_.hasRecTrack();          }
-    double                 recTrack_pt()                  const { return genChargedHadronToTrackMatch_.recTrack_pt();          }
-    double                 recTrack_eta()                 const { return genChargedHadronToTrackMatch_.recTrack_eta();         }
-    double                 recTrack_phi()                 const { return genChargedHadronToTrackMatch_.recTrack_phi();         }
-    const std::string&     genTau_decayMode()             const { return genTau_decayMode_;                                    }
-    double                 dR()                           const { return dR_;                                                  }
-    const T2&              genChargedHadronToTrackMatch() const { return genChargedHadronToTrackMatch_;                        }
+    const reco::Candidate* genChargedHadron()             const { return genChargedHadronToTrackMatch_.genChargedHadron();        }
+    bool                   hasGenChargedHadron()          const { return genChargedHadronToTrackMatch_.hasGenChargedHadron();     }
+    double                 genChargedHadron_pt()          const { return genChargedHadronToTrackMatch_.genChargedHadron_pt();     }
+    double                 genChargedHadron_eta()         const { return genChargedHadronToTrackMatch_.genChargedHadron_eta();    }
+    double                 genChargedHadron_absEta()      const { return genChargedHadronToTrackMatch_.genChargedHadron_absEta(); }
+    double                 genChargedHadron_phi()         const { return genChargedHadronToTrackMatch_.genChargedHadron_phi();    }
+    const T1*              recTrack()                     const { return genChargedHadronToTrackMatch_.recTrack();                }
+    bool                   hasRecTrack()                  const { return genChargedHadronToTrackMatch_.hasRecTrack();             }
+    double                 recTrack_pt()                  const { return genChargedHadronToTrackMatch_.recTrack_pt();             }
+    double                 recTrack_eta()                 const { return genChargedHadronToTrackMatch_.recTrack_eta();            }
+    double                 recTrack_absEta()              const { return genChargedHadronToTrackMatch_.recTrack_absEta();         }
+    double                 recTrack_phi()                 const { return genChargedHadronToTrackMatch_.recTrack_phi();            }
+    const std::string&     genTau_decayMode()             const { return genTau_decayMode_;                                       }
+    double                 dR()                           const { return dR_;                                                     }
+    const T2&              genChargedHadronToTrackMatch() const { return genChargedHadronToTrackMatch_;                           }
     
   private:
     T2 genChargedHadronToTrackMatch_;
@@ -150,6 +154,12 @@ class L1TrackAnalyzer : public edm::EDAnalyzer
 
   edm::InputTag src_genTaus_;
   edm::EDGetTokenT<reco::GenJetCollection> token_genTaus_;
+
+  enum { kGenVtx, kRecVtx };
+  int vtxMode_;
+
+  edm::InputTag src_genVertex_position_;
+  edm::EDGetTokenT<reco::TrackBase::Point> token_genVertex_position_;
 
   edm::InputTag src_offlineVertices_;
   edm::EDGetTokenT<reco::VertexCollection> token_offlineVertices_;
@@ -295,9 +305,9 @@ class L1TrackAnalyzer : public edm::EDAnalyzer
       histogram_minDeltaR_denominator_ = me_minDeltaR_denominator_->getTH1();
       assert(histogram_minDeltaR_denominator_);
 
-      const int numBins_absEta = 12;
+      const int numBins_absEta = 6;
       float binning_absEta[numBins_absEta + 1] = { 
-        0., 0.2, 0.4, 0.6, 0.8, 1.0, 1.2, 1.4, 1.6, 1.8, 2.0, 2.2, 2.4
+        0., 0.4, 0.8, 1.2, 1.6, 2.0, 2.4
       };
 
       const int numBins_ptS = 11;
@@ -345,9 +355,8 @@ class L1TrackAnalyzer : public edm::EDAnalyzer
 	  
 	if ( genTau_decayMode_ != "all" && match->genTau_decayMode() != genTau_decayMode_ ) continue;
 
-	double genChargedHadron_absEta = TMath::Abs(match->genChargedHadron_eta());
-	if ( match->genChargedHadron_pt() > genChargedHadron_min_pt_     && match->genChargedHadron_pt() < genChargedHadron_max_pt_     && 
-	     genChargedHadron_absEta      > genChargedHadron_min_absEta_ && genChargedHadron_absEta      < genChargedHadron_max_absEta_ )
+	if ( match->genChargedHadron_pt()     > genChargedHadron_min_pt_     && match->genChargedHadron_pt()     < genChargedHadron_max_pt_     && 
+	     match->genChargedHadron_absEta() > genChargedHadron_min_absEta_ && match->genChargedHadron_absEta() < genChargedHadron_max_absEta_ )
 	{
 	  if ( match->hasRecTrack() )
 	  {
@@ -356,7 +365,7 @@ class L1TrackAnalyzer : public edm::EDAnalyzer
 	    histogram_eta_numerator_->Fill(match->genChargedHadron_eta(), evtWeight);
 	    histogram_phi_numerator_->Fill(match->genChargedHadron_phi(), evtWeight);
 	    histogram_minDeltaR_numerator_->Fill(minDeltaR, evtWeight);
-	    histogram_pt_vs_absEta_numerator_->Fill(match->genChargedHadron_eta(), match->genChargedHadron_pt(), evtWeight);
+	    histogram_pt_vs_absEta_numerator_->Fill(match->genChargedHadron_absEta(), match->genChargedHadron_pt(), evtWeight);
 	  }
 
 	  //std::cout << " filling denominator histograms" << std::endl; 
@@ -364,7 +373,7 @@ class L1TrackAnalyzer : public edm::EDAnalyzer
 	  histogram_eta_denominator_->Fill(match->genChargedHadron_eta(), evtWeight);
 	  histogram_phi_denominator_->Fill(match->genChargedHadron_phi(), evtWeight);
 	  histogram_minDeltaR_denominator_->Fill(minDeltaR, evtWeight);
-	  histogram_pt_vs_absEta_denominator_->Fill(match->genChargedHadron_eta(), match->genChargedHadron_pt(), evtWeight);
+	  histogram_pt_vs_absEta_denominator_->Fill(match->genChargedHadron_absEta(), match->genChargedHadron_pt(), evtWeight);
 
 	  if ( match->hasRecTrack() )
   	  {

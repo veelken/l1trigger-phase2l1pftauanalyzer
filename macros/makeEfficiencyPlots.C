@@ -481,19 +481,26 @@ void makeEfficiencyPlots()
   isolationWPs.push_back("relChargedIsoLt0p05");
 
   std::map<std::string, double> xMin; // key = observable
-  xMin["pt"]  =   0.;
-  xMin["eta"] =  -3.0;
-
+  xMin["pt"]        =   0.;
+  xMin["eta"]       =  -3.0;
+  xMin["phi"]       = -TMath::Pi();
+  xMin["minDeltaR"] =   0.;
+  
   std::map<std::string, double> xMax; // key = observable
-  xMax["pt"]  = 100.;
-  xMax["eta"] =  +3.0;
+  xMax["pt"]        = 100.;
+  xMax["eta"]       =  +3.0;
+  xMax["phi"]       = +TMath::Pi();
+  xMax["minDeltaR"] =   5.;
 
   std::map<std::string, std::string> xAxisTitles; // key = observable
-  //xAxisTitles["pt"] = "True #tau_{h} p_{T} [GeV]";
-  //xAxisTitles["eta"] = "True #tau_{h} #eta";
-  xAxisTitles["pt"] = "Offline #tau_{h} p_{T} [GeV]";
-  xAxisTitles["eta"] = "Offline #tau_{h} #eta";
-
+  //xAxisTitles["pt"]        = "True #tau_{h} p_{T} [GeV]";
+  //xAxisTitles["eta"]       = "True #tau_{h} #eta";
+  //xAxisTitles["phi"]       = "True #tau_{h} #phi";
+  xAxisTitles["pt"]        = "Offline #tau_{h} p_{T} [GeV]";
+  xAxisTitles["eta"]       = "Offline #tau_{h} #eta";
+  xAxisTitles["phi"]       = "Offline #tau_{h} #phi";
+  xAxisTitles["minDeltaR"] = "#Delta R";
+  
   std::map<std::string, std::string> legendEntries_vs_isolationWPs; // key = isolationWP
   legendEntries_vs_isolationWPs["relChargedIsoLt0p40"] = "I_{ch} < 0.40*p_{T}";
   legendEntries_vs_isolationWPs["relChargedIsoLt0p20"] = "I_{ch} < 0.20*p_{T}";

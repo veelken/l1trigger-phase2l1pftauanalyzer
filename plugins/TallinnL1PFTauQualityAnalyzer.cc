@@ -80,9 +80,24 @@ void TallinnL1PFTauQualityAnalyzer::beginJob()
       dqmDirectory = dqmDirectory.ReplaceAll(".", "p");
 
       dqmStore.setCurrentFolder(dqmDirectory.Data());
-      plotEntryType* plot = new plotEntryType(min_pt, max_pt, min_absEta, max_absEta);
-      plot->bookHistograms(dqmStore);
-      plots_.push_back(plot);
+      plotEntryType* plots_vLoose  = new plotEntryType(min_pt, max_pt, min_absEta, max_absEta, 0.40, -1.); // vLoose
+      plots_vLoose->bookHistograms(dqmStore);
+      plots_.push_back(plots_vLoose);
+      plotEntryType* plots_Loose   = new plotEntryType(min_pt, max_pt, min_absEta, max_absEta, 0.20, -1.); // Loose
+      plots_Loose->bookHistograms(dqmStore);
+      plots_.push_back(plots_Loose);
+      plotEntryType* plots_Medium  = new plotEntryType(min_pt, max_pt, min_absEta, max_absEta, 0.10, -1.); // Medium
+      plots_Medium->bookHistograms(dqmStore);
+      plots_.push_back(plots_Medium);
+      plotEntryType* plots_Tight   = new plotEntryType(min_pt, max_pt, min_absEta, max_absEta, 0.05, -1.); // Tight
+      plots_Tight->bookHistograms(dqmStore);
+      plots_.push_back(plots_Tight);
+      plotEntryType* plots_vTight  = new plotEntryType(min_pt, max_pt, min_absEta, max_absEta, 0.02, -1.); // vTight
+      plots_vTight->bookHistograms(dqmStore);
+      plots_.push_back(plots_vTight);
+      plotEntryType* plots_vvTight = new plotEntryType(min_pt, max_pt, min_absEta, max_absEta, 0.01, -1.); // vvTight
+      plots_vvTight->bookHistograms(dqmStore);
+      plots_.push_back(plots_vvTight);
     }
   }
 }

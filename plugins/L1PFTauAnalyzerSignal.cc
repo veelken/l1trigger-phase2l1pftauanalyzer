@@ -51,44 +51,54 @@ void L1PFTauAnalyzerSignal::beginJob()
   }
 
   DQMStore& dqmStore = (*edm::Service<DQMStore>());
-  dqmStore.setCurrentFolder(dqmDirectory_.data());
 
   std::vector<std::string> decayModes = { "oneProng0Pi0", "oneProng1Pi0", "oneProng2Pi0", "threeProng0Pi0", "threeProng1Pi0", "all" };
+  std::vector<double> min_absEtaValues = { -1.,   1.4,   1.4, -1.,    -1.  };
+  std::vector<double> max_absEtaValues = {  1.4,  2.172, 2.4,  2.172,  2.4 };
+  assert(min_absEtaValues.size() == max_absEtaValues.size());
   std::vector<double> ptThresholds = { 20., 25., 30., 35., 40., 45., 50. };
-  for ( auto decayMode : decayModes )
+    size_t numAbsEtaRanges = min_absEtaValues.size();
+  for ( size_t idxAbsEtaRange = 0; idxAbsEtaRange < numAbsEtaRanges; ++idxAbsEtaRange )
   {
-    for ( auto ptThreshold : ptThresholds )
+    double min_absEta = min_absEtaValues[idxAbsEtaRange];
+    double max_absEta = max_absEtaValues[idxAbsEtaRange];
+    for ( auto decayMode : decayModes )
     {
-      efficiencyPlots_.push_back(new efficiencyPlotEntryType(45., 1.e+3, -1.,  1.4,   decayMode, ptThreshold, "vLoose")); // vLoose
-      efficiencyPlots_.push_back(new efficiencyPlotEntryType(45., 1.e+3, -1.,  1.4,   decayMode, ptThreshold, "Loose"));  // Loose
-      efficiencyPlots_.push_back(new efficiencyPlotEntryType(45., 1.e+3, -1.,  1.4,   decayMode, ptThreshold, "Medium")); // Medium
-      efficiencyPlots_.push_back(new efficiencyPlotEntryType(45., 1.e+3, -1.,  1.4,   decayMode, ptThreshold, "Tight"));  // Tight
+      for ( auto ptThreshold : ptThresholds )
+      {
+	TString dqmDirectory = dqmDirectory_.data();
+	if ( min_absEta >= 0. && max_absEta > 0. ) 
+	{ 
+	  dqmDirectory.Append(Form("/absEta%1.2fto%1.2f", min_absEta, max_absEta));
+        }
+        else if ( min_absEta >= 0. ) 
+        {
+          dqmDirectory.Append(Form("/absEtaGt%1.2f", min_absEta));
+        }
+        else if ( max_absEta > 0. ) 
+        {
+          dqmDirectory.Append(Form("/absEtaLt%1.2f", max_absEta));
+        }
+        std::string decayMode_capitalized = decayMode;
+        decayMode_capitalized[0] = toupper(decayMode_capitalized[0]);	
+        dqmDirectory.Append(Form("/gen%sTau", decayMode_capitalized.data()));
+        dqmDirectory = dqmDirectory.ReplaceAll(".", "p");
 
-      efficiencyPlots_.push_back(new efficiencyPlotEntryType(45., 1.e+3,  1.4, 2.172, decayMode, ptThreshold, "vLoose")); // vLoose
-      efficiencyPlots_.push_back(new efficiencyPlotEntryType(45., 1.e+3,  1.4, 2.172, decayMode, ptThreshold, "Loose"));  // Loose
-      efficiencyPlots_.push_back(new efficiencyPlotEntryType(45., 1.e+3,  1.4, 2.172, decayMode, ptThreshold, "Medium")); // Medium
-      efficiencyPlots_.push_back(new efficiencyPlotEntryType(45., 1.e+3,  1.4, 2.172, decayMode, ptThreshold, "Tight"));  // Tight
-
-      efficiencyPlots_.push_back(new efficiencyPlotEntryType(45., 1.e+3,  1.4, 2.4,   decayMode, ptThreshold, "vLoose")); // vLoose
-      efficiencyPlots_.push_back(new efficiencyPlotEntryType(45., 1.e+3,  1.4, 2.4,   decayMode, ptThreshold, "Loose"));  // Loose
-      efficiencyPlots_.push_back(new efficiencyPlotEntryType(45., 1.e+3,  1.4, 2.4,   decayMode, ptThreshold, "Medium")); // Medium
-      efficiencyPlots_.push_back(new efficiencyPlotEntryType(45., 1.e+3,  1.4, 2.4,   decayMode, ptThreshold, "Tight"));  // Tight
-
-      efficiencyPlots_.push_back(new efficiencyPlotEntryType(45., 1.e+3, -1.,  2.172, decayMode, ptThreshold, "vLoose")); // vLoose
-      efficiencyPlots_.push_back(new efficiencyPlotEntryType(45., 1.e+3, -1.,  2.172, decayMode, ptThreshold, "Loose"));  // Loose
-      efficiencyPlots_.push_back(new efficiencyPlotEntryType(45., 1.e+3, -1.,  2.172, decayMode, ptThreshold, "Medium")); // Medium
-      efficiencyPlots_.push_back(new efficiencyPlotEntryType(45., 1.e+3, -1.,  2.172, decayMode, ptThreshold, "Tight"));  // Tight    
-
-      efficiencyPlots_.push_back(new efficiencyPlotEntryType(45., 1.e+3, -1.,  2.4,   decayMode, ptThreshold, "vLoose")); // vLoose
-      efficiencyPlots_.push_back(new efficiencyPlotEntryType(45., 1.e+3, -1.,  2.4,   decayMode, ptThreshold, "Loose"));  // Loose
-      efficiencyPlots_.push_back(new efficiencyPlotEntryType(45., 1.e+3, -1.,  2.4,   decayMode, ptThreshold, "Medium")); // Medium
-      efficiencyPlots_.push_back(new efficiencyPlotEntryType(45., 1.e+3, -1.,  2.4,   decayMode, ptThreshold, "Tight"));  // Tight      
+	dqmStore.setCurrentFolder(dqmDirectory.Data());
+        efficiencyPlotEntryType* efficiencyPlots_vLoose  = new efficiencyPlotEntryType(45., 1.e+3, min_absEta, max_absEta, decayMode, ptThreshold, "vLoose"); // vLoose
+	efficiencyPlots_vLoose->bookHistograms(dqmStore);
+	efficiencyPlots_.push_back(efficiencyPlots_vLoose);
+	efficiencyPlotEntryType* efficiencyPlots_Loose   = new efficiencyPlotEntryType(45., 1.e+3, min_absEta, max_absEta, decayMode, ptThreshold, "Loose");  // Loose
+	efficiencyPlots_Loose->bookHistograms(dqmStore);
+	efficiencyPlots_.push_back(efficiencyPlots_Loose);
+	efficiencyPlotEntryType* efficiencyPlots_Medium  = new efficiencyPlotEntryType(45., 1.e+3, min_absEta, max_absEta, decayMode, ptThreshold, "Medium"); // Medium
+	efficiencyPlots_Medium->bookHistograms(dqmStore);
+	efficiencyPlots_.push_back(efficiencyPlots_Medium);
+	efficiencyPlotEntryType* efficiencyPlots_Tight   = new efficiencyPlotEntryType(45., 1.e+3, min_absEta, max_absEta, decayMode, ptThreshold, "Tight");  // Tight
+	efficiencyPlots_Tight->bookHistograms(dqmStore);
+	efficiencyPlots_.push_back(efficiencyPlots_Tight);
+      }
     }
-  }
-
-  for ( auto efficiencyPlot : efficiencyPlots_ ) 
-  {
-    efficiencyPlot->bookHistograms(dqmStore);
   }
 }
 

@@ -223,7 +223,7 @@ void makeTrackingEfficiencyPlots()
   gROOT->SetBatch(true);
 
   std::string inputFilePath = Form("%s/src/L1Trigger/TallinnL1PFTauAnalyzer/test/", gSystem->Getenv("CMSSW_BASE"));
-  std::string inputFileName = "TallinnL1PFTauAnalyzer_signal_qqH_2019Jun18.root";
+  std::string inputFileName = "TallinnL1PFTauAnalyzer_signal_ggH_2019Jul05.root";
   std::string inputFileName_full = inputFilePath;
   if ( inputFileName_full.find_last_of("/") != (inputFileName_full.size() - 1) ) inputFileName_full.append("/");
   inputFileName_full.append(inputFileName);
@@ -243,6 +243,10 @@ void makeTrackingEfficiencyPlots()
   recTrack_options.push_back("woQualityCuts");
   recTrack_options.push_back("wQualityCuts");
 
+  std::vector<std::string> vtxModes;
+  recTrack_options.push_back("GenVertex");
+  recTrack_options.push_back("RecVertex");
+  
   std::vector<std::string> observables;
   observables.push_back("pt");
   observables.push_back("eta");
@@ -309,34 +313,38 @@ void makeTrackingEfficiencyPlots()
   typedef std::map<std::string, string_to_graph_map_2> string_to_graph_map_3;
   typedef std::map<std::string, string_to_graph_map_3> string_to_graph_map_4;
   typedef std::map<std::string, string_to_graph_map_4> string_to_graph_map_5;
-  string_to_graph_map_5 graphs_efficiency; // key = recTrack_type, recTrack_option, observable, absEtaRange, decayMode
-
-  for ( std::vector<std::string>::const_iterator recTrack_type = recTrack_types.begin();
-	recTrack_type != recTrack_types.end(); ++recTrack_type ) {
-    for ( std::vector<std::string>::const_iterator recTrack_option = recTrack_options.begin();
-	  recTrack_option != recTrack_options.end(); ++recTrack_option ) {
-      for ( std::vector<std::string>::const_iterator observable = observables.begin();
-	    observable != observables.end(); ++observable ) {
-	for ( std::vector<std::string>::const_iterator absEtaRange = absEtaRanges.begin();
-	      absEtaRange != absEtaRanges.end(); ++absEtaRange ) {
-	  for ( std::vector<std::string>::const_iterator decayMode = decayModes.begin();
-		decayMode != decayModes.end(); ++decayMode ) {
-	    std::string recTrack_type_capitalized = *recTrack_type;
-	    recTrack_type_capitalized[0] = toupper(recTrack_type_capitalized[0]);
-	    std::string decayMode_capitalized = *decayMode;
-	    decayMode_capitalized[0] = toupper(decayMode_capitalized[0]);
-	    std::string dqmDirectory_full = Form("%s/%s/gen%sTau/%s_%s", 
-              dqmDirectory.data(), absEtaRange->data(), decayMode_capitalized.data(), recTrack_type->data(), recTrack_option->data());	    
-	    std::string histogramName_numerator = Form("%s/eff%s_%s_vs_%s_numerator_%s_pt1p00to1000p00", 
-	      dqmDirectory_full.data(), recTrack_type_capitalized.data(), recTrack_option->data(), observable->data(), absEtaRange->data());
-	    if ( (*decayMode) != "all" ) histogramName_numerator.append(Form("_gen%sTau", decayMode_capitalized.data()));
-	    TH1* histogram_numerator = loadHistogram(inputFile, histogramName_numerator);
-	    std::string histogramName_denominator = Form("%s/eff%s_%s_vs_%s_denominator_%s_pt1p00to1000p00", 
-	      dqmDirectory_full.data(), recTrack_type_capitalized.data(), recTrack_option->data(), observable->data(), absEtaRange->data());
-	    if ( (*decayMode) != "all" ) histogramName_denominator.append(Form("_gen%sTau", decayMode_capitalized.data()));
-	    TH1* histogram_denominator = loadHistogram(inputFile, histogramName_denominator);
-	    TGraph* graph_efficiency = makeEfficiencyGraph(histogram_numerator, histogram_denominator);
-	    graphs_efficiency[*recTrack_type][*recTrack_option][*observable][*absEtaRange][*decayMode] = graph_efficiency;
+  typedef std::map<std::string, string_to_graph_map_5> string_to_graph_map_6;
+  string_to_graph_map_6 graphs_efficiency; // key = recTrack_type, recTrack_option, vtxMode, observable, absEtaRange, decayMode
+  
+  for ( std::vector<std::string>::const_iterator vtxMode = vtxModes.begin();
+	vtxMode != vtxModes.end(); ++vtxMode ) {
+    for ( std::vector<std::string>::const_iterator recTrack_type = recTrack_types.begin();
+	  recTrack_type != recTrack_types.end(); ++recTrack_type ) {
+      for ( std::vector<std::string>::const_iterator recTrack_option = recTrack_options.begin();
+	    recTrack_option != recTrack_options.end(); ++recTrack_option ) {
+        for ( std::vector<std::string>::const_iterator observable = observables.begin();
+	      observable != observables.end(); ++observable ) {
+  	  for ( std::vector<std::string>::const_iterator absEtaRange = absEtaRanges.begin();
+	        absEtaRange != absEtaRanges.end(); ++absEtaRange ) {
+	    for ( std::vector<std::string>::const_iterator decayMode = decayModes.begin();
+		  decayMode != decayModes.end(); ++decayMode ) {
+	      std::string recTrack_type_capitalized = *recTrack_type;
+	      recTrack_type_capitalized[0] = toupper(recTrack_type_capitalized[0]);
+	      std::string decayMode_capitalized = *decayMode;
+	      decayMode_capitalized[0] = toupper(decayMode_capitalized[0]);
+	      std::string dqmDirectory_full = Form("%sWrt%s/%s/gen%sTau/%s_%s", 
+                dqmDirectory.data(), vtxMode->data(), absEtaRange->data(), decayMode_capitalized.data(), recTrack_type->data(), recTrack_option->data());	    
+	      std::string histogramName_numerator = Form("%s/eff%s_%s_vs_%s_numerator_%s_pt1p00to1000p00", 
+	        dqmDirectory_full.data(), recTrack_type_capitalized.data(), recTrack_option->data(), observable->data(), absEtaRange->data());
+	      if ( (*decayMode) != "all" ) histogramName_numerator.append(Form("_gen%sTau", decayMode_capitalized.data()));
+	      TH1* histogram_numerator = loadHistogram(inputFile, histogramName_numerator);
+	      std::string histogramName_denominator = Form("%s/eff%s_%s_vs_%s_denominator_%s_pt1p00to1000p00", 
+	        dqmDirectory_full.data(), recTrack_type_capitalized.data(), recTrack_option->data(), observable->data(), absEtaRange->data());
+	      if ( (*decayMode) != "all" ) histogramName_denominator.append(Form("_gen%sTau", decayMode_capitalized.data()));
+	      TH1* histogram_denominator = loadHistogram(inputFile, histogramName_denominator);
+	      TGraph* graph_efficiency = makeEfficiencyGraph(histogram_numerator, histogram_denominator);
+	      graphs_efficiency[*recTrack_type][*recTrack_option][*vtxMode][*observable][*absEtaRange][*decayMode] = graph_efficiency;
+	    }
 	  }
 	}
       }
@@ -344,124 +352,133 @@ void makeTrackingEfficiencyPlots()
   }
 
   // 1st set of plots: comparing efficiencies of different algorithms (L1 Track, L1 PFlow, offline Track, offline PFlow)
-  for ( std::vector<std::string>::const_iterator recTrack_option = recTrack_options.begin();
-	recTrack_option != recTrack_options.end(); ++recTrack_option ) {
-    for ( std::vector<std::string>::const_iterator absEtaRange = absEtaRanges.begin();
-	  absEtaRange != absEtaRanges.end(); ++absEtaRange ) {
-      for ( std::vector<std::string>::const_iterator observable = observables.begin();
-	    observable != observables.end(); ++observable ) {
-	TGraph* graph_l1Track = graphs_efficiency["l1Track"][*recTrack_option][*observable][*absEtaRange]["all"];
-	assert(graph_l1Track);
-	TGraph* graph_l1PFlow = graphs_efficiency["l1PFCandTrack"][*recTrack_option][*observable][*absEtaRange]["all"];
-	assert(graph_l1PFlow);
-	TGraph* graph_offlineTrack = graphs_efficiency["offlineTrack"][*recTrack_option][*observable][*absEtaRange]["all"];
-	assert(graph_offlineTrack);
-	TGraph* graph_offlinePFlow = graphs_efficiency["offlinePFCandTrack"][*recTrack_option][*observable][*absEtaRange]["all"];
-	assert(graph_offlinePFlow);
-	
-	double legendPosX = 0.68;
-        double legendPosY = 0.17;
-        if ( (*observable) == "minDeltaR" ) {
-    	  legendPosX = 0.18;
-	  legendPosY = 0.17;
-        }
-	std::vector<std::string> labelTextLines;
-	std::string outputFileName = Form("makeTrackingEfficiencyPlots_vs_algo_and_%s_%s_%s.png", 
-          observable->data(), recTrack_option->data(), absEtaRange->data());
-	showGraphs(1150, 850,
-		   graph_l1Track,      legendEntries_vs_recTrack_types["l1Track"],
-		   graph_l1PFlow,      legendEntries_vs_recTrack_types["l1PFCandTrack"],
-		   graph_offlineTrack, legendEntries_vs_recTrack_types["offlineTrack"],
-		   graph_offlinePFlow, legendEntries_vs_recTrack_types["offlinePFCandTrack"],
-		   0, "",
-		   0, "",
-		   colors, markerStyles, lineStyles, 
-		   0.045, legendPosX, legendPosY, 0.25, 0.26, 
-		   labelTextLines, 0.050,
-		   0.63, 0.65, 0.26, 0.07, 
-		   xMin[*observable], xMax[*observable], xAxisTitles[*observable], 1.2, 
-		   false, 0., 1.09, "Efficiency", 1.4, 
-		   outputFileName);
-      }
-    }
-  }
-	
-  // 2nd set of plots: comparing efficiencies obtained before and after quality cuts are applied
-   for ( std::vector<std::string>::const_iterator recTrack_type = recTrack_types.begin();
-	recTrack_type != recTrack_types.end(); ++recTrack_type ) {
-    for ( std::vector<std::string>::const_iterator absEtaRange = absEtaRanges.begin();
-	  absEtaRange != absEtaRanges.end(); ++absEtaRange ) {
-      for ( std::vector<std::string>::const_iterator observable = observables.begin();
-	    observable != observables.end(); ++observable ) {
-	TGraph* graph_woQualityCuts = graphs_efficiency[*recTrack_type]["woQualityCuts"][*observable][*absEtaRange]["all"];
-	assert(graph_woQualityCuts);
-	TGraph* graph_wQualityCuts = graphs_efficiency[*recTrack_type]["wQualityCuts"][*observable][*absEtaRange]["all"];
-	assert(graph_wQualityCuts);
-	
-	double legendPosX = 0.68;
-        double legendPosY = 0.17;
-        if ( (*observable) == "minDeltaR" ) {
-    	  legendPosX = 0.18;
-	  legendPosY = 0.17;
-        }
-	std::vector<std::string> labelTextLines;
-	std::string outputFileName = Form("makeTrackingEfficiencyPlots_vs_recTrackOption_and_%s_%s_%s.png", 
-          observable->data(), recTrack_type->data(), absEtaRange->data());
-	showGraphs(1150, 850,
-		   graph_woQualityCuts, legendEntries_vs_recTrack_options["woQualityCuts"],
-		   graph_wQualityCuts,  legendEntries_vs_recTrack_options["wQualityCuts"],
-		   0, "",
-		   0, "",
-		   0, "",
-		   0, "",
-		   colors, markerStyles, lineStyles, 
-		   0.045, legendPosX, legendPosY, 0.32, 0.13, 
-		   labelTextLines, 0.050,
-		   0.63, 0.65, 0.26, 0.07, 
-		   xMin[*observable], xMax[*observable], xAxisTitles[*observable], 1.2, 
-		   false, 0., 1.09, "Efficiency", 1.4, 
-		   outputFileName);
-      }
-    }
-  }
-  
-  // 3rd set of plots: comparing efficiencies for different generator-level tau decay modes
-  for ( std::vector<std::string>::const_iterator recTrack_type = recTrack_types.begin();
-	recTrack_type != recTrack_types.end(); ++recTrack_type ) {
+  for ( std::vector<std::string>::const_iterator vtxMode = vtxModes.begin();
+	vtxMode != vtxModes.end(); ++vtxMode ) {
     for ( std::vector<std::string>::const_iterator recTrack_option = recTrack_options.begin();
 	  recTrack_option != recTrack_options.end(); ++recTrack_option ) {
       for ( std::vector<std::string>::const_iterator absEtaRange = absEtaRanges.begin();
 	    absEtaRange != absEtaRanges.end(); ++absEtaRange ) {
-	for ( std::vector<std::string>::const_iterator observable = observables.begin();
+        for ( std::vector<std::string>::const_iterator observable = observables.begin();
 	      observable != observables.end(); ++observable ) {
-	  TGraph* graph_oneProng0Pi0 = graphs_efficiency[*recTrack_type][*recTrack_option][*observable][*absEtaRange]["oneProng0Pi0"];
-	  assert(graph_oneProng0Pi0);
-	  TGraph* graph_oneProng1Pi0 = graphs_efficiency[*recTrack_type][*recTrack_option][*observable][*absEtaRange]["oneProng1Pi0"];
-	  assert(graph_oneProng1Pi0);
-	  TGraph* graph_oneProng2Pi0 = graphs_efficiency[*recTrack_type][*recTrack_option][*observable][*absEtaRange]["oneProng2Pi0"];
-	  assert(graph_oneProng2Pi0);
-	  TGraph* graph_threeProng0Pi0 = graphs_efficiency[*recTrack_type][*recTrack_option][*observable][*absEtaRange]["threeProng0Pi0"];
-	  assert(graph_threeProng0Pi0);
-	  TGraph* graph_threeProng1Pi0 = graphs_efficiency[*recTrack_type][*recTrack_option][*observable][*absEtaRange]["threeProng1Pi0"];
-	  assert(graph_threeProng1Pi0);
+	  TGraph* graph_l1Track = graphs_efficiency["l1Track"][*recTrack_option][*vtxMode][*observable][*absEtaRange]["all"];
+	  assert(graph_l1Track);
+	  TGraph* graph_l1PFlow = graphs_efficiency["l1PFCandTrack"][*recTrack_option][*vtxMode][*observable][*absEtaRange]["all"];
+	  assert(graph_l1PFlow);
+	  TGraph* graph_offlineTrack = graphs_efficiency["offlineTrack"][*recTrack_option][*vtxMode][*observable][*absEtaRange]["all"];
+	  assert(graph_offlineTrack);
+	  TGraph* graph_offlinePFlow = graphs_efficiency["offlinePFCandTrack"][*recTrack_option][*vtxMode][*observable][*absEtaRange]["all"];
+	  assert(graph_offlinePFlow);
 	
+  	  double legendPosX = 0.68;
+          double legendPosY = 0.17;
+          if ( (*observable) == "minDeltaR" ) {
+    	    legendPosX = 0.18;
+	    legendPosY = 0.17;
+          }
   	  std::vector<std::string> labelTextLines;
-	  std::string outputFileName = Form("makeTrackingEfficiencyPlots_vs_decayMode_and_%s_%s_%s_%s.png", 
-            observable->data(), recTrack_type->data(), recTrack_option->data(), absEtaRange->data());
+	  std::string outputFileName = Form("makeTrackingEfficiencyPlots_vs_algo_and_%s_%s_wrt%s_%s.png", 
+            observable->data(), recTrack_option->data(), vtxMode->data(), absEtaRange->data());
 	  showGraphs(1150, 850,
-		     graph_oneProng0Pi0, legendEntries_vs_decayModes["oneProng0Pi0"],
-		     graph_oneProng1Pi0, legendEntries_vs_decayModes["oneProng1Pi0"],
-		     graph_oneProng2Pi0, legendEntries_vs_decayModes["oneProng2Pi0"],
-		     graph_threeProng0Pi0, legendEntries_vs_decayModes["threeProng0Pi0"],
-		     graph_threeProng1Pi0, legendEntries_vs_decayModes["threeProng1Pi0"],
+		     graph_l1Track,      legendEntries_vs_recTrack_types["l1Track"],
+		     graph_l1PFlow,      legendEntries_vs_recTrack_types["l1PFCandTrack"],
+		     graph_offlineTrack, legendEntries_vs_recTrack_types["offlineTrack"],
+		     graph_offlinePFlow, legendEntries_vs_recTrack_types["offlinePFCandTrack"],
+		     0, "",
 		     0, "",
 		     colors, markerStyles, lineStyles, 
-		     0.045, 0.68, 0.17, 0.25, 0.26, 
+		     0.045, legendPosX, legendPosY, 0.25, 0.26, 
 		     labelTextLines, 0.050,
 		     0.63, 0.65, 0.26, 0.07, 
 		     xMin[*observable], xMax[*observable], xAxisTitles[*observable], 1.2, 
 		     false, 0., 1.09, "Efficiency", 1.4, 
 		     outputFileName);
+	}
+      }
+    }
+  }
+	
+  // 2nd set of plots: comparing efficiencies obtained before and after quality cuts are applied
+  for ( std::vector<std::string>::const_iterator vtxMode = vtxModes.begin();
+	vtxMode != vtxModes.end(); ++vtxMode ) {
+    for ( std::vector<std::string>::const_iterator recTrack_type = recTrack_types.begin();
+	  recTrack_type != recTrack_types.end(); ++recTrack_type ) {
+      for ( std::vector<std::string>::const_iterator absEtaRange = absEtaRanges.begin();
+	    absEtaRange != absEtaRanges.end(); ++absEtaRange ) {
+        for ( std::vector<std::string>::const_iterator observable = observables.begin();
+	      observable != observables.end(); ++observable ) {
+	  TGraph* graph_woQualityCuts = graphs_efficiency[*recTrack_type]["woQualityCuts"][*vtxMode][*observable][*absEtaRange]["all"];
+	  assert(graph_woQualityCuts);
+	  TGraph* graph_wQualityCuts = graphs_efficiency[*recTrack_type]["wQualityCuts"][*vtxMode][*observable][*absEtaRange]["all"];
+	  assert(graph_wQualityCuts);
+	
+  	  double legendPosX = 0.68;
+          double legendPosY = 0.17;
+          if ( (*observable) == "minDeltaR" ) {
+    	    legendPosX = 0.18;
+	    legendPosY = 0.17;
+          }
+	  std::vector<std::string> labelTextLines;
+	  std::string outputFileName = Form("makeTrackingEfficiencyPlots_vs_recTrackOption_and_%s_%s_wrt%s_%s.png", 
+            observable->data(), recTrack_type->data(), vtxMode->data(), absEtaRange->data());
+	  showGraphs(1150, 850,
+		     graph_woQualityCuts, legendEntries_vs_recTrack_options["woQualityCuts"],
+		     graph_wQualityCuts,  legendEntries_vs_recTrack_options["wQualityCuts"],
+		     0, "",
+		     0, "",
+		     0, "",
+		     0, "",
+		     colors, markerStyles, lineStyles, 
+		     0.045, legendPosX, legendPosY, 0.32, 0.13, 
+		     labelTextLines, 0.050,
+		     0.63, 0.65, 0.26, 0.07, 
+		     xMin[*observable], xMax[*observable], xAxisTitles[*observable], 1.2, 
+		     false, 0., 1.09, "Efficiency", 1.4, 
+		     outputFileName);
+	}
+      }
+    }
+  }
+  
+  // 3rd set of plots: comparing efficiencies for different generator-level tau decay modes
+  for ( std::vector<std::string>::const_iterator vtxMode = vtxModes.begin();
+	vtxMode != vtxModes.end(); ++vtxMode ) {
+    for ( std::vector<std::string>::const_iterator recTrack_type = recTrack_types.begin();
+	  recTrack_type != recTrack_types.end(); ++recTrack_type ) {
+      for ( std::vector<std::string>::const_iterator recTrack_option = recTrack_options.begin();
+	    recTrack_option != recTrack_options.end(); ++recTrack_option ) {
+        for ( std::vector<std::string>::const_iterator absEtaRange = absEtaRanges.begin();
+	      absEtaRange != absEtaRanges.end(); ++absEtaRange ) {
+  	  for ( std::vector<std::string>::const_iterator observable = observables.begin();
+		observable != observables.end(); ++observable ) {
+	    TGraph* graph_oneProng0Pi0 = graphs_efficiency[*recTrack_type][*recTrack_option][*vtxMode][*observable][*absEtaRange]["oneProng0Pi0"];
+	    assert(graph_oneProng0Pi0);
+	    TGraph* graph_oneProng1Pi0 = graphs_efficiency[*recTrack_type][*recTrack_option][*vtxMode][*observable][*absEtaRange]["oneProng1Pi0"];
+	    assert(graph_oneProng1Pi0);
+	    TGraph* graph_oneProng2Pi0 = graphs_efficiency[*recTrack_type][*recTrack_option][*vtxMode][*observable][*absEtaRange]["oneProng2Pi0"];
+	    assert(graph_oneProng2Pi0);
+	    TGraph* graph_threeProng0Pi0 = graphs_efficiency[*recTrack_type][*recTrack_option][*vtxMode][*observable][*absEtaRange]["threeProng0Pi0"];
+	    assert(graph_threeProng0Pi0);
+	    TGraph* graph_threeProng1Pi0 = graphs_efficiency[*recTrack_type][*recTrack_option][*vtxMode][*observable][*absEtaRange]["threeProng1Pi0"];
+	    assert(graph_threeProng1Pi0);
+	    
+	    std::vector<std::string> labelTextLines;
+	    std::string outputFileName = Form("makeTrackingEfficiencyPlots_vs_decayMode_and_%s_%s_%s_wrt%s_%s.png", 
+              observable->data(), recTrack_type->data(), recTrack_option->data(), vtxMode->data(), absEtaRange->data());
+	    showGraphs(1150, 850,
+		       graph_oneProng0Pi0,   legendEntries_vs_decayModes["oneProng0Pi0"],
+		       graph_oneProng1Pi0,   legendEntries_vs_decayModes["oneProng1Pi0"],
+		       graph_oneProng2Pi0,   legendEntries_vs_decayModes["oneProng2Pi0"],
+		       graph_threeProng0Pi0, legendEntries_vs_decayModes["threeProng0Pi0"],
+		       graph_threeProng1Pi0, legendEntries_vs_decayModes["threeProng1Pi0"],
+		       0, "",
+		       colors, markerStyles, lineStyles, 
+		       0.045, 0.68, 0.17, 0.25, 0.26, 
+		       labelTextLines, 0.050,
+		       0.63, 0.65, 0.26, 0.07, 
+		       xMin[*observable], xMax[*observable], xAxisTitles[*observable], 1.2, 
+		       false, 0., 1.09, "Efficiency", 1.4, 
+		       outputFileName);
+	  }
 	}
       }
     }

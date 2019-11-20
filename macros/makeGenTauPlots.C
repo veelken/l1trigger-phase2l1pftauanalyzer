@@ -70,6 +70,7 @@ void showHistograms(double canvasSizeX, double canvasSizeY,
                     TH1* histogram5, const std::string& legendEntry5,
                     TH1* histogram6, const std::string& legendEntry6,
                     int colors[], int markerStyles[], int lineStyles[], 
+		    double topMargin, double leftMargin, double bottomMargin, double rightMargin,  
                     double legendTextSize, double legendPosX, double legendPosY, double legendSizeX, double legendSizeY, 
                     std::vector<std::string>& labelTextLines, double labelTextSize,
                     double labelPosX, double labelPosY, double labelSizeX, double labelSizeY,
@@ -81,10 +82,10 @@ void showHistograms(double canvasSizeX, double canvasSizeY,
   canvas->SetFillColor(10);
   canvas->SetBorderSize(2);
   
-  canvas->SetTopMargin(0.05);
-  canvas->SetLeftMargin(0.14);
-  canvas->SetBottomMargin(0.14);
-  canvas->SetRightMargin(0.05);
+  canvas->SetTopMargin(topMargin);
+  canvas->SetLeftMargin(leftMargin);
+  canvas->SetBottomMargin(bottomMargin);
+  canvas->SetRightMargin(rightMargin);
 
   canvas->SetLogy(useLogScale);
   
@@ -232,7 +233,7 @@ void makeGenTauPlots()
   gROOT->SetBatch(true);
 
   std::string inputFilePath = Form("%s/src/L1Trigger/TallinnL1PFTauAnalyzer/test/", gSystem->Getenv("CMSSW_BASE"));
-  std::string inputFileName = "GenHadTauAnalyzer_signal_2019Jun21.root";
+  std::string inputFileName = "GenHadTauAnalyzer_signal_qqH_2019Oct16.root";
   TFile* inputFile = openFile(inputFilePath, inputFileName);
 
   std::vector<std::string> observables;
@@ -240,12 +241,46 @@ void makeGenTauPlots()
   observables.push_back("eta");
 
   std::vector<std::string> tauTypes;
-  tauTypes.push_back("gen");
-  tauTypes.push_back("offline");
+  tauTypes.push_back("genTau");
+  tauTypes.push_back("genTau_offlineMatched");
+  tauTypes.push_back("genHadTau");
+  tauTypes.push_back("genHadTau_offlineMatched");
+  //tauTypes.push_back("offlineHadTau");
 
   std::map<std::string, std::string> dqmDirectories; // key = tauType
-  dqmDirectories["gen"]     = "DQMData/GenTauAnalyzer";
-  dqmDirectories["offline"] = "DQMData/PATTauAnalyzer";
+  dqmDirectories["genTau"]                   = "DQMData/GenTauAnalyzer";
+  dqmDirectories["genTau_offlineMatched"]    = "DQMData/GenTauAnalyzer_offlineMatched";
+  dqmDirectories["genHadTau"]                = "DQMData/GenHadTauAnalyzer";
+  dqmDirectories["genHadTau_offlineMatched"] = "DQMData/GenHadTauAnalyzer_offlineMatched";
+  dqmDirectories["offlineHadTau"]            = "DQMData/PATTauAnalyzer";
+
+  std::map<std::string, int> canvasSizesX; // key = tauType
+  canvasSizesX["genTau"]                    = 1150;
+  canvasSizesX["genTau_offlineMatched"]     = 1150;
+  canvasSizesX["genHadTau"]                 = 1150;
+  canvasSizesX["genHadTau_offlineMatched"]  = 1150;
+  canvasSizesX["offlineHadTau"]             = 1150;
+
+  std::map<std::string, int> canvasSizesY; // key = tauType
+  canvasSizesY["genTau"]                    = 1050;
+  canvasSizesY["genTau_offlineMatched"]     = 1050;
+  canvasSizesY["genHadTau"]                 =  850;
+  canvasSizesY["genHadTau_offlineMatched"]  =  850;
+  canvasSizesY["offlineHadTau"]             =  850;
+
+  std::map<std::string, double> leftMargins; // key = tauType
+  leftMargins["genTau"]                     =    0.17;
+  leftMargins["genTau_offlineMatched"]      =    0.17;
+  leftMargins["genHadTau"]                  =    0.14;
+  leftMargins["genHadTau_offlineMatched"]   =    0.14;
+  leftMargins["offlineHadTau"]              =    0.14;
+
+  std::map<std::string, double> bottomMargins; // key = tauType
+  bottomMargins["genTau"]                   =    0.11;
+  bottomMargins["genTau_offlineMatched"]    =    0.11;
+  bottomMargins["genHadTau"]                =    0.14;
+  bottomMargins["genHadTau_offlineMatched"] =    0.14;
+  bottomMargins["offlineHadTau"]            =    0.14;
 
   std::map<std::string, int> rebin; // key = observable
   rebin["pt"]           =   1;
@@ -258,7 +293,7 @@ void makeGenTauPlots()
   xMin["deltaR"]        =   0.;
 
   std::map<std::string, double> xMax; // key = observable
-  xMax["pt"]            = 100.;
+  xMax["pt"]            = 200.;
   xMax["eta"]           =  +3.;
   xMax["deltaR"]        =   5.;
   
@@ -267,11 +302,61 @@ void makeGenTauPlots()
   xAxisTitles["eta"]    = "#eta";
   xAxisTitles["deltaR"] = "#Delta R";
 
+  std::map<std::string, double> xAxisOffsets; // key = tauType
+  xAxisOffsets["genTau"]                   =    1.1;
+  xAxisOffsets["genTau_offlineMatched"]    =    1.1;
+  xAxisOffsets["genHadTau"]                =    1.2;
+  xAxisOffsets["genHadTau_offlineMatched"] =    1.2;
+  xAxisOffsets["offlineHadTau"]            =    1.2;
+
+  std::map<std::string, double> yMin; // key = observable
+  yMin["pt"]            =   0.;
+  yMin["eta"]           =   0.;
+  yMin["deltaR"]        =   0.;
+
+  std::map<std::string, double> yMax; // key = observable
+  yMax["pt"]            =   0.10;
+  yMax["eta"]           =   0.08;
+  yMax["deltaR"]        =   0.1;
+
   std::map<std::string, std::string> yAxisTitles; // key = observable
   yAxisTitles["pt"]     = "#frac{dN}{dp_{T}} [1/GeV]";
   yAxisTitles["eta"]    = "#frac{dN}{d#eta}";
   yAxisTitles["deltaR"] = "#frac{dN}{d#Delta R}";
   
+  std::map<std::string, double> yAxisOffsets; // key = tauType
+  yAxisOffsets["genTau"]                   =    1.7;
+  yAxisOffsets["genTau_offlineMatched"]    =    1.7;
+  yAxisOffsets["genHadTau"]                =    1.4;
+  yAxisOffsets["genHadTau_offlineMatched"] =    1.4;
+  yAxisOffsets["offlineHadTau"]            =    1.4;
+
+  std::map<std::string, std::map<std::string, std::string>> legendEntries; // key = tauType, "leading" / "subleading"
+  legendEntries["genTau"]["leading"]                      = "lead. #tau";
+  legendEntries["genTau"]["subleading"]                   = "sublead. #tau";
+  legendEntries["genTau_offlineMatched"]["leading"]       = "lead. #tau";
+  legendEntries["genTau_offlineMatched"]["subleading"]    = "sublead. #tau";
+  legendEntries["genHadTau"]["leading"]                   = "lead. #tau_{h}";
+  legendEntries["genHadTau"]["subleading"]                = "sublead. #tau_{h}";
+  legendEntries["genHadTau_offlineMatched"]["leading"]    = "lead. #tau_{h}";
+  legendEntries["genHadTau_offlineMatched"]["subleading"] = "sublead. #tau_{h}";
+  legendEntries["offlineHadTau"]["leading"]               = "lead. #tau_{h}";
+  legendEntries["offlineHadTau"]["subleading"]            = "sublead. #tau_{h}";
+  
+  std::map<std::string, double> legendPosX; // key = tauType
+  legendPosX["genTau"]                   =    0.68;
+  legendPosX["genTau_offlineMatched"]    =    0.68;
+  legendPosX["genHadTau"]                =    0.71;
+  legendPosX["genHadTau_offlineMatched"] =    0.71;
+  legendPosX["offlineHadTau"]            =    0.71;
+
+  std::map<std::string, double> legendPosY; // key = tauType
+  legendPosY["genTau"]                   =    0.74;
+  legendPosY["genTau_offlineMatched"]    =    0.74;
+  legendPosY["genHadTau"]                =    0.74;
+  legendPosY["genHadTau_offlineMatched"] =    0.74;
+  legendPosY["offlineHadTau"]            =    0.74;
+
   int colors[6] = { 1, 8, 2, 4, 6, 7 };
   int lineStyles[6] = { 1, 1, 1, 1, 1, 1 };
   int markerStyles[6] = { 26, 23, 20, 24, 21, 25 };
@@ -282,30 +367,31 @@ void makeGenTauPlots()
 	tauType != tauTypes.end(); ++tauType ) {
     for ( std::vector<std::string>::const_iterator observable = observables.begin();
 	  observable != observables.end(); ++observable ) {
-      std::string histogramName_leading = Form("%s/leadingTau_%s_all_absEtaLt1p40_ptGt30", dqmDirectories[*tauType].data(), observable->data()); 
+      std::string histogramName_leading = Form("%s/leadingTau_%s_all_absEtaLt2p40_pt20p00to1000p00", dqmDirectories[*tauType].data(), observable->data()); 
       TH1* histogram_leading = loadHistogram(inputFile, histogramName_leading, true);
       TH1* histogram_leading_rebinned = (TH1*)histogram_leading->Clone(Form("%s_rebinned", histogram_leading->GetName()));
       if ( rebin[*observable] > 1 ) histogram_leading_rebinned->Rebin(rebin[*observable]);
 
-      std::string histogramName_subleading = Form("%s/subleadingTau_%s_all_absEtaLt1p40_ptGt30", dqmDirectories[*tauType].data(), observable->data()); 
+      std::string histogramName_subleading = Form("%s/subleadingTau_%s_all_absEtaLt2p40_pt20p00to1000p00", dqmDirectories[*tauType].data(), observable->data()); 
       TH1* histogram_subleading = loadHistogram(inputFile, histogramName_subleading, true);
       TH1* histogram_subleading_rebinned = (TH1*)histogram_subleading->Clone(Form("%s_rebinned", histogram_subleading->GetName()));
       if ( rebin[*observable] > 1 ) histogram_leading_rebinned->Rebin(rebin[*observable]);
 
       std::string outputFileName = Form("makeGenTauPlots_%s_%s.png", observable->data(), tauType->data());
-      showHistograms(1150, 850,
-		     histogram_leading_rebinned, "lead. #tau_{h}",
-		     histogram_subleading_rebinned, "sublead. #tau_{h}",
+      showHistograms(canvasSizesX[*tauType], canvasSizesY[*tauType], 
+		     histogram_leading_rebinned,    legendEntries[*tauType]["leading"],
+		     histogram_subleading_rebinned, legendEntries[*tauType]["subleading"],
 		     0, "",
 		     0, "",
 		     0, "",
 		     0, "",
 		     colors, markerStyles, lineStyles, 
-		     0.050, 0.71, 0.74, 0.22, 0.18, 
+		     0.05, leftMargins[*tauType], bottomMargins[*tauType], 0.05,
+		     0.050, legendPosX[*tauType], legendPosY[*tauType], 0.22, 0.18, 
 		     labelTextLines, 0.050,
 		     0.70, 0.62, 0.23, 0.06, 
-		     xMin[*observable], xMax[*observable], xAxisTitles[*observable], 1.2, 
-		     false, 0., 0.1, yAxisTitles[*observable], 1.4, 
+		     xMin[*observable], xMax[*observable], xAxisTitles[*observable], xAxisOffsets[*tauType], 
+		     false, yMin[*observable], yMax[*observable], yAxisTitles[*observable], yAxisOffsets[*tauType], 
 		     outputFileName);
 
       delete histogram_leading_rebinned;
@@ -326,11 +412,12 @@ void makeGenTauPlots()
 		   0, "",
 		   0, "",
 		   colors, markerStyles, lineStyles, 
+		   0.05, 0.14, 0.14, 0.05,
 		   0.050, 0.71, 0.74, 0.22, 0.18, 
 		   labelTextLines, 0.050,
 		   0.70, 0.62, 0.23, 0.06, 
 		   xMin["deltaR"], xMax["deltaR"], xAxisTitles["deltaR"], 1.2, 
-		   false, 0., 0.1, yAxisTitles["deltaR"], 1.4, 
+		   false, yMin["deltaR"], yMax["deltaR"], yAxisTitles["deltaR"], 1.4, 
 		   outputFileName_deltaR);
     
     delete histogram_deltaR_rebinned;

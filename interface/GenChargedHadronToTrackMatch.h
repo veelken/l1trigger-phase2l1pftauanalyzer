@@ -21,11 +21,13 @@ class GenChargedHadronToTrackMatchBase
   bool hasGenChargedHadron() const;
   double genChargedHadron_pt() const;
   double genChargedHadron_eta() const;
+  double genChargedHadron_absEta() const;
   double genChargedHadron_phi() const;
 
   bool hasRecTrack() const;
   double recTrack_pt() const;
   double recTrack_eta() const;
+  double recTrack_absEta() const;
   double recTrack_phi() const;
 
  protected:
@@ -33,11 +35,13 @@ class GenChargedHadronToTrackMatchBase
   bool hasGenChargedHadron_;
   double genChargedHadron_pt_;
   double genChargedHadron_eta_;
+  double genChargedHadron_absEta_;
   double genChargedHadron_phi_;
   
   bool hasRecTrack_;
   double recTrack_pt_;
   double recTrack_eta_;
+  double recTrack_absEta_;
   double recTrack_phi_;
 };
 

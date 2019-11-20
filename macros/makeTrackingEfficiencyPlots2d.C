@@ -106,6 +106,7 @@ void showHistogram2d(double canvasSizeX, double canvasSizeY,
   yAxis->SetTitleOffset(yAxisOffset);
 
   //histogram->Draw("COLZ");
+  histogram->SetMarkerSize(0.5);
   histogram->Draw("TEXT");
 
   TPaveText* label = 0;
@@ -129,9 +130,9 @@ void showHistogram2d(double canvasSizeX, double canvasSizeY,
   std::string outputFileName_plot = "plots/";
   size_t idx = outputFileName.find_last_of('.');
   outputFileName_plot.append(std::string(outputFileName, 0, idx));
-  if ( idx != std::string::npos ) canvas->Print(std::string(outputFileName_plot).append(std::string(outputFileName, idx)).data());
+  //if ( idx != std::string::npos ) canvas->Print(std::string(outputFileName_plot).append(std::string(outputFileName, idx)).data());
   canvas->Print(std::string(outputFileName_plot).append(".png").data());
-  canvas->Print(std::string(outputFileName_plot).append(".pdf").data());
+  //canvas->Print(std::string(outputFileName_plot).append(".pdf").data());
   
   delete label;
   delete canvas;  
@@ -146,7 +147,7 @@ void makeTrackingEfficiencyPlots2d()
   gROOT->SetBatch(true);
 
   std::string inputFilePath = Form("%s/src/L1Trigger/TallinnL1PFTauAnalyzer/test/", gSystem->Getenv("CMSSW_BASE"));
-  std::string inputFileName = "TallinnL1PFTauAnalyzer_signal_qqH_2019Jul02.root";
+  std::string inputFileName = "TallinnL1PFTauAnalyzer_signal_ggH_2019Jul05.root";
   std::string inputFileName_full = inputFilePath;
   if ( inputFileName_full.find_last_of("/") != (inputFileName_full.size() - 1) ) inputFileName_full.append("/");
   inputFileName_full.append(inputFileName);
@@ -165,6 +166,10 @@ void makeTrackingEfficiencyPlots2d()
   std::vector<std::string> recTrack_options;
   recTrack_options.push_back("woQualityCuts");
   recTrack_options.push_back("wQualityCuts");
+
+  std::vector<std::string> vtxModes;
+  vtxModes.push_back("GenVertex");
+  vtxModes.push_back("RecVertex");
 
   std::vector<std::string> observables;
   observables.push_back("pt_vs_absEta");
@@ -185,40 +190,43 @@ void makeTrackingEfficiencyPlots2d()
 
   std::string dqmDirectory = "DQMData/L1TrackAnalyzer";
 
-  for ( std::vector<std::string>::const_iterator recTrack_type = recTrack_types.begin();
-	recTrack_type != recTrack_types.end(); ++recTrack_type ) {
-    for ( std::vector<std::string>::const_iterator recTrack_option = recTrack_options.begin();
-	  recTrack_option != recTrack_options.end(); ++recTrack_option ) {
-      for ( std::vector<std::string>::const_iterator observable = observables.begin();
-	    observable != observables.end(); ++observable ) {
-	for ( std::vector<std::string>::const_iterator decayMode = decayModes.begin();
-	      decayMode != decayModes.end(); ++decayMode ) {
-	  std::string recTrack_type_capitalized = *recTrack_type;
-	  recTrack_type_capitalized[0] = toupper(recTrack_type_capitalized[0]);
-	  std::string decayMode_capitalized = *decayMode;
-	  decayMode_capitalized[0] = toupper(decayMode_capitalized[0]);
-	  std::string dqmDirectory_full = Form("%s/%s/gen%sTau/%s_%s", 
-            dqmDirectory.data(), "absEtaLt2p40", decayMode_capitalized.data(), recTrack_type->data(), recTrack_option->data());	    
-	  std::string histogramName_numerator = Form("%s/eff%s_%s_vs_%s_numerator_%s_pt1p00to1000p00", 
-	    dqmDirectory_full.data(), recTrack_type_capitalized.data(), recTrack_option->data(), observable->data(), "absEtaLt2p40");
-	  if ( (*decayMode) != "all" ) histogramName_numerator.append(Form("_gen%sTau", decayMode_capitalized.data()));
-	  TH2* histogram_numerator = loadHistogram2d(inputFile, histogramName_numerator);
-	  std::string histogramName_denominator = Form("%s/eff%s_%s_vs_%s_denominator_%s_pt1p00to1000p00", 
-	    dqmDirectory_full.data(), recTrack_type_capitalized.data(), recTrack_option->data(), observable->data(), "absEtaLt2p40");
-	  if ( (*decayMode) != "all" ) histogramName_denominator.append(Form("_gen%sTau", decayMode_capitalized.data()));
-	  TH2* histogram_denominator = loadHistogram2d(inputFile, histogramName_denominator);
-	  TH2* histogram_efficiency = makeEfficiencyHistogram2d(histogram_numerator, histogram_denominator);
+  for ( std::vector<std::string>::const_iterator vtxMode = vtxModes.begin();
+	vtxMode != vtxModes.end(); ++vtxMode ) {
+    for ( std::vector<std::string>::const_iterator recTrack_type = recTrack_types.begin();
+	  recTrack_type != recTrack_types.end(); ++recTrack_type ) {
+      for ( std::vector<std::string>::const_iterator recTrack_option = recTrack_options.begin();
+	    recTrack_option != recTrack_options.end(); ++recTrack_option ) {
+        for ( std::vector<std::string>::const_iterator observable = observables.begin();
+	      observable != observables.end(); ++observable ) {
+  	  for ( std::vector<std::string>::const_iterator decayMode = decayModes.begin();
+	        decayMode != decayModes.end(); ++decayMode ) {
+	    std::string recTrack_type_capitalized = *recTrack_type;
+	    recTrack_type_capitalized[0] = toupper(recTrack_type_capitalized[0]);
+	    std::string decayMode_capitalized = *decayMode;
+	    decayMode_capitalized[0] = toupper(decayMode_capitalized[0]);
+	    std::string dqmDirectory_full = Form("%sWrt%s/%s/gen%sTau/%s_%s", 
+              dqmDirectory.data(), vtxMode->data(), "absEtaLt2p40", decayMode_capitalized.data(), recTrack_type->data(), recTrack_option->data());	    
+	    std::string histogramName_numerator = Form("%s/eff%s_%s_vs_%s_numerator_%s_pt1p00to1000p00", 
+	      dqmDirectory_full.data(), recTrack_type_capitalized.data(), recTrack_option->data(), observable->data(), "absEtaLt2p40");
+	    if ( (*decayMode) != "all" ) histogramName_numerator.append(Form("_gen%sTau", decayMode_capitalized.data()));
+	    TH2* histogram_numerator = loadHistogram2d(inputFile, histogramName_numerator);
+	    std::string histogramName_denominator = Form("%s/eff%s_%s_vs_%s_denominator_%s_pt1p00to1000p00", 
+	      dqmDirectory_full.data(), recTrack_type_capitalized.data(), recTrack_option->data(), observable->data(), "absEtaLt2p40");
+	    if ( (*decayMode) != "all" ) histogramName_denominator.append(Form("_gen%sTau", decayMode_capitalized.data()));
+	    TH2* histogram_denominator = loadHistogram2d(inputFile, histogramName_denominator);
+	    TH2* histogram_efficiency = makeEfficiencyHistogram2d(histogram_numerator, histogram_denominator);
 
-	  std::vector<std::string> labelTextLines;
-	  std::string outputFileName = Form("makeTrackingEfficiencyPlots2d_%s_%s_%s_%s.png", 
-	    observable->data(), recTrack_type->data(), recTrack_option->data(), decayMode->data());
-	  showHistogram2d(1150, 1150,
-			  histogram_efficiency,
-			  labelTextLines, 0.050,
-			  0.63, 0.65, 0.26, 0.07, 
-			  xAxisTitles[*observable], 1.2, 
-			  yAxisTitles[*observable], 1.4, 
-			  outputFileName);
+	    std::vector<std::string> labelTextLines;
+	    std::string outputFileName = Form("makeTrackingEfficiencyPlots2d_%s_%s_%s_wrt%s_%s.png", 
+	    observable->data(), recTrack_type->data(), recTrack_option->data(), vtxMode->data(), decayMode->data());
+	    showHistogram2d(1150, 1150,
+		  	    histogram_efficiency,
+			    labelTextLines, 0.050,
+			    0.63, 0.65, 0.26, 0.07, 
+			    xAxisTitles[*observable], 1.2, 
+			    yAxisTitles[*observable], 1.4, 
+			    outputFileName);
+	  }
 	}
       }
     }

@@ -1,5 +1,7 @@
 #include "L1Trigger/TallinnL1PFTauAnalyzer/interface/GenChargedHadronToTrackMatch.h"
 
+#include <TMath.h> // TMath::Abs()
+
 //-------------------------------------------------------------------------------
 // Implementation of GenChargedHadronToTrackMatchBase class
 GenChargedHadronToTrackMatchBase::GenChargedHadronToTrackMatchBase(const reco::Candidate* genChargedHadron)
@@ -7,12 +9,14 @@ GenChargedHadronToTrackMatchBase::GenChargedHadronToTrackMatchBase(const reco::C
   , hasRecTrack_(false)
   , recTrack_pt_(0.)
   , recTrack_eta_(0.)
+  , recTrack_absEta_(0.)
   , recTrack_phi_(0.)
 {
   assert(genChargedHadron_);
   hasGenChargedHadron_  = true;
   genChargedHadron_pt_  = genChargedHadron_->pt();
   genChargedHadron_eta_ = genChargedHadron_->eta();
+  genChargedHadron_absEta_ = TMath::Abs(genChargedHadron_eta_);
   genChargedHadron_phi_ = genChargedHadron_->phi();
 }
    
@@ -38,6 +42,11 @@ double GenChargedHadronToTrackMatchBase::genChargedHadron_eta() const
 {
   return genChargedHadron_eta_;
 }
+
+double GenChargedHadronToTrackMatchBase::genChargedHadron_absEta() const
+{
+  return genChargedHadron_absEta_;
+}
  
 double GenChargedHadronToTrackMatchBase::genChargedHadron_phi() const
 {
@@ -58,6 +67,11 @@ double GenChargedHadronToTrackMatchBase::recTrack_eta() const
 {
   return recTrack_eta_;
 }
+
+double GenChargedHadronToTrackMatchBase::recTrack_absEta() const
+{
+  return recTrack_absEta_;
+}
  
 double GenChargedHadronToTrackMatchBase::recTrack_phi() const
 {
@@ -76,6 +90,7 @@ GenChargedHadronToOfflineTrackMatch::GenChargedHadronToOfflineTrackMatch(const r
     hasRecTrack_  = true;
     recTrack_pt_  = recTrack_->pt();
     recTrack_eta_ = recTrack_->eta();
+    recTrack_absEta_ = TMath::Abs(recTrack_eta_);
     recTrack_phi_ = recTrack_->phi();
   }
 }
@@ -107,6 +122,7 @@ GenChargedHadronToL1TrackMatch::GenChargedHadronToL1TrackMatch(const reco::Candi
     const unsigned nParam = 4;
     recTrack_pt_  = recTrack_->getMomentum(nParam).perp();
     recTrack_eta_ = recTrack_->getMomentum(nParam).eta();
+    recTrack_absEta_ = TMath::Abs(recTrack_eta_);
     recTrack_phi_ = recTrack_->getMomentum(nParam).phi();
   }
 }

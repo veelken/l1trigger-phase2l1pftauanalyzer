@@ -10,9 +10,8 @@
 #include "DQMServices/Core/interface/DQMStore.h" 
 #include "DQMServices/Core/interface/MonitorElement.h"
 
-#include "DataFormats/JetReco/interface/GenJet.h"           // reco::GenJet
-#include "DataFormats/JetReco/interface/GenJetCollection.h" // reco::GenJetCollection
-#include "PhysicsTools/JetMCUtils/interface/JetMCTag.h"     // JetMCTagUtils::genTauDecayMode()
+#include "DataFormats/HepMCCandidate/interface/GenParticle.h"    // reco::GenParticle
+#include "DataFormats/HepMCCandidate/interface/GenParticleFwd.h" // reco::GenParticleCollection
 
 #include <TH1.h>     // TH1
 #include <TString.h> // TString, Form()
@@ -38,7 +37,7 @@ class GenTauAnalyzer : public edm::EDAnalyzer
   std::string moduleLabel_;
 
   edm::InputTag src_;
-  edm::EDGetTokenT<reco::GenJetCollection> token_;
+  edm::EDGetTokenT<reco::GenParticleCollection> token_;
 
   double min_pt_;
   double max_pt_;
@@ -49,7 +48,7 @@ class GenTauAnalyzer : public edm::EDAnalyzer
 
   struct plotEntryType
   {
-    plotEntryType(double min_pt, double max_pt, double min_absEta, double max_absEta, const std::string& decayMode, int idx)
+    plotEntryType(double min_pt, double max_pt, double min_absEta, double max_absEta, int idx)
       : me_pt_(nullptr)
       , histogram_pt_(nullptr)
       , me_eta_(nullptr)
@@ -60,7 +59,6 @@ class GenTauAnalyzer : public edm::EDAnalyzer
       , max_pt_(max_pt)
       , min_absEta_(min_absEta)
       , max_absEta_(max_absEta)
-      , decayMode_(decayMode)
       , idx_(idx)
     {}
     ~plotEntryType() 
@@ -72,7 +70,7 @@ class GenTauAnalyzer : public edm::EDAnalyzer
       else if ( idx_ == 1 ) histogramName_prefix = "subleadingTau";
       else throw cms::Exception("GenTauAnalyzer") 
 	<< " Invalid Configuration parameter 'idx' = " << idx_ << " !!\n";;
-      TString histogramName_suffix = decayMode_.data();      
+      TString histogramName_suffix = "all";
       if      ( min_absEta_ >= 0. && max_absEta_ > 0. ) histogramName_suffix.Append(Form("_absEta%1.2fto%1.2f", min_absEta_, max_absEta_));
       else if ( min_absEta_ >= 0.                     ) histogramName_suffix.Append(Form("_absEtaGt%1.2f", min_absEta_));
       else if (                      max_absEta_ > 0. ) histogramName_suffix.Append(Form("_absEtaLt%1.2f", max_absEta_));
@@ -82,7 +80,7 @@ class GenTauAnalyzer : public edm::EDAnalyzer
       histogramName_suffix = histogramName_suffix.ReplaceAll(".", "p");
 
       TString histogramName_pt = Form("%s_pt_%s", histogramName_prefix.Data(), histogramName_suffix.Data());
-      me_pt_ = dqmStore.book1D(histogramName_pt.Data(), histogramName_pt.Data(), 40, 0., 100.);
+      me_pt_ = dqmStore.book1D(histogramName_pt.Data(), histogramName_pt.Data(), 40, 0., 200.);
       histogram_pt_ = me_pt_->getTH1();
       assert(histogram_pt_);
 
@@ -96,13 +94,10 @@ class GenTauAnalyzer : public edm::EDAnalyzer
       histogram_phi_ = me_phi_->getTH1();
       assert(histogram_phi_);
     }
-    void fillHistograms(const reco::GenJetCollection& genTaus, double evtWeight)
+    void fillHistograms(const reco::GenParticleCollection& genTaus, double evtWeight)
     {
       if ( (int)genTaus.size() > idx_ ) {
-	const reco::GenJet& genTau = genTaus[idx_];
-
-	std::string genTau_decayMode = JetMCTagUtils::genTauDecayMode(genTau);
-	if ( decayMode_ != "all" && genTau_decayMode != decayMode_ ) return;
+	const reco::GenParticle& genTau = genTaus[idx_];
 
 	double genTau_absEta = TMath::Abs(genTau.eta());
 	if ( genTau_absEta > min_absEta_ && genTau_absEta < max_absEta_ ) 
@@ -129,11 +124,18 @@ class GenTauAnalyzer : public edm::EDAnalyzer
     double max_pt_;
     double min_absEta_;
     double max_absEta_;
-    std::string decayMode_;
     int idx_;
   };
   std::vector<plotEntryType*> plots_;
 
+  MonitorElement* me_diTau_pt_;
+  TH1* histogram_diTau_pt_;
+  MonitorElement* me_diTau_eta_;
+  TH1* histogram_diTau_eta_;
+  MonitorElement* me_diTau_phi_;
+  TH1* histogram_diTau_phi_;
+  MonitorElement* me_diTau_mass_;
+  TH1* histogram_diTau_mass_;
   MonitorElement* me_deltaR_;
   TH1* histogram_deltaR_;
 };
