@@ -37,12 +37,12 @@ L1VertexAnalyzer::~L1VertexAnalyzer()
 
 void L1VertexAnalyzer::beginJob()
 {
-  if ( !edm::Service<DQMStore>().isAvailable() ) {
+  if ( !edm::Service<dqm::legacy::DQMStore>().isAvailable() ) {
     throw cms::Exception("JetToTauFakeRateAnalyzer") 
       << " Failed to access dqmStore --> histograms will NEITHER be booked NOR filled !!\n";
   }
 
-  DQMStore& dqmStore = (*edm::Service<DQMStore>());
+  DQMStore& dqmStore = (*edm::Service<dqm::legacy::DQMStore>());
   dqmStore.setCurrentFolder(Form("%s/%s", dqmDirectory_.data(), "L1Vertex"));
   l1VertexPlots_ = new vertexPlotEntryType();
   l1VertexPlots_->bookHistograms(dqmStore); 

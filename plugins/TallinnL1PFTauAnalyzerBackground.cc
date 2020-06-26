@@ -27,12 +27,12 @@ TallinnL1PFTauAnalyzerBackground::~TallinnL1PFTauAnalyzerBackground()
 
 void TallinnL1PFTauAnalyzerBackground::beginJob()
 {
-  if ( !edm::Service<DQMStore>().isAvailable() ) {
+  if ( !edm::Service<dqm::legacy::DQMStore>().isAvailable() ) {
     throw cms::Exception("TallinnL1PFTauAnalyzerBackground") 
       << " Failed to access dqmStore --> histograms will NEITHER be booked NOR filled !!\n";
   }
 
-  DQMStore& dqmStore = (*edm::Service<DQMStore>());
+  DQMStore& dqmStore = (*edm::Service<dqm::legacy::DQMStore>());
   dqmStore.setCurrentFolder(dqmDirectory_.data());
 
   ratePlots_.push_back(new ratePlotEntryType(-1.,  1.4,   0.40, -1., 0.4)); // vLoose

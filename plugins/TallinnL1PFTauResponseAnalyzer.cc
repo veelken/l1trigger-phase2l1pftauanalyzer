@@ -45,12 +45,12 @@ TallinnL1PFTauResponseAnalyzer::~TallinnL1PFTauResponseAnalyzer()
 
 void TallinnL1PFTauResponseAnalyzer::beginJob()
 {
-  if ( !edm::Service<DQMStore>().isAvailable() ) {
+  if ( !edm::Service<dqm::legacy::DQMStore>().isAvailable() ) {
     throw cms::Exception("TallinnL1PFTauResponseAnalyzer") 
       << " Failed to access dqmStore --> histograms will NEITHER be booked NOR filled !!\n";
   }
 
-  DQMStore& dqmStore = (*edm::Service<DQMStore>());
+  DQMStore& dqmStore = (*edm::Service<dqm::legacy::DQMStore>());
   dqmStore.setCurrentFolder(dqmDirectory_.data());
 
   std::vector<std::string> decayModes = { "oneProng0Pi0", "oneProng1Pi0", "oneProng2Pi0", "threeProng0Pi0", "threeProng1Pi0", "all" };

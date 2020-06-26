@@ -28,12 +28,12 @@ TallinnL1PFTauQualityAnalyzer::~TallinnL1PFTauQualityAnalyzer()
 
 void TallinnL1PFTauQualityAnalyzer::beginJob()
 {
-  if ( !edm::Service<DQMStore>().isAvailable() ) {
+  if ( !edm::Service<dqm::legacy::DQMStore>().isAvailable() ) {
     throw cms::Exception("TallinnL1PFTauQualityAnalyzer") 
       << " Failed to access dqmStore --> histograms will NEITHER be booked NOR filled !!\n";
   }
 
-  DQMStore& dqmStore = (*edm::Service<DQMStore>());
+  DQMStore& dqmStore = (*edm::Service<dqm::legacy::DQMStore>());
   
   std::vector<double> min_ptValues = { 20., 25., 30., 35., 40., 50., 60.,  80., 20. };
   std::vector<double> max_ptValues = { 25., 30., 35., 40., 50., 60., 80., 100., -1. };

@@ -59,12 +59,12 @@ TallinnL1PFTauIsolationAnalyzer::~TallinnL1PFTauIsolationAnalyzer()
 
 void TallinnL1PFTauIsolationAnalyzer::beginJob()
 {
-  if ( !edm::Service<DQMStore>().isAvailable() ) {
+  if ( !edm::Service<dqm::legacy::DQMStore>().isAvailable() ) {
     throw cms::Exception("TallinnL1PFTauIsolationAnalyzer") 
       << " Failed to access dqmStore --> histograms will NEITHER be booked NOR filled !!\n";
   }
 
-  DQMStore& dqmStore = (*edm::Service<DQMStore>());
+  DQMStore& dqmStore = (*edm::Service<dqm::legacy::DQMStore>());
   dqmStore.setCurrentFolder(dqmDirectory_.data());
 
   std::vector<std::string> decayModes;

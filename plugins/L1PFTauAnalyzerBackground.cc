@@ -27,12 +27,12 @@ L1PFTauAnalyzerBackground::~L1PFTauAnalyzerBackground()
 
 void L1PFTauAnalyzerBackground::beginJob()
 {
-  if ( !edm::Service<DQMStore>().isAvailable() ) {
+  if ( !edm::Service<dqm::legacy::DQMStore>().isAvailable() ) {
     throw cms::Exception("L1PFTauAnalyzerBackground") 
       << " Failed to access dqmStore --> histograms will NEITHER be booked NOR filled !!\n";
   }
 
-  DQMStore& dqmStore = (*edm::Service<DQMStore>());
+  DQMStore& dqmStore = (*edm::Service<dqm::legacy::DQMStore>());
   dqmStore.setCurrentFolder(dqmDirectory_.data());
 
   ratePlots_.push_back(new ratePlotEntryType(-1.,  1.4,   "vLoose")); // vLoose

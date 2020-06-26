@@ -45,12 +45,12 @@ L1PFTauAnalyzerSignal::~L1PFTauAnalyzerSignal()
 
 void L1PFTauAnalyzerSignal::beginJob()
 {
-  if ( !edm::Service<DQMStore>().isAvailable() ) {
+  if ( !edm::Service<dqm::legacy::DQMStore>().isAvailable() ) {
     throw cms::Exception("L1PFTauAnalyzerSignal") 
       << " Failed to access dqmStore --> histograms will NEITHER be booked NOR filled !!\n";
   }
 
-  DQMStore& dqmStore = (*edm::Service<DQMStore>());
+  DQMStore& dqmStore = (*edm::Service<dqm::legacy::DQMStore>());
 
   std::vector<std::string> decayModes = { "oneProng0Pi0", "oneProng1Pi0", "oneProng2Pi0", "threeProng0Pi0", "threeProng1Pi0", "all" };
   std::vector<double> min_absEtaValues = { -1.,   1.4,   1.4, -1.,    -1.  };
