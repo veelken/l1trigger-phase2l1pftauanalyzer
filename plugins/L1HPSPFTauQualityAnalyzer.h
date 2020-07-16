@@ -1,5 +1,5 @@
-#ifndef L1Trigger_TallinnL1PFTauAnalyzer_TallinnL1PFTauQualityAnalyzer_h
-#define L1Trigger_TallinnL1PFTauAnalyzer_TallinnL1PFTauQualityAnalyzer_h
+#ifndef L1Trigger_TallinnL1PFTauAnalyzer_L1HPSPFTauQualityAnalyzer_h
+#define L1Trigger_TallinnL1PFTauAnalyzer_L1HPSPFTauQualityAnalyzer_h
 
 #include "FWCore/Framework/interface/EDAnalyzer.h"
 #include "FWCore/Framework/interface/Event.h"
@@ -9,12 +9,12 @@
 #include "DQMServices/Core/interface/DQMStore.h" 
 #include "DQMServices/Core/interface/MonitorElement.h"
 
-#include "DataFormats/TallinnL1PFTaus/interface/TallinnL1PFTau.h"             // l1t::TallinnL1PFTau
-#include "DataFormats/TallinnL1PFTaus/interface/TallinnL1PFTauFwd.h"          // l1t::TallinnL1PFTauCollection
-#include "DataFormats/Phase2L1ParticleFlow/interface/PFCandidate.h"           // l1t::PFCandidate
-#include "DataFormats/Phase2L1ParticleFlow/interface/PFTrack.h"               // l1t::PFTrack
-#include "DataFormats/L1TrackTrigger/interface/TTTrack.h"                     // TTTrack
-#include "L1Trigger/TallinnL1PFTauAnalyzer/interface/histogramAuxFunctions.h" // fillWithOverflow
+#include "DataFormats/Phase2L1Taus/interface/L1HPSPFTau.h"                     // l1t::L1HPSPFTau
+#include "DataFormats/Phase2L1Taus/interface/L1HPSPFTauFwd.h"                  // l1t::L1HPSPFTauCollection
+#include "DataFormats/L1TParticleFlow/interface/PFCandidate.h"                 // l1t::PFCandidate
+#include "DataFormats/L1TParticleFlow/interface/PFTrack.h"                     // l1t::PFTrack
+#include "DataFormats/L1TrackTrigger/interface/TTTrack.h"                      // TTTrack
+#include "HLTrigger/TallinnHLTPFTauAnalyzer/interface/histogramAuxFunctions.h" // fillWithOverflow
 
 #include <TH1.h>     // TH1
 #include <TH2.h>     // TH2
@@ -23,6 +23,8 @@
 
 #include <vector>    // std::vector
 #include <string>    // std::string
+
+using namespace dqm::implementation;
 
 reco::Candidate::LorentzVector getP4_with_massConstraint(const reco::Candidate::LorentzVector& p4, double mass)
 {
@@ -46,14 +48,14 @@ reco::Candidate::LorentzVector getNeutralPionP4(const reco::Candidate::LorentzVe
   return getP4_with_massConstraint(p4, neutralPionMass);
 }
 
-class TallinnL1PFTauQualityAnalyzer : public edm::EDAnalyzer 
+class L1HPSPFTauQualityAnalyzer : public edm::EDAnalyzer 
 {
  public:
   // constructor 
-  explicit TallinnL1PFTauQualityAnalyzer(const edm::ParameterSet&);
+  explicit L1HPSPFTauQualityAnalyzer(const edm::ParameterSet&);
     
   // destructor
-  ~TallinnL1PFTauQualityAnalyzer();
+  ~L1HPSPFTauQualityAnalyzer();
     
  private:
   void beginJob();
@@ -63,7 +65,7 @@ class TallinnL1PFTauQualityAnalyzer : public edm::EDAnalyzer
   std::string moduleLabel_;
 
   edm::InputTag src_;
-  edm::EDGetTokenT<l1t::TallinnL1PFTauCollection> token_;
+  edm::EDGetTokenT<l1t::L1HPSPFTauCollection> token_;
 
   std::string dqmDirectory_;
 
@@ -186,9 +188,9 @@ class TallinnL1PFTauQualityAnalyzer : public edm::EDAnalyzer
       histogram_strip_numPhotons_plus_Electrons_ = me_strip_numPhotons_plus_Electrons_->getTH1();
       assert(histogram_strip_numPhotons_plus_Electrons_);
     }
-    void fillHistograms(const l1t::TallinnL1PFTauCollection& l1PFTaus, double evtWeight)
+    void fillHistograms(const l1t::L1HPSPFTauCollection& l1PFTaus, double evtWeight)
     {
-      for ( l1t::TallinnL1PFTauCollection::const_iterator l1PFTau = l1PFTaus.begin(); 
+      for ( l1t::L1HPSPFTauCollection::const_iterator l1PFTau = l1PFTaus.begin(); 
 	    l1PFTau != l1PFTaus.end(); ++l1PFTau ) {	
 	double l1PFTau_absEta = TMath::Abs(l1PFTau->eta());
 	if ( (min_pt_     < 0.        || l1PFTau->pt()            >  min_pt_                           ) &&
@@ -206,8 +208,8 @@ class TallinnL1PFTauQualityAnalyzer : public edm::EDAnalyzer
 	    if ( leadPFCand->pfTrack().isNonnull() && leadPFCand->pfTrack()->track().isNonnull() )
 	    {
 	      const l1t::PFTrack::L1TTTrackType& track = (*leadPFCand->pfTrack()->track());
-	      fillWithOverFlow(histogram_leadTrack_pt_, track.getMomentum().perp(), evtWeight);
-	      fillWithOverFlow(histogram_leadTrack_chi2_, track.getChi2(), evtWeight);
+	      fillWithOverFlow(histogram_leadTrack_pt_, track.momentum().perp(), evtWeight);
+	      fillWithOverFlow(histogram_leadTrack_chi2_, track.chi2(), evtWeight);
 	      fillWithOverFlow(histogram_leadTrack_numStubs_, track.getStubRefs().size(), evtWeight);
 	    }
 	  }
@@ -218,8 +220,8 @@ class TallinnL1PFTauQualityAnalyzer : public edm::EDAnalyzer
 	    if ( (*signalPFCand)->pfTrack().isNonnull() && (*signalPFCand)->pfTrack()->track().isNonnull() ) 
 	    {
 	      const l1t::PFTrack::L1TTTrackType& track = *(*signalPFCand)->pfTrack()->track();
-	      fillWithOverFlow(histogram_signalTrack_pt_, track.getMomentum().perp(), evtWeight);
-	      fillWithOverFlow(histogram_signalTrack_chi2_, track.getChi2(), evtWeight);
+	      fillWithOverFlow(histogram_signalTrack_pt_, track.momentum().perp(), evtWeight);
+	      fillWithOverFlow(histogram_signalTrack_chi2_, track.chi2(), evtWeight);
 	      fillWithOverFlow(histogram_signalTrack_numStubs_, track.getStubRefs().size(), evtWeight);
 	    }
 	  }
@@ -230,8 +232,8 @@ class TallinnL1PFTauQualityAnalyzer : public edm::EDAnalyzer
 	    if ( (*isolationPFCand)->pfTrack().isNonnull() && (*isolationPFCand)->pfTrack()->track().isNonnull() ) 
 	    {
 	      const l1t::PFTrack::L1TTTrackType& track = *(*isolationPFCand)->pfTrack()->track();
-	      fillWithOverFlow(histogram_isolationTrack_pt_, track.getMomentum().perp(), evtWeight);
-	      fillWithOverFlow(histogram_isolationTrack_chi2_, track.getChi2(), evtWeight);
+	      fillWithOverFlow(histogram_isolationTrack_pt_, track.momentum().perp(), evtWeight);
+	      fillWithOverFlow(histogram_isolationTrack_chi2_, track.chi2(), evtWeight);
 	      fillWithOverFlow(histogram_isolationTrack_numStubs_, track.getStubRefs().size(), evtWeight);
 	    }
 	  }

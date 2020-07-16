@@ -34,7 +34,7 @@ L1TrackAnalyzer::L1TrackAnalyzer(const edm::ParameterSet& cfg)
     token_offlineVertices_ = consumes<reco::VertexCollection>(src_offlineVertices_);
 
     src_l1Vertices_ = cfg.getParameter<edm::InputTag>("srcL1Vertices");
-    token_l1Vertices_ = consumes<l1t::VertexCollection>(src_l1Vertices_);
+    token_l1Vertices_ = consumes<l1t::TkPrimaryVertexCollection>(src_l1Vertices_);
 
     src_l1PFVertex_z_ = cfg.getParameter<edm::InputTag>("srcL1PFVertex_z");
     token_l1PFVertex_z_ = consumes<float>(src_l1PFVertex_z_);
@@ -283,10 +283,9 @@ namespace
       size_t idxRecTrack = 0;
       for ( auto recTrack : recTracks )
       {
-	const unsigned nParam = 4;
-	double recTrack_pt  = recTrack->getMomentum(nParam).perp();
-	double recTrack_eta = recTrack->getMomentum(nParam).eta();
-	double recTrack_phi = recTrack->getMomentum(nParam).phi();
+	double recTrack_pt  = recTrack->momentum().perp();
+	double recTrack_eta = recTrack->momentum().eta();
+	double recTrack_phi = recTrack->momentum().phi();
 	double dR = deltaR(genTauChargedHadron.genChargedHadron_eta(), genTauChargedHadron.genChargedHadron_phi(), recTrack_eta, recTrack_phi);
 	if ( dR < dRmatch ) 
         {
@@ -523,11 +522,11 @@ void L1TrackAnalyzer::analyze(const edm::Event& evt, const edm::EventSetup& es)
     bool l1PrimaryVertex_found = false;
     if ( vtxMode_ == kRecVtx && src_l1Vertices_.label() != "" ) 
     {
-      edm::Handle<l1t::VertexCollection> l1Vertices;
+      edm::Handle<l1t::TkPrimaryVertexCollection> l1Vertices;
       evt.getByToken(token_l1Vertices_, l1Vertices);
       if ( l1Vertices->size() > 0 ) 
       {
-        l1PrimaryVertex_z = l1Vertices->at(0).z0();
+        l1PrimaryVertex_z = l1Vertices->at(0).zvertex();
 	l1PrimaryVertex_found = true;
       }
     }

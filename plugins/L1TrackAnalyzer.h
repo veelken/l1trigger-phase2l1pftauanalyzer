@@ -9,10 +9,9 @@
 #include "DQMServices/Core/interface/DQMStore.h" 
 #include "DQMServices/Core/interface/MonitorElement.h"
 
-#include "DataFormats/L1TVertex/interface/Vertex.h"                                  // l1t::Vertex, l1t::VertexCollection
-#include "DataFormats/Phase2L1ParticleFlow/interface/PFTrack.h"                      // l1t::PFTrack::L1TTTrackType
-#include "DataFormats/Phase2L1ParticleFlow/interface/PFCandidate.h"                  // l1t::PFCandidate
-#include "DataFormats/Phase2L1ParticleFlow/interface/PFCandidateFwd.h"               // l1t::PFCandidateCollection
+#include "DataFormats/L1TCorrelator/interface/TkPrimaryVertex.h"                     // l1t::TkPrimaryVertex, l1t::TkPrimaryVertexCollection
+#include "DataFormats/L1TParticleFlow/interface/PFTrack.h"                           // l1t::PFTrack::L1TTTrackType
+#include "DataFormats/L1TParticleFlow/interface/PFCandidate.h"                       // l1t::PFCandidate, l1t::PFCandidateCollection
 #include "DataFormats/VertexReco/interface/Vertex.h"                                 // reco::Vertex
 #include "DataFormats/VertexReco/interface/VertexFwd.h"                              // reco::VertexCollection
 #include "DataFormats/TrackReco/interface/Track.h"                                   // reco::Track
@@ -139,6 +138,8 @@ namespace
   }
 }
 
+using namespace dqm::implementation;
+
 class L1TrackAnalyzer : public edm::EDAnalyzer 
 {
  public:
@@ -171,7 +172,7 @@ class L1TrackAnalyzer : public edm::EDAnalyzer
   edm::EDGetTokenT<reco::PFCandidateCollection> token_offlinePFCands_;
 
   edm::InputTag src_l1Vertices_;
-  edm::EDGetTokenT<l1t::VertexCollection> token_l1Vertices_;
+  edm::EDGetTokenT<l1t::TkPrimaryVertexCollection> token_l1Vertices_;
 
   edm::InputTag src_l1Tracks_;
   edm::EDGetTokenT<l1t::TrackCollection> token_l1Tracks_;

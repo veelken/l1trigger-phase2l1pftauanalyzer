@@ -1,4 +1,4 @@
-#include "L1Trigger/TallinnL1PFTauAnalyzer/plugins/TallinnL1PFTauAnalyzerSignal.h"
+#include "L1Trigger/TallinnL1PFTauAnalyzer/plugins/L1HPSPFTauAnalyzerSignal.h"
 
 #include "FWCore/ServiceRegistry/interface/Service.h"
 #include "FWCore/Utilities/interface/Exception.h"
@@ -9,11 +9,11 @@
 #include <iostream>
 #include <iomanip>
 
-TallinnL1PFTauAnalyzerSignal::TallinnL1PFTauAnalyzerSignal(const edm::ParameterSet& cfg)
+L1HPSPFTauAnalyzerSignal::L1HPSPFTauAnalyzerSignal(const edm::ParameterSet& cfg)
   : moduleLabel_(cfg.getParameter<std::string>("@module_label"))
 {
   srcNumerator_ = cfg.getParameter<edm::InputTag>("srcNumerator");
-  tokenNumerator_ = consumes<l1t::TallinnL1PFTauCollection>(srcNumerator_);
+  tokenNumerator_ = consumes<l1t::L1HPSPFTauCollection>(srcNumerator_);
   srcDenominator_ = cfg.getParameter<edm::InputTag>("srcDenominator");
   std::string typeDenominator_string = cfg.getParameter<std::string>("typeDenominator");
   if ( typeDenominator_string == "gen" ) 
@@ -28,14 +28,14 @@ TallinnL1PFTauAnalyzerSignal::TallinnL1PFTauAnalyzerSignal(const edm::ParameterS
   }
   else
   {
-    throw cms::Exception("TallinnL1PFTauAnalyzerSignal") 
+    throw cms::Exception("L1HPSPFTauAnalyzerSignal") 
       << " Invalid Configuration parameter 'typeDenominator' = " << typeDenominator_string << " !!\n";;
   }
 
   dqmDirectory_ = cfg.getParameter<std::string>("dqmDirectory");
 }
 
-TallinnL1PFTauAnalyzerSignal::~TallinnL1PFTauAnalyzerSignal()
+L1HPSPFTauAnalyzerSignal::~L1HPSPFTauAnalyzerSignal()
 {
   for ( auto efficiencyPlot : efficiencyPlots_ ) 
   {
@@ -43,10 +43,10 @@ TallinnL1PFTauAnalyzerSignal::~TallinnL1PFTauAnalyzerSignal()
   }
 }
 
-void TallinnL1PFTauAnalyzerSignal::beginJob()
+void L1HPSPFTauAnalyzerSignal::beginJob()
 {
   if ( !edm::Service<dqm::legacy::DQMStore>().isAvailable() ) {
-    throw cms::Exception("TallinnL1PFTauAnalyzerSignal") 
+    throw cms::Exception("L1HPSPFTauAnalyzerSignal") 
       << " Failed to access dqmStore --> histograms will NEITHER be booked NOR filled !!\n";
   }
 
@@ -108,9 +108,9 @@ void TallinnL1PFTauAnalyzerSignal::beginJob()
   }
 }
 
-void TallinnL1PFTauAnalyzerSignal::analyze(const edm::Event& evt, const edm::EventSetup& es)
+void L1HPSPFTauAnalyzerSignal::analyze(const edm::Event& evt, const edm::EventSetup& es)
 {
-  edm::Handle<l1t::TallinnL1PFTauCollection> numeratorTaus;
+  edm::Handle<l1t::L1HPSPFTauCollection> numeratorTaus;
   evt.getByToken(tokenNumerator_, numeratorTaus);
   
   const double evtWeight = 1.;
@@ -138,9 +138,9 @@ void TallinnL1PFTauAnalyzerSignal::analyze(const edm::Event& evt, const edm::Eve
   }
 }
 
-void TallinnL1PFTauAnalyzerSignal::endJob()
+void L1HPSPFTauAnalyzerSignal::endJob()
 {}
 
 #include "FWCore/Framework/interface/MakerMacros.h"
 
-DEFINE_FWK_MODULE(TallinnL1PFTauAnalyzerSignal);
+DEFINE_FWK_MODULE(L1HPSPFTauAnalyzerSignal);

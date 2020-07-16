@@ -1,16 +1,16 @@
-#include "L1Trigger/TallinnL1PFTauAnalyzer/plugins/TallinnL1PFTauSeedAnalyzer.h"
+#include "L1Trigger/TallinnL1PFTauAnalyzer/plugins/L1HPSPFTauSeedAnalyzer.h"
 
 #include "FWCore/ServiceRegistry/interface/Service.h"
 #include "DataFormats/Common/interface/Handle.h"
 
-#include "L1Trigger/TallinnL1PFTauAnalyzer/interface/histogramAuxFunctions.h" // fillWithOverFlow()
+#include "HLTrigger/TallinnHLTPFTauAnalyzer/interface/histogramAuxFunctions.h" // fillWithOverFlow
 
 #include <TMath.h> // TMath::Abs(), TMath::Pi()
 
 #include <iostream>
 #include <iomanip>
 
-TallinnL1PFTauSeedAnalyzer::TallinnL1PFTauSeedAnalyzer(const edm::ParameterSet& cfg)
+L1HPSPFTauSeedAnalyzer::L1HPSPFTauSeedAnalyzer(const edm::ParameterSet& cfg)
   : moduleLabel_(cfg.getParameter<std::string>("@module_label"))
   , min_seedChargedPFCand_pt_(cfg.getParameter<double>("min_seedChargedPFCand_pt"))
   , max_seedChargedPFCand_eta_(cfg.getParameter<double>("max_seedChargedPFCand_eta"))
@@ -35,7 +35,7 @@ TallinnL1PFTauSeedAnalyzer::TallinnL1PFTauSeedAnalyzer(const edm::ParameterSet& 
   srcL1Vertices_ = cfg.getParameter<edm::InputTag>("srcL1Vertices");
   if ( srcL1Vertices_.label() != "" ) 
   {
-    tokenL1Vertices_ = consumes<l1t::VertexCollection>(srcL1Vertices_);
+    tokenL1Vertices_ = consumes<l1t::TkPrimaryVertexCollection>(srcL1Vertices_);
   }
 
   edm::ParameterSet cfg_signalQualityCuts = cfg.getParameter<edm::ParameterSet>("signalQualityCuts");
@@ -44,13 +44,13 @@ TallinnL1PFTauSeedAnalyzer::TallinnL1PFTauSeedAnalyzer(const edm::ParameterSet& 
   dqmDirectory_ = cfg.getParameter<std::string>("dqmDirectory");
 }
 
-TallinnL1PFTauSeedAnalyzer::~TallinnL1PFTauSeedAnalyzer()
+L1HPSPFTauSeedAnalyzer::~L1HPSPFTauSeedAnalyzer()
 {}
 
-void TallinnL1PFTauSeedAnalyzer::beginJob()
+void L1HPSPFTauSeedAnalyzer::beginJob()
 {
   if ( !edm::Service<dqm::legacy::DQMStore>().isAvailable() ) {
-    throw cms::Exception("TallinnL1PFTauSeedAnalyzer") 
+    throw cms::Exception("L1HPSPFTauSeedAnalyzer") 
       << " Failed to access dqmStore --> histograms will NEITHER be booked NOR filled !!\n";
   }
 
@@ -91,21 +91,21 @@ void TallinnL1PFTauSeedAnalyzer::beginJob()
   assert(histogram_numSeedPFJets_);
 }
 
-void TallinnL1PFTauSeedAnalyzer::analyze(const edm::Event& evt, const edm::EventSetup& es)
+void L1HPSPFTauSeedAnalyzer::analyze(const edm::Event& evt, const edm::EventSetup& es)
 {
   edm::Handle<l1t::PFCandidateCollection> l1PFCands;
   evt.getByToken(tokenL1PFCands_, l1PFCands);
 
-  l1t::VertexRef primaryVertex;
+  l1t::TkPrimaryVertexRef primaryVertex;
   float primaryVertex_z = 0.;
   if ( srcL1Vertices_.label() != "" ) 
   {
-    edm::Handle<l1t::VertexCollection> vertices;
+    edm::Handle<l1t::TkPrimaryVertexCollection> vertices;
     evt.getByToken(tokenL1Vertices_, vertices);
     if ( vertices->size() > 0 ) 
     {
-      primaryVertex = l1t::VertexRef(vertices, 0);
-      primaryVertex_z = primaryVertex->z0();
+      primaryVertex = l1t::TkPrimaryVertexRef(vertices, 0);
+      primaryVertex_z = primaryVertex->zvertex();
     }
   }
 
@@ -153,9 +153,9 @@ void TallinnL1PFTauSeedAnalyzer::analyze(const edm::Event& evt, const edm::Event
   fillWithOverFlow(histogram_numSeedPFJets_, numSeedPFJets, evtWeight);
 }
 
-void TallinnL1PFTauSeedAnalyzer::endJob()
+void L1HPSPFTauSeedAnalyzer::endJob()
 {}
 
 #include "FWCore/Framework/interface/MakerMacros.h"
 
-DEFINE_FWK_MODULE(TallinnL1PFTauSeedAnalyzer);
+DEFINE_FWK_MODULE(L1HPSPFTauSeedAnalyzer);

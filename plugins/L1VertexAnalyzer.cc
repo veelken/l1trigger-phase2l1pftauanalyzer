@@ -15,7 +15,7 @@ L1VertexAnalyzer::L1VertexAnalyzer(const edm::ParameterSet& cfg)
   token_genVertex_z_ = consumes<float>(src_genVertex_z_);
 
   src_l1Vertices_ = cfg.getParameter<edm::InputTag>("srcL1Vertices");
-  token_l1Vertices_ = consumes<l1t::VertexCollection>(src_l1Vertices_);
+  token_l1Vertices_ = consumes<l1t::TkPrimaryVertexCollection>(src_l1Vertices_);
 
   src_l1PFVertex_z_ = cfg.getParameter<edm::InputTag>("srcL1PFVertex_z");
   token_l1PFVertex_z_ = consumes<float>(src_l1PFVertex_z_);
@@ -56,12 +56,12 @@ void L1VertexAnalyzer::beginJob()
 
 namespace
 {
-  std::vector<double> get_recVertex_z(const l1t::VertexCollection& recVertices)
+  std::vector<double> get_recVertex_z(const l1t::TkPrimaryVertexCollection& recVertices)
   {
     std::vector<double> recVertices_z;
     for ( auto recVertex : recVertices )
     {
-      recVertices_z.push_back(recVertex.z0());
+      recVertices_z.push_back(recVertex.zvertex());
     }
     return recVertices_z;
   }
@@ -84,7 +84,7 @@ void L1VertexAnalyzer::analyze(const edm::Event& evt, const edm::EventSetup& es)
 
   const double evtWeight = 1.;
 
-  edm::Handle<l1t::VertexCollection> l1Vertices;
+  edm::Handle<l1t::TkPrimaryVertexCollection> l1Vertices;
   evt.getByToken(token_l1Vertices_, l1Vertices);
   std::vector<double> l1Vertices_z = get_recVertex_z(*l1Vertices);
   l1VertexPlots_->fillHistograms(*genVertex_z, l1Vertices_z, evtWeight);

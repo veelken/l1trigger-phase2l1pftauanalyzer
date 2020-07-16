@@ -9,9 +9,9 @@
 #include "DQMServices/Core/interface/DQMStore.h" 
 #include "DQMServices/Core/interface/MonitorElement.h"
 
-#include "DataFormats/L1TVertex/interface/Vertex.h"     // l1t::Vertex, l1t::VertexCollection
-#include "DataFormats/VertexReco/interface/Vertex.h"    // reco::Vertex
-#include "DataFormats/VertexReco/interface/VertexFwd.h" // reco::VertexCollection
+#include "DataFormats/L1TCorrelator/interface/TkPrimaryVertex.h" // l1t::TkPrimaryVertex, l1t::TkPrimaryVertexCollection
+#include "DataFormats/VertexReco/interface/Vertex.h"             // reco::Vertex
+#include "DataFormats/VertexReco/interface/VertexFwd.h"          // reco::VertexCollection
 
 #include <TH1.h>
 #include <TH2.h>
@@ -21,6 +21,8 @@
 #include <vector>
 #include <string>
 #include <algorithm> // std::sort
+
+using namespace dqm::implementation;
 
 class L1VertexAnalyzer : public edm::EDAnalyzer 
 {
@@ -42,7 +44,7 @@ class L1VertexAnalyzer : public edm::EDAnalyzer
   edm::EDGetTokenT<float> token_genVertex_z_;
 
   edm::InputTag src_l1Vertices_;
-  edm::EDGetTokenT<l1t::VertexCollection> token_l1Vertices_;
+  edm::EDGetTokenT<l1t::TkPrimaryVertexCollection> token_l1Vertices_;
 
   edm::InputTag src_l1PFVertex_z_;
   edm::EDGetTokenT<float> token_l1PFVertex_z_;

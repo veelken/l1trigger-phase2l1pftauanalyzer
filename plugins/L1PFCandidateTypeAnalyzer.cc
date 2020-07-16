@@ -18,7 +18,7 @@ L1PFCandidateTypeAnalyzer::L1PFCandidateTypeAnalyzer(const edm::ParameterSet& cf
   srcL1Vertices_ = cfg.getParameter<edm::InputTag>("srcL1Vertices");
   if ( srcL1Vertices_.label() != "" ) 
   {
-    tokenL1Vertices_ = consumes<l1t::VertexCollection>(srcL1Vertices_);
+    tokenL1Vertices_ = consumes<l1t::TkPrimaryVertexCollection>(srcL1Vertices_);
   }
 
   srcPileupSummaryInfo_ = cfg.getParameter<edm::InputTag>("srcPileupSummaryInfo");
@@ -78,12 +78,12 @@ void L1PFCandidateTypeAnalyzer::analyze(const edm::Event& evt, const edm::EventS
   float primaryVertex_z = 0.;
   if ( srcL1Vertices_.label() != "" ) 
   {
-    edm::Handle<l1t::VertexCollection> vertices;
+    edm::Handle<l1t::TkPrimaryVertexCollection> vertices;
     evt.getByToken(tokenL1Vertices_, vertices);
     if ( vertices->size() > 0 ) 
     {
-      edm::Ref<l1t::VertexCollection> primaryVertex = l1t::VertexRef(vertices, 0);
-      primaryVertex_z = primaryVertex->z0();
+      l1t::TkPrimaryVertexRef primaryVertex = l1t::TkPrimaryVertexRef(vertices, 0);
+      primaryVertex_z = primaryVertex->zvertex();
     }
   }
   //std::cout << "primaryVertex_z = " << primaryVertex_z << std::endl;

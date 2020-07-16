@@ -119,11 +119,10 @@ GenChargedHadronToL1TrackMatch::GenChargedHadronToL1TrackMatch(const reco::Candi
   if ( recTrack_ )
   {
     hasRecTrack_  = true;
-    const unsigned nParam = 4;
-    recTrack_pt_  = recTrack_->getMomentum(nParam).perp();
-    recTrack_eta_ = recTrack_->getMomentum(nParam).eta();
+    recTrack_pt_  = recTrack_->momentum().perp();
+    recTrack_eta_ = recTrack_->momentum().eta();
     recTrack_absEta_ = TMath::Abs(recTrack_eta_);
-    recTrack_phi_ = recTrack_->getMomentum(nParam).phi();
+    recTrack_phi_ = recTrack_->momentum().phi();
   }
 }
 

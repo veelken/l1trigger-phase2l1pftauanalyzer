@@ -1,5 +1,5 @@
-#ifndef L1Trigger_TallinnL1PFTauAnalyzer_TallinnL1PFTauPairAnalyzer_h
-#define L1Trigger_TallinnL1PFTauAnalyzer_TallinnL1PFTauPairAnalyzer_h
+#ifndef L1Trigger_TallinnL1PFTauAnalyzer_L1HPSPFTauPairAnalyzer_h
+#define L1Trigger_TallinnL1PFTauAnalyzer_L1HPSPFTauPairAnalyzer_h
 
 #include "FWCore/Framework/interface/EDAnalyzer.h"
 #include "FWCore/Framework/interface/Event.h"
@@ -9,11 +9,11 @@
 #include "DQMServices/Core/interface/DQMStore.h" 
 #include "DQMServices/Core/interface/MonitorElement.h"
 
-#include "DataFormats/TallinnL1PFTaus/interface/TallinnL1PFTau.h"             // l1t::TallinnL1PFTau
-#include "DataFormats/TallinnL1PFTaus/interface/TallinnL1PFTauFwd.h"          // l1t::TallinnL1PFTauCollection
-#include "DataFormats/Candidate/interface/CandidateFwd.h"                     // reco::CandidateView
-#include "DataFormats/Candidate/interface/Candidate.h"                        // reco::Candidate
-#include "L1Trigger/TallinnL1PFTauAnalyzer/interface/histogramAuxFunctions.h" // fillWithOverFlow()
+#include "DataFormats/Phase2L1Taus/interface/L1HPSPFTau.h"                     // l1t::L1HPSPFTau
+#include "DataFormats/Phase2L1Taus/interface/L1HPSPFTauFwd.h"                  // l1t::L1HPSPFTauCollection
+#include "DataFormats/Candidate/interface/CandidateFwd.h"                      // reco::CandidateView
+#include "DataFormats/Candidate/interface/Candidate.h"                         // reco::Candidate
+#include "HLTrigger/TallinnHLTPFTauAnalyzer/interface/histogramAuxFunctions.h" // fillWithOverFlow()
 
 #include <TH1.h>     // TH1
 #include <TH2.h>     // TH2
@@ -26,33 +26,35 @@
 
 namespace l1t
 {
-  class TallinnL1PFTauPair
+  class L1HPSPFTauPair
   {
    public:
-    TallinnL1PFTauPair(const l1t::TallinnL1PFTau* leadL1PFTau, const l1t::TallinnL1PFTau* subleadL1PFTau)
+    L1HPSPFTauPair(const l1t::L1HPSPFTau* leadL1PFTau, const l1t::L1HPSPFTau* subleadL1PFTau)
       : leadL1PFTau_(leadL1PFTau)
       , subleadL1PFTau_(subleadL1PFTau)
     {}
-    ~TallinnL1PFTauPair() 
+    ~L1HPSPFTauPair() 
     {}
-    const l1t::TallinnL1PFTau* leadL1PFTau()    const { return leadL1PFTau_;    }
-    const l1t::TallinnL1PFTau* subleadL1PFTau() const { return subleadL1PFTau_; }
+    const l1t::L1HPSPFTau* leadL1PFTau()    const { return leadL1PFTau_;    }
+    const l1t::L1HPSPFTau* subleadL1PFTau() const { return subleadL1PFTau_; }
    private:
-    const l1t::TallinnL1PFTau* leadL1PFTau_;
-    const l1t::TallinnL1PFTau* subleadL1PFTau_;
+    const l1t::L1HPSPFTau* leadL1PFTau_;
+    const l1t::L1HPSPFTau* subleadL1PFTau_;
   };
 
-  typedef std::vector<TallinnL1PFTauPair> TallinnL1PFTauPairCollection;
+  typedef std::vector<L1HPSPFTauPair> L1HPSPFTauPairCollection;
 }
 
-class TallinnL1PFTauPairAnalyzer : public edm::EDAnalyzer 
+using namespace dqm::implementation;
+
+class L1HPSPFTauPairAnalyzer : public edm::EDAnalyzer 
 {
  public:
   // constructor 
-  explicit TallinnL1PFTauPairAnalyzer(const edm::ParameterSet&);
+  explicit L1HPSPFTauPairAnalyzer(const edm::ParameterSet&);
     
   // destructor
-  ~TallinnL1PFTauPairAnalyzer();
+  ~L1HPSPFTauPairAnalyzer();
     
  private:
   void beginJob();
@@ -62,7 +64,7 @@ class TallinnL1PFTauPairAnalyzer : public edm::EDAnalyzer
   std::string moduleLabel_;
 
   edm::InputTag srcL1PFTaus_;
-  edm::EDGetTokenT<l1t::TallinnL1PFTauCollection> tokenL1PFTaus_;
+  edm::EDGetTokenT<l1t::L1HPSPFTauCollection> tokenL1PFTaus_;
   edm::InputTag srcRefTaus_;
   edm::EDGetTokenT<reco::CandidateView> tokenRefTaus_;
 
@@ -109,14 +111,14 @@ class TallinnL1PFTauPairAnalyzer : public edm::EDAnalyzer
       histogram_denominator_ = me_denominator_->getTH1();
       assert(histogram_denominator_);
     }
-    void fillHistograms(const l1t::TallinnL1PFTauPairCollection& l1PFTauPairs, double evtWeight)
+    void fillHistograms(const l1t::L1HPSPFTauPairCollection& l1PFTauPairs, double evtWeight)
     {
-      std::vector<const l1t::TallinnL1PFTauPair*> l1PFTauPairs_passingAbsEta;
-      for ( l1t::TallinnL1PFTauPairCollection::const_iterator l1PFTauPair = l1PFTauPairs.begin(); 
+      std::vector<const l1t::L1HPSPFTauPair*> l1PFTauPairs_passingAbsEta;
+      for ( l1t::L1HPSPFTauPairCollection::const_iterator l1PFTauPair = l1PFTauPairs.begin(); 
 	    l1PFTauPair != l1PFTauPairs.end(); ++l1PFTauPair ) 
       {
-	const l1t::TallinnL1PFTau* leadL1PFTau    = l1PFTauPair->leadL1PFTau();
-	const l1t::TallinnL1PFTau* subleadL1PFTau = l1PFTauPair->subleadL1PFTau();
+	const l1t::L1HPSPFTau* leadL1PFTau    = l1PFTauPair->leadL1PFTau();
+	const l1t::L1HPSPFTau* subleadL1PFTau = l1PFTauPair->subleadL1PFTau();
 	if ( ( min_absEta_ < 0.                                                                             || 
 	      (TMath::Abs(leadL1PFTau->eta())    >=  min_absEta_                                          && 
 	       TMath::Abs(subleadL1PFTau->eta()) >=  min_absEta_                                          ) ) &&
@@ -158,7 +160,7 @@ class TallinnL1PFTauPairAnalyzer : public edm::EDAnalyzer
           {
 	    double subleadL1PFTau_ptThreshold = yAxis->GetBinCenter(idxBinY);
 	    int numL1PFTauPairs_passingPt = 0;
-	    for ( std::vector<const l1t::TallinnL1PFTauPair*>::const_iterator l1PFTauPair = l1PFTauPairs_passingAbsEta.begin(); 
+	    for ( std::vector<const l1t::L1HPSPFTauPair*>::const_iterator l1PFTauPair = l1PFTauPairs_passingAbsEta.begin(); 
 		  l1PFTauPair != l1PFTauPairs_passingAbsEta.end(); ++l1PFTauPair ) {
 	      if ( (*l1PFTauPair)->leadL1PFTau()->pt()    > leadL1PFTau_ptThreshold    &&
 		   (*l1PFTauPair)->subleadL1PFTau()->pt() > subleadL1PFTau_ptThreshold )

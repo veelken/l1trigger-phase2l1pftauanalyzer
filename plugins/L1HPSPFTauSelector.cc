@@ -1,12 +1,12 @@
-#include "L1Trigger/TallinnL1PFTauAnalyzer/plugins/TallinnL1PFTauSelector.h"
+#include "L1Trigger/TallinnL1PFTauAnalyzer/plugins/L1HPSPFTauSelector.h"
 
 #include <cmath>
 
-TallinnL1PFTauSelector::TallinnL1PFTauSelector(const edm::ParameterSet& cfg)
+L1HPSPFTauSelector::L1HPSPFTauSelector(const edm::ParameterSet& cfg)
  : moduleLabel_(cfg.getParameter<std::string>("@module_label"))
 {
   src_ = cfg.getParameter<edm::InputTag>("src");
-  token_ = consumes<l1t::TallinnL1PFTauCollection>(src_);
+  token_ = consumes<l1t::L1HPSPFTauCollection>(src_);
  
   min_pt_ = cfg.getParameter<double>("min_pt");
   max_pt_ = cfg.getParameter<double>("max_pt");
@@ -18,18 +18,18 @@ TallinnL1PFTauSelector::TallinnL1PFTauSelector(const edm::ParameterSet& cfg)
   max_absChargedIso_ = cfg.getParameter<double>("max_absChargedIso");
 }
 
-TallinnL1PFTauSelector::~TallinnL1PFTauSelector()
+L1HPSPFTauSelector::~L1HPSPFTauSelector()
 {}
 
 void 
-TallinnL1PFTauSelector::produce(edm::Event& evt, const edm::EventSetup& es)
+L1HPSPFTauSelector::produce(edm::Event& evt, const edm::EventSetup& es)
 {
-  std::unique_ptr<l1t::TallinnL1PFTauCollection> l1PFTaus_selected(new l1t::TallinnL1PFTauCollection());
+  std::unique_ptr<l1t::L1HPSPFTauCollection> l1PFTaus_selected(new l1t::L1HPSPFTauCollection());
 
-  edm::Handle<l1t::TallinnL1PFTauCollection> l1PFTaus;
+  edm::Handle<l1t::L1HPSPFTauCollection> l1PFTaus;
   evt.getByToken(token_, l1PFTaus);
 
-  for ( l1t::TallinnL1PFTauCollection::const_iterator l1PFTau = l1PFTaus->begin();
+  for ( l1t::L1HPSPFTauCollection::const_iterator l1PFTau = l1PFTaus->begin();
         l1PFTau != l1PFTaus->end(); ++l1PFTau ) {
     if ( (min_pt_            < 0. || l1PFTau->pt()                      >=  min_pt_                          ) &&
          (max_pt_            < 0. || l1PFTau->pt()                      <=  max_pt_                          ) &&
@@ -49,5 +49,5 @@ TallinnL1PFTauSelector::produce(edm::Event& evt, const edm::EventSetup& es)
 }
 
 #include "FWCore/Framework/interface/MakerMacros.h"
-DEFINE_FWK_MODULE(TallinnL1PFTauSelector);
+DEFINE_FWK_MODULE(L1HPSPFTauSelector);
 

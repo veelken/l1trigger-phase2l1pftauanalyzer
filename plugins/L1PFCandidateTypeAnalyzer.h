@@ -9,20 +9,20 @@
 #include "DQMServices/Core/interface/DQMStore.h" 
 #include "DQMServices/Core/interface/MonitorElement.h"
 
-#include "L1Trigger/TallinnL1PFTaus/interface/TallinnL1PFTauQualityCut.h"     // TallinnL1PFTauQualityCut
-#include "DataFormats/Phase2L1ParticleFlow/interface/PFCandidate.h"           // l1t::PFCandidate
-#include "DataFormats/Phase2L1ParticleFlow/interface/PFCandidateFwd.h"        // l1t::PFCandidateCollection
-#include "DataFormats/L1TVertex/interface/Vertex.h"                           // l1t::Vertex
-#include "DataFormats/L1TVertex/interface/VertexFwd.h"                        // l1t::VertexCollection
-#include "SimDataFormats/PileupSummaryInfo/interface/PileupSummaryInfo.h"     // PileupSummaryInfo
+#include "L1Trigger/Phase2L1Taus/interface/L1HPSPFTauQualityCut.h"             // L1HPSPFTauQualityCut
+#include "DataFormats/L1TParticleFlow/interface/PFCandidate.h"                 // l1t::PFCandidate, l1t::PFCandidateCollection, l1t::PFCandidateRef
+#include "DataFormats/L1TCorrelator/interface/TkPrimaryVertex.h"               // l1t::TkPrimaryVertex, l1t::TkPrimaryVertexCollection
+#include "SimDataFormats/PileupSummaryInfo/interface/PileupSummaryInfo.h"      // PileupSummaryInfo
 
-#include "L1Trigger/TallinnL1PFTauAnalyzer/interface/histogramAuxFunctions.h" // divideByBinWidth
+#include "HLTrigger/TallinnHLTPFTauAnalyzer/interface/histogramAuxFunctions.h" // divideByBinWidth
 
 #include <TH1.h>     // TH1
 #include <TString.h> // TString, Form()
 
 #include <vector>    // std::vector
 #include <string>    // std::string
+
+using namespace dqm::implementation;
 
 class L1PFCandidateTypeAnalyzer : public edm::EDAnalyzer 
 {
@@ -41,15 +41,15 @@ class L1PFCandidateTypeAnalyzer : public edm::EDAnalyzer
   edm::EDGetTokenT<l1t::PFCandidateCollection> token_l1PFCands_;
   
   edm::InputTag srcL1Vertices_;
-  edm::EDGetTokenT<l1t::VertexCollection> tokenL1Vertices_;
+  edm::EDGetTokenT<l1t::TkPrimaryVertexCollection> tokenL1Vertices_;
 
   typedef std::vector<PileupSummaryInfo> PileupSummaryInfoCollection;
   edm::InputTag srcPileupSummaryInfo_;
   edm::EDGetTokenT<PileupSummaryInfoCollection> tokenPileupSummaryInfo_;
 
-  std::vector<TallinnL1PFTauQualityCut> isolationQualityCuts_dzCut_disabled_;
-  std::vector<TallinnL1PFTauQualityCut> isolationQualityCuts_dzCut_enabled_primary_;
-  std::vector<TallinnL1PFTauQualityCut> isolationQualityCuts_dzCut_enabled_pileup_;
+  std::vector<L1HPSPFTauQualityCut> isolationQualityCuts_dzCut_disabled_;
+  std::vector<L1HPSPFTauQualityCut> isolationQualityCuts_dzCut_enabled_primary_;
+  std::vector<L1HPSPFTauQualityCut> isolationQualityCuts_dzCut_enabled_pileup_;
 
   std::string dqmDirectory_;
 

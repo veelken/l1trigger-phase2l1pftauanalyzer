@@ -1,5 +1,5 @@
-#ifndef L1Trigger_TallinnL1PFTauAnalyzer_TallinnL1PFTauIsolationAnalyzer_h
-#define L1Trigger_TallinnL1PFTauAnalyzer_TallinnL1PFTauIsolationAnalyzer_h
+#ifndef L1Trigger_TallinnL1PFTauAnalyzer_L1HPSPFTauIsolationAnalyzer_h
+#define L1Trigger_TallinnL1PFTauAnalyzer_L1HPSPFTauIsolationAnalyzer_h
 
 #include "FWCore/Framework/interface/EDAnalyzer.h"
 #include "FWCore/Framework/interface/Event.h"
@@ -10,15 +10,15 @@
 #include "DQMServices/Core/interface/DQMStore.h" 
 #include "DQMServices/Core/interface/MonitorElement.h"
 
-#include "DataFormats/TallinnL1PFTaus/interface/TallinnL1PFTau.h"             // l1t::TallinnL1PFTau
-#include "DataFormats/TallinnL1PFTaus/interface/TallinnL1PFTauFwd.h"          // l1t::TallinnL1PFTauCollection
+#include "DataFormats/Phase2L1Taus/interface/L1HPSPFTau.h"                    // l1t::L1HPSPFTau
+#include "DataFormats/Phase2L1Taus/interface/L1HPSPFTauFwd.h"                 // l1t::L1HPSPFTauCollection
 #include "DataFormats/Math/interface/deltaR.h"                                // reco::deltaR
 #include "DataFormats/JetReco/interface/GenJet.h"                             // reco::GenJet
 #include "DataFormats/JetReco/interface/GenJetCollection.h"                   // reco::GenJetCollection
 #include "PhysicsTools/JetMCUtils/interface/JetMCTag.h"                       // JetMCTagUtils::genTauDecayMode()
 
-#include "L1Trigger/TallinnL1PFTaus/interface/LocalFileInPath.h"              // LocalFileInPath
-#include "L1Trigger/TallinnL1PFTaus/interface/TallinnL1PFTauQualityCut.h"     // TallinnL1PFTauQualityCut
+#include "HLTrigger/TallinnHLTPFTauAnalyzer/interface/LocalFileInPath.h"      // LocalFileInPath
+#include "L1Trigger/Phase2L1Taus/interface/L1HPSPFTauQualityCut.h"            // L1HPSPFTauQualityCut
 #include "L1Trigger/TallinnL1PFTauAnalyzer/interface/histogramAuxFunctions.h" // fillWithOverFlow(), fillWithOverFlow2d()
 
 #include <TFile.h>   // TFile
@@ -30,14 +30,16 @@
 #include <vector>
 #include <string>
 
-class TallinnL1PFTauIsolationAnalyzer : public edm::EDAnalyzer 
+using namespace dqm::implementation;
+
+class L1HPSPFTauIsolationAnalyzer : public edm::EDAnalyzer 
 {
  public:
   // constructor 
-  explicit TallinnL1PFTauIsolationAnalyzer(const edm::ParameterSet&);
+  explicit L1HPSPFTauIsolationAnalyzer(const edm::ParameterSet&);
     
   // destructor
-  ~TallinnL1PFTauIsolationAnalyzer();
+  ~L1HPSPFTauIsolationAnalyzer();
     
  private:
   void beginJob();
@@ -47,7 +49,7 @@ class TallinnL1PFTauIsolationAnalyzer : public edm::EDAnalyzer
   std::string moduleLabel_;
 
   edm::InputTag src_l1PFTaus_;
-  edm::EDGetTokenT<l1t::TallinnL1PFTauCollection> token_l1PFTaus_;
+  edm::EDGetTokenT<l1t::L1HPSPFTauCollection> token_l1PFTaus_;
   edm::InputTag src_genTaus_;
   edm::EDGetTokenT<reco::GenJetCollection> token_genTaus_;
   double dRmatch_;
@@ -243,7 +245,7 @@ class TallinnL1PFTauIsolationAnalyzer : public edm::EDAnalyzer
       histogram_hpsMass_ = me_hpsMass_->getTH1();
       assert(histogram_hpsMass_);
     }
-    void fillHistograms(const l1t::TallinnL1PFTau& l1PFTau, double rhoCorr, double evtWeight)
+    void fillHistograms(const l1t::L1HPSPFTau& l1PFTau, double rhoCorr, double evtWeight)
     {
       if ( (l1PFTau.pt()              > min_pt_     || min_pt_     <= 0.) && (l1PFTau.pt()              < max_pt_     || max_pt_     <= 0.) &&
 	   (TMath::Abs(l1PFTau.eta()) > min_absEta_ || min_absEta_ <= 0.) && (TMath::Abs(l1PFTau.eta()) < max_absEta_ || max_absEta_ <= 0.) )
@@ -337,11 +339,11 @@ class TallinnL1PFTauIsolationAnalyzer : public edm::EDAnalyzer
 	fillWithOverFlow(histogram_hpsMass_, hpsP4.mass(), evtWeight);
       }
     }
-    void fillHistograms_woGenMatching(const l1t::TallinnL1PFTau& l1PFTau, double rhoCorr, double evtWeight)
+    void fillHistograms_woGenMatching(const l1t::L1HPSPFTau& l1PFTau, double rhoCorr, double evtWeight)
     {
       fillHistograms(l1PFTau, rhoCorr, evtWeight);
     }
-    void fillHistograms_wGenMatching(const l1t::TallinnL1PFTau& l1PFTau, double rhoCorr, bool isMatched, const std::string& genTau_decayMode, double evtWeight)
+    void fillHistograms_wGenMatching(const l1t::L1HPSPFTau& l1PFTau, double rhoCorr, bool isMatched, const std::string& genTau_decayMode, double evtWeight)
     {
       if ( isMatched && (decayMode_ == "all" || genTau_decayMode == decayMode_) )
       {

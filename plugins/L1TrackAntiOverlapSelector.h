@@ -10,7 +10,7 @@
 
 #include "DataFormats/Candidate/interface/CandidateFwd.h" 
 #include "DataFormats/Candidate/interface/Candidate.h" 
-#include "DataFormats/Phase2L1ParticleFlow/interface/PFTrack.h" // l1t::PFTrack::L1TTTrackType
+#include "DataFormats/L1TParticleFlow/interface/PFTrack.h" // l1t::PFTrack::L1TTTrackType
 
 #include "DataFormats/Math/interface/deltaR.h"
 

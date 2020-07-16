@@ -9,14 +9,14 @@
 #include "DQMServices/Core/interface/DQMStore.h" 
 #include "DQMServices/Core/interface/MonitorElement.h"
 
-#include "DataFormats/TallinnL1PFTaus/interface/TallinnL1PFTau.h"    // l1t::TallinnL1PFTau
-#include "DataFormats/TallinnL1PFTaus/interface/TallinnL1PFTauFwd.h" // l1t::TallinnL1PFTauCollection
-#include "DataFormats/Math/interface/deltaR.h"                       // reco::deltaR
-#include "DataFormats/JetReco/interface/GenJet.h"                    // reco::GenJet
-#include "DataFormats/JetReco/interface/GenJetCollection.h"          // reco::GenJetCollection
-#include "DataFormats/PatCandidates/interface/Tau.h"                 // pat::Tau, pat::TauCollection
-#include "PhysicsTools/JetMCUtils/interface/JetMCTag.h"              // JetMCTagUtils::genTauDecayMode()
-#include "DataFormats/TauReco/interface/PFTau.h"                     // reco::PFTau::kOneProng0PiZero, reco::PFTau::kOneProng1PiZero,...
+#include "DataFormats/Phase2L1Taus/interface/L1HPSPFTau.h"    // l1t::L1HPSPFTau
+#include "DataFormats/Phase2L1Taus/interface/L1HPSPFTauFwd.h" // l1t::L1HPSPFTauCollection
+#include "DataFormats/Math/interface/deltaR.h"                // reco::deltaR
+#include "DataFormats/JetReco/interface/GenJet.h"             // reco::GenJet
+#include "DataFormats/JetReco/interface/GenJetCollection.h"   // reco::GenJetCollection
+#include "DataFormats/PatCandidates/interface/Tau.h"          // pat::Tau, pat::TauCollection
+#include "PhysicsTools/JetMCUtils/interface/JetMCTag.h"       // JetMCTagUtils::genTauDecayMode()
+#include "DataFormats/TauReco/interface/PFTau.h"              // reco::PFTau::kOneProng0PiZero, reco::PFTau::kOneProng1PiZero,...
 
 #include <TH1.h>     // TH1
 #include <TH2.h>     // TH2
@@ -26,14 +26,16 @@
 #include <vector>    // std::vector
 #include <string>    // std::string
 
-class TallinnL1PFTauAnalyzerSignal : public edm::EDAnalyzer 
+using namespace dqm::implementation;
+
+class L1HPSPFTauAnalyzerSignal : public edm::EDAnalyzer 
 {
  public:
   // constructor 
-  explicit TallinnL1PFTauAnalyzerSignal(const edm::ParameterSet&);
+  explicit L1HPSPFTauAnalyzerSignal(const edm::ParameterSet&);
     
   // destructor
-  ~TallinnL1PFTauAnalyzerSignal();
+  ~L1HPSPFTauAnalyzerSignal();
     
  private:
   void beginJob();
@@ -43,7 +45,7 @@ class TallinnL1PFTauAnalyzerSignal : public edm::EDAnalyzer
   std::string moduleLabel_;
 
   edm::InputTag srcNumerator_;
-  edm::EDGetTokenT<l1t::TallinnL1PFTauCollection> tokenNumerator_;
+  edm::EDGetTokenT<l1t::L1HPSPFTauCollection> tokenNumerator_;
   edm::InputTag srcDenominator_;
   enum { kGen, kOffline };
   int typeDenominator_;
@@ -154,7 +156,7 @@ class TallinnL1PFTauAnalyzerSignal : public edm::EDAnalyzer
       histogram_pt_vs_absEta_denominator_ = dynamic_cast<TH2*>(me_pt_vs_absEta_denominator_->getTH1());
       assert(histogram_pt_vs_absEta_denominator_);
     }
-    void fillHistograms(const l1t::TallinnL1PFTauCollection& numeratorTaus, const reco::GenJetCollection& denominatorTaus, double evtWeight)
+    void fillHistograms(const l1t::L1HPSPFTauCollection& numeratorTaus, const reco::GenJetCollection& denominatorTaus, double evtWeight)
     {
       double minDeltaR = 1.e+3;
       for ( reco::GenJetCollection::const_iterator denominatorTau1 = denominatorTaus.begin();
@@ -210,7 +212,7 @@ class TallinnL1PFTauAnalyzerSignal : public edm::EDAnalyzer
 	if ( isMatched ) histogram_pt_vs_absEta_numerator_->Fill(denominatorTau_absEta, denominatorTau.pt(), evtWeight);
       }
     }
-    void fillHistograms(const l1t::TallinnL1PFTauCollection& numeratorTaus, const pat::TauCollection& denominatorTaus, double evtWeight)
+    void fillHistograms(const l1t::L1HPSPFTauCollection& numeratorTaus, const pat::TauCollection& denominatorTaus, double evtWeight)
     {
       double minDeltaR = 1.e+3;
       for ( pat::TauCollection::const_iterator denominatorTau1 = denominatorTaus.begin();

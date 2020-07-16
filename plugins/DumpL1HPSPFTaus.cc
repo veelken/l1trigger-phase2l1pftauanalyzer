@@ -1,4 +1,4 @@
-#include "L1Trigger/TallinnL1PFTauAnalyzer/plugins/DumpTallinL1PFTaus.h"
+#include "L1Trigger/TallinnL1PFTauAnalyzer/plugins/DumpL1HPSPFTaus.h"
 
 #include "DataFormats/Common/interface/Handle.h"
 
@@ -7,20 +7,20 @@
 #include <iostream>
 #include <iomanip>
 
-DumpTallinL1PFTaus::DumpTallinL1PFTaus(const edm::ParameterSet& cfg)
+DumpL1HPSPFTaus::DumpL1HPSPFTaus(const edm::ParameterSet& cfg)
   : moduleLabel_(cfg.getParameter<std::string>("@module_label"))
   , debug_(cfg.getUntrackedParameter<bool>("debug", false))
 {
   src_ = cfg.getParameter<edm::InputTag>("src");
-  token_ = consumes<l1t::TallinnL1PFTauCollection>(src_);
+  token_ = consumes<l1t::L1HPSPFTauCollection>(src_);
 }
 
-DumpTallinL1PFTaus::~DumpTallinL1PFTaus()
+DumpL1HPSPFTaus::~DumpL1HPSPFTaus()
 {}
 
 namespace
 {
-  bool isSelected(const l1t::TallinnL1PFTau& tau, bool debug)
+  bool isSelected(const l1t::L1HPSPFTau& tau, bool debug)
   {
     const double min_PFTau_pt              = 20.;
     const double max_PFTau_eta             = 2.1;
@@ -69,15 +69,15 @@ namespace
       std::cout << "tau.leadChargedPFCand()->pfTrack()->vertex().z() = " << tau.leadChargedPFCand()->pfTrack()->vertex().z() << std::endl;
       if ( tau.primaryVertex().isNonnull() ) 
       {
-        std::cout << "tau.primaryVertex()->z0() = " << tau.primaryVertex()->z0() << std::endl;
+        std::cout << "tau.primaryVertex()->zvertex() = " << tau.primaryVertex()->zvertex() << std::endl;
       } 
       else 
       {
-        std::cout << "tau.primaryVertex()->z0() = N/A" << std::endl; 
+        std::cout << "tau.primaryVertex()->zvertex() = N/A" << std::endl; 
       }
     }
     if ( !(tau.primaryVertex().isNonnull() && tau.leadChargedPFCand().isNonnull() && 
-	   std::fabs(tau.leadChargedPFCand()->pfTrack()->vertex().z() - tau.primaryVertex()->z0()) < max_leadChargedPFCand_dz) )
+	   std::fabs(tau.leadChargedPFCand()->pfTrack()->vertex().z() - tau.primaryVertex()->zvertex()) < max_leadChargedPFCand_dz) )
     { 
       if ( debug )
       {
@@ -109,19 +109,19 @@ namespace
   }
 }
 
-void DumpTallinL1PFTaus::analyze(const edm::Event& evt, const edm::EventSetup& es)
+void DumpL1HPSPFTaus::analyze(const edm::Event& evt, const edm::EventSetup& es)
 {
-  std::cout << "<DumpTallinL1PFTaus::analyze (moduleLabel = " << moduleLabel_ << ")>:" << std::endl;
+  std::cout << "<DumpL1HPSPFTaus::analyze (moduleLabel = " << moduleLabel_ << ")>:" << std::endl;
   std::cout << " src = " << src_ << std::endl;
 
-  edm::Handle<l1t::TallinnL1PFTauCollection> taus;
+  edm::Handle<l1t::L1HPSPFTauCollection> taus;
   evt.getByToken(token_, taus);
   
   size_t numTaus = taus->size();
   for ( size_t idxTau = 0; idxTau < numTaus; ++idxTau ) 
   {
-    const l1t::TallinnL1PFTau& tau = taus->at(idxTau);
-    std::cout << "TallinnL1PFTau #" << idxTau << ": " << tau;
+    const l1t::L1HPSPFTau& tau = taus->at(idxTau);
+    std::cout << "L1HPSPFTau #" << idxTau << ": " << tau;
     if ( debug_ ) 
     {
       if ( !isSelected(tau, debug_) )
@@ -134,7 +134,7 @@ void DumpTallinL1PFTaus::analyze(const edm::Event& evt, const edm::EventSetup& e
 
 #include "FWCore/Framework/interface/MakerMacros.h"
 
-DEFINE_FWK_MODULE(DumpTallinL1PFTaus);
+DEFINE_FWK_MODULE(DumpL1HPSPFTaus);
 
 
 

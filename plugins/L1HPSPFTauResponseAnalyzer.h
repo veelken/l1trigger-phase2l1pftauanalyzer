@@ -1,5 +1,5 @@
-#ifndef L1Trigger_TallinnL1PFTauAnalyzer_TallinnL1PFTauResponseAnalyzer_h
-#define L1Trigger_TallinnL1PFTauAnalyzer_TallinnL1PFTauResponseAnalyzer_h
+#ifndef L1Trigger_TallinnL1PFTauAnalyzer_L1HPSPFTauResponseAnalyzer_h
+#define L1Trigger_TallinnL1PFTauAnalyzer_L1HPSPFTauResponseAnalyzer_h
 
 #include "FWCore/Framework/interface/EDAnalyzer.h"
 #include "FWCore/Framework/interface/Event.h"
@@ -9,14 +9,14 @@
 #include "DQMServices/Core/interface/DQMStore.h" 
 #include "DQMServices/Core/interface/MonitorElement.h"
 
-#include "DataFormats/TallinnL1PFTaus/interface/TallinnL1PFTau.h"    // l1t::TallinnL1PFTau
-#include "DataFormats/TallinnL1PFTaus/interface/TallinnL1PFTauFwd.h" // l1t::TallinnL1PFTauCollection
-#include "DataFormats/Math/interface/deltaR.h"                       // reco::deltaR
-#include "DataFormats/JetReco/interface/GenJet.h"                    // reco::GenJet
-#include "DataFormats/JetReco/interface/GenJetCollection.h"          // reco::GenJetCollection
-#include "DataFormats/PatCandidates/interface/Tau.h"                 // pat::Tau, pat::TauCollection
-#include "PhysicsTools/JetMCUtils/interface/JetMCTag.h"              // JetMCTagUtils::genTauDecayMode()
-#include "DataFormats/TauReco/interface/PFTau.h"                     // reco::PFTau::kOneProng0PiZero, reco::PFTau::kOneProng1PiZero,...
+#include "DataFormats/Phase2L1Taus/interface/L1HPSPFTau.h"    // l1t::L1HPSPFTau
+#include "DataFormats/Phase2L1Taus/interface/L1HPSPFTauFwd.h" // l1t::L1HPSPFTauCollection
+#include "DataFormats/Math/interface/deltaR.h"                // reco::deltaR
+#include "DataFormats/JetReco/interface/GenJet.h"             // reco::GenJet
+#include "DataFormats/JetReco/interface/GenJetCollection.h"   // reco::GenJetCollection
+#include "DataFormats/PatCandidates/interface/Tau.h"          // pat::Tau, pat::TauCollection
+#include "PhysicsTools/JetMCUtils/interface/JetMCTag.h"       // JetMCTagUtils::genTauDecayMode()
+#include "DataFormats/TauReco/interface/PFTau.h"              // reco::PFTau::kOneProng0PiZero, reco::PFTau::kOneProng1PiZero,...
 
 #include <TH1.h>     // TH1
 #include <TString.h> // TString, Form()
@@ -25,14 +25,16 @@
 #include <vector>    // std::vector
 #include <string>    // std::string
 
-class TallinnL1PFTauResponseAnalyzer : public edm::EDAnalyzer 
+using namespace dqm::implementation;
+
+class L1HPSPFTauResponseAnalyzer : public edm::EDAnalyzer 
 {
  public:
   // constructor 
-  explicit TallinnL1PFTauResponseAnalyzer(const edm::ParameterSet&);
+  explicit L1HPSPFTauResponseAnalyzer(const edm::ParameterSet&);
     
   // destructor
-  ~TallinnL1PFTauResponseAnalyzer();
+  ~L1HPSPFTauResponseAnalyzer();
     
  private:
   void beginJob();
@@ -42,7 +44,7 @@ class TallinnL1PFTauResponseAnalyzer : public edm::EDAnalyzer
   std::string moduleLabel_;
 
   edm::InputTag srcL1PFTaus_;
-  edm::EDGetTokenT<l1t::TallinnL1PFTauCollection> tokenL1PFTaus_;
+  edm::EDGetTokenT<l1t::L1HPSPFTauCollection> tokenL1PFTaus_;
   edm::InputTag srcRefTaus_;
   enum { kGen, kOffline };
   int typeRefTaus_;
@@ -79,7 +81,7 @@ class TallinnL1PFTauResponseAnalyzer : public edm::EDAnalyzer
       histogram_response_ = me_response_->getTH1();
       assert(histogram_response_);
     }
-    void fillHistograms(const l1t::TallinnL1PFTauCollection& l1PFTaus, const reco::GenJetCollection& refTaus, double evtWeight)
+    void fillHistograms(const l1t::L1HPSPFTauCollection& l1PFTaus, const reco::GenJetCollection& refTaus, double evtWeight)
     {
       for ( auto refTau : refTaus )
       {
@@ -105,7 +107,7 @@ class TallinnL1PFTauResponseAnalyzer : public edm::EDAnalyzer
 	}
       }
     }
-    void fillHistograms(const l1t::TallinnL1PFTauCollection& l1PFTaus, const pat::TauCollection& refTaus, double evtWeight)
+    void fillHistograms(const l1t::L1HPSPFTauCollection& l1PFTaus, const pat::TauCollection& refTaus, double evtWeight)
     {
       for ( auto refTau : refTaus )
       {

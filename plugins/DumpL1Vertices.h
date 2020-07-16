@@ -6,7 +6,7 @@
 #include "FWCore/Framework/interface/EventSetup.h"
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
 #include "FWCore/Utilities/interface/InputTag.h"
-#include "DataFormats/L1TVertex/interface/Vertex.h" // l1t::Vertex, l1t::VertexCollection
+#include "DataFormats/L1TCorrelator/interface/TkPrimaryVertex.h" // l1t::TkPrimaryVertex, l1t::TkPrimaryVertexCollection
 
 #include <vector>
 #include <string>
@@ -26,7 +26,7 @@ class DumpL1Vertices : public edm::EDAnalyzer
   std::string moduleLabel_;
 
   edm::InputTag src_;
-  edm::EDGetTokenT<l1t::VertexCollection> token_;
+  edm::EDGetTokenT<l1t::TkPrimaryVertexCollection> token_;
 };
 
 #endif   

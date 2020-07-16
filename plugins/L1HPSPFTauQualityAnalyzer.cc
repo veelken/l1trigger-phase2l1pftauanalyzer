@@ -1,4 +1,4 @@
-#include "L1Trigger/TallinnL1PFTauAnalyzer/plugins/TallinnL1PFTauQualityAnalyzer.h"
+#include "L1Trigger/TallinnL1PFTauAnalyzer/plugins/L1HPSPFTauQualityAnalyzer.h"
 
 #include "FWCore/ServiceRegistry/interface/Service.h"
 #include "FWCore/Utilities/interface/Exception.h"
@@ -9,16 +9,16 @@
 #include <iostream>
 #include <iomanip>
 
-TallinnL1PFTauQualityAnalyzer::TallinnL1PFTauQualityAnalyzer(const edm::ParameterSet& cfg)
+L1HPSPFTauQualityAnalyzer::L1HPSPFTauQualityAnalyzer(const edm::ParameterSet& cfg)
   : moduleLabel_(cfg.getParameter<std::string>("@module_label"))
 {
   src_ = cfg.getParameter<edm::InputTag>("src");
-  token_ = consumes<l1t::TallinnL1PFTauCollection>(src_);
+  token_ = consumes<l1t::L1HPSPFTauCollection>(src_);
 
   dqmDirectory_ = cfg.getParameter<std::string>("dqmDirectory");
 }
 
-TallinnL1PFTauQualityAnalyzer::~TallinnL1PFTauQualityAnalyzer()
+L1HPSPFTauQualityAnalyzer::~L1HPSPFTauQualityAnalyzer()
 {
   for ( auto plot : plots_ ) 
   {
@@ -26,10 +26,10 @@ TallinnL1PFTauQualityAnalyzer::~TallinnL1PFTauQualityAnalyzer()
   }
 }
 
-void TallinnL1PFTauQualityAnalyzer::beginJob()
+void L1HPSPFTauQualityAnalyzer::beginJob()
 {
   if ( !edm::Service<dqm::legacy::DQMStore>().isAvailable() ) {
-    throw cms::Exception("TallinnL1PFTauQualityAnalyzer") 
+    throw cms::Exception("L1HPSPFTauQualityAnalyzer") 
       << " Failed to access dqmStore --> histograms will NEITHER be booked NOR filled !!\n";
   }
 
@@ -102,9 +102,9 @@ void TallinnL1PFTauQualityAnalyzer::beginJob()
   }
 }
 
-void TallinnL1PFTauQualityAnalyzer::analyze(const edm::Event& evt, const edm::EventSetup& es)
+void L1HPSPFTauQualityAnalyzer::analyze(const edm::Event& evt, const edm::EventSetup& es)
 {
-  edm::Handle<l1t::TallinnL1PFTauCollection> l1PFTaus;
+  edm::Handle<l1t::L1HPSPFTauCollection> l1PFTaus;
   evt.getByToken(token_, l1PFTaus);
   
   const double evtWeight = 1.;
@@ -115,9 +115,9 @@ void TallinnL1PFTauQualityAnalyzer::analyze(const edm::Event& evt, const edm::Ev
   }
 }
 
-void TallinnL1PFTauQualityAnalyzer::endJob()
+void L1HPSPFTauQualityAnalyzer::endJob()
 {}
 
 #include "FWCore/Framework/interface/MakerMacros.h"
 
-DEFINE_FWK_MODULE(TallinnL1PFTauQualityAnalyzer);
+DEFINE_FWK_MODULE(L1HPSPFTauQualityAnalyzer);

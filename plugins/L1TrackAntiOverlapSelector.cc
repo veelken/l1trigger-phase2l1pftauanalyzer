@@ -40,9 +40,8 @@ void L1TrackAntiOverlapSelector::produce(edm::Event& evt, const edm::EventSetup&
       for ( size_t idxL1Track = 0; idxL1Track < numL1Tracks; ++idxL1Track )
       {
 	const L1Track& l1Track = l1Tracks->at(idxL1Track);
-	const unsigned nParam = 4;
-	double l1Track_eta = l1Track.getMomentum(nParam).eta();
-	double l1Track_phi = l1Track.getMomentum(nParam).phi();
+	double l1Track_eta = l1Track.momentum().eta();
+	double l1Track_phi = l1Track.momentum().phi();
 	double dR = reco::deltaR(l1Track_eta, l1Track_phi, particleNotToBeFiltered->eta(), particleNotToBeFiltered->phi());	  
 	if ( dR < dRmin_ ) isOverlap[idxL1Track] = true;
       }

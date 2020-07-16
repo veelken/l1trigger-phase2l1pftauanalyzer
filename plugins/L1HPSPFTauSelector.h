@@ -7,17 +7,17 @@
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
 #include "FWCore/Framework/interface/Frameworkfwd.h"
 
-#include "DataFormats/TallinnL1PFTaus/interface/TallinnL1PFTau.h"    // l1t::TallinnL1PFTau
-#include "DataFormats/TallinnL1PFTaus/interface/TallinnL1PFTauFwd.h" // l1t::TallinnL1PFTauCollection
+#include "DataFormats/Phase2L1Taus/interface/L1HPSPFTau.h"    // l1t::L1HPSPFTau
+#include "DataFormats/Phase2L1Taus/interface/L1HPSPFTauFwd.h" // l1t::L1HPSPFTauCollection
 
 #include <string>
 #include <vector>
 
-class TallinnL1PFTauSelector : public edm::EDProducer 
+class L1HPSPFTauSelector : public edm::EDProducer 
 {
  public:
-  explicit TallinnL1PFTauSelector(const edm::ParameterSet& cfg);
-  ~TallinnL1PFTauSelector();
+  explicit L1HPSPFTauSelector(const edm::ParameterSet& cfg);
+  ~L1HPSPFTauSelector();
 
  private:
   void produce(edm::Event& evt, const edm::EventSetup& es);
@@ -25,7 +25,7 @@ class TallinnL1PFTauSelector : public edm::EDProducer
   std::string moduleLabel_;
 
   edm::InputTag src_;
-  edm::EDGetTokenT<l1t::TallinnL1PFTauCollection> token_;
+  edm::EDGetTokenT<l1t::L1HPSPFTauCollection> token_;
 
   double min_pt_;
   double max_pt_;

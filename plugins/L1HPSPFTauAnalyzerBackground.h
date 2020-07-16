@@ -1,5 +1,5 @@
-#ifndef L1Trigger_TallinnL1PFTauAnalyzer_TallinnL1PFTauAnalyzerBackground_h
-#define L1Trigger_TallinnL1PFTauAnalyzer_TallinnL1PFTauAnalyzerBackground_h
+#ifndef L1Trigger_TallinnL1PFTauAnalyzer_L1HPSPFTauAnalyzerBackground_h
+#define L1Trigger_TallinnL1PFTauAnalyzer_L1HPSPFTauAnalyzerBackground_h
 
 #include "FWCore/Framework/interface/EDAnalyzer.h"
 #include "FWCore/Framework/interface/Event.h"
@@ -9,8 +9,8 @@
 #include "DQMServices/Core/interface/DQMStore.h" 
 #include "DQMServices/Core/interface/MonitorElement.h"
 
-#include "DataFormats/TallinnL1PFTaus/interface/TallinnL1PFTau.h"             // l1t::TallinnL1PFTau
-#include "DataFormats/TallinnL1PFTaus/interface/TallinnL1PFTauFwd.h"          // l1t::TallinnL1PFTauCollection
+#include "DataFormats/Phase2L1Taus/interface/L1HPSPFTau.h"                    // l1t::L1HPSPFTau
+#include "DataFormats/Phase2L1Taus/interface/L1HPSPFTauFwd.h"                 // l1t::L1HPSPFTauCollection
 #include "L1Trigger/TallinnL1PFTauAnalyzer/interface/histogramAuxFunctions.h" // fillWithOverFlow()
 
 #include <TH1.h>     // TH1
@@ -25,21 +25,23 @@
 namespace
 {
   bool
-  isHigherPt(const l1t::TallinnL1PFTau* l1PFTau1,
-	     const l1t::TallinnL1PFTau* l1PFTau2)
+  isHigherPt(const l1t::L1HPSPFTau* l1PFTau1,
+	     const l1t::L1HPSPFTau* l1PFTau2)
   {
     return l1PFTau1->pt() > l1PFTau2->pt();
   }
 }
 
-class TallinnL1PFTauAnalyzerBackground : public edm::EDAnalyzer 
+using namespace dqm::implementation;
+
+class L1HPSPFTauAnalyzerBackground : public edm::EDAnalyzer 
 {
  public:
   // constructor 
-  explicit TallinnL1PFTauAnalyzerBackground(const edm::ParameterSet&);
+  explicit L1HPSPFTauAnalyzerBackground(const edm::ParameterSet&);
     
   // destructor
-  ~TallinnL1PFTauAnalyzerBackground();
+  ~L1HPSPFTauAnalyzerBackground();
     
  private:
   void beginJob();
@@ -49,7 +51,7 @@ class TallinnL1PFTauAnalyzerBackground : public edm::EDAnalyzer
   std::string moduleLabel_;
 
   edm::InputTag srcL1PFTaus_;
-  edm::EDGetTokenT<l1t::TallinnL1PFTauCollection> tokenL1PFTaus_;
+  edm::EDGetTokenT<l1t::L1HPSPFTauCollection> tokenL1PFTaus_;
 
   std::string dqmDirectory_;
 
@@ -124,10 +126,10 @@ class TallinnL1PFTauAnalyzerBackground : public edm::EDAnalyzer
       histogram_numL1PFTausPtGt50_ = me_numL1PFTausPtGt50_->getTH1();
       assert(histogram_numL1PFTausPtGt50_);
     }
-    void fillHistograms(const l1t::TallinnL1PFTauCollection& l1PFTaus, double evtWeight)
+    void fillHistograms(const l1t::L1HPSPFTauCollection& l1PFTaus, double evtWeight)
     {
-      std::vector<const l1t::TallinnL1PFTau*> l1PFTaus_passingAbsEta;
-      for ( l1t::TallinnL1PFTauCollection::const_iterator l1PFTau = l1PFTaus.begin(); 
+      std::vector<const l1t::L1HPSPFTau*> l1PFTaus_passingAbsEta;
+      for ( l1t::L1HPSPFTauCollection::const_iterator l1PFTau = l1PFTaus.begin(); 
 	    l1PFTau != l1PFTaus.end(); ++l1PFTau ) {
 	double l1PFTau_absEta = TMath::Abs(l1PFTau->eta());
 	if ( (min_absEta_        < 0. || l1PFTau_absEta             >=  min_absEta_                      ) &&
@@ -149,7 +151,7 @@ class TallinnL1PFTauAnalyzerBackground : public edm::EDAnalyzer
       int numL1PFTausPtGt40 = 0;
       int numL1PFTausPtGt45 = 0;
       int numL1PFTausPtGt50 = 0;
-      for ( std::vector<const l1t::TallinnL1PFTau*>::const_iterator l1PFTau = l1PFTaus_passingAbsEta.begin();
+      for ( std::vector<const l1t::L1HPSPFTau*>::const_iterator l1PFTau = l1PFTaus_passingAbsEta.begin();
 	    l1PFTau != l1PFTaus_passingAbsEta.end(); ++l1PFTau ) {
 	if ( (*l1PFTau)->pt() > 20. ) ++numL1PFTausPtGt20;
 	if ( (*l1PFTau)->pt() > 25. ) ++numL1PFTausPtGt25;
@@ -178,10 +180,10 @@ class TallinnL1PFTauAnalyzerBackground : public edm::EDAnalyzer
 	int max_numL1PFTaus_passingPt = 0;
         if ( !max_numL1PFTaus_passingPt_isZero ) 
         {
-	  for ( std::vector<const l1t::TallinnL1PFTau*>::const_iterator l1PFTau_zVtxRef = l1PFTaus_passingAbsEta.begin(); 
+	  for ( std::vector<const l1t::L1HPSPFTau*>::const_iterator l1PFTau_zVtxRef = l1PFTaus_passingAbsEta.begin(); 
 	        l1PFTau_zVtxRef != l1PFTaus_passingAbsEta.end(); ++l1PFTau_zVtxRef ) {
 	    int numL1PFTaus_passingPt = 0;
-	    for ( std::vector<const l1t::TallinnL1PFTau*>::const_iterator l1PFTau_toMatch = l1PFTaus_passingAbsEta.begin(); 
+	    for ( std::vector<const l1t::L1HPSPFTau*>::const_iterator l1PFTau_toMatch = l1PFTaus_passingAbsEta.begin(); 
 		  l1PFTau_toMatch != l1PFTaus_passingAbsEta.end(); ++l1PFTau_toMatch ) {
 	      if ( (*l1PFTau_toMatch)->pt() > ptThreshold )
 	      {

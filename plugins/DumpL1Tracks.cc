@@ -29,10 +29,9 @@ void DumpL1Tracks::analyze(const edm::Event& evt, const edm::EventSetup& es)
   for ( size_t idxTrack = 0; idxTrack < numTracks; ++idxTrack ) 
   {
     const l1t::PFTrack::L1TTTrackType& l1Track = l1Tracks->at(idxTrack);
-    const unsigned nParam = 4;
-    double l1Track_pt  = l1Track.getMomentum(nParam).perp();
-    double l1Track_eta = l1Track.getMomentum(nParam).eta();
-    double l1Track_phi = l1Track.getMomentum(nParam).phi();
+    double l1Track_pt  = l1Track.momentum().perp();
+    double l1Track_eta = l1Track.momentum().eta();
+    double l1Track_phi = l1Track.momentum().phi();
     std::cout << "L1Track #" << idxTrack << ":" 
 	      << " pT = " << l1Track_pt << ", eta = " << l1Track_eta << ", phi = " << l1Track_phi << std::endl;
   }

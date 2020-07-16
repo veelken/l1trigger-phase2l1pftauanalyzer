@@ -1,14 +1,14 @@
-#include "L1Trigger/TallinnL1PFTauAnalyzer/plugins/TallinnL1PFTauIsolationAnalyzer.h"
+#include "L1Trigger/TallinnL1PFTauAnalyzer/plugins/L1HPSPFTauIsolationAnalyzer.h"
 
 #include "FWCore/ServiceRegistry/interface/Service.h"
 #include "DataFormats/Common/interface/Handle.h"
 
-#include "L1Trigger/TallinnL1PFTaus/interface/lutAuxFunctions.h" // openFile(), loadTH1()
+#include "HLTrigger/TallinnHLTPFTauAnalyzer/interface/lutAuxFunctions.h" // openFile(), loadTH1()
 
 #include <iostream>
 #include <iomanip>
 
-TallinnL1PFTauIsolationAnalyzer::TallinnL1PFTauIsolationAnalyzer(const edm::ParameterSet& cfg)
+L1HPSPFTauIsolationAnalyzer::L1HPSPFTauIsolationAnalyzer(const edm::ParameterSet& cfg)
   : moduleLabel_(cfg.getParameter<std::string>("@module_label"))
   , dRmatch_(cfg.getParameter<double>("dRmatch"))
   , inputFileName_rhoCorr_(cfg.getParameter<std::string>("inputFileName_rhoCorr"))
@@ -18,7 +18,7 @@ TallinnL1PFTauIsolationAnalyzer::TallinnL1PFTauIsolationAnalyzer(const edm::Para
   , histogram_rhoCorr_yMax_(-1.)
 {
   src_l1PFTaus_ = cfg.getParameter<edm::InputTag>("srcL1PFTaus");
-  token_l1PFTaus_ = consumes<l1t::TallinnL1PFTauCollection>(src_l1PFTaus_);
+  token_l1PFTaus_ = consumes<l1t::L1HPSPFTauCollection>(src_l1PFTaus_);
   src_genTaus_ = cfg.getParameter<edm::InputTag>("srcGenTaus");
   token_genTaus_ = consumes<reco::GenJetCollection>(src_genTaus_);
   src_rho_ = cfg.getParameter<edm::InputTag>("srcRho");
@@ -47,7 +47,7 @@ TallinnL1PFTauIsolationAnalyzer::TallinnL1PFTauIsolationAnalyzer(const edm::Para
   dqmDirectory_ = cfg.getParameter<std::string>("dqmDirectory");
 }
 
-TallinnL1PFTauIsolationAnalyzer::~TallinnL1PFTauIsolationAnalyzer()
+L1HPSPFTauIsolationAnalyzer::~L1HPSPFTauIsolationAnalyzer()
 {
   delete histogram_rhoCorr_;
 
@@ -57,10 +57,10 @@ TallinnL1PFTauIsolationAnalyzer::~TallinnL1PFTauIsolationAnalyzer()
   }
 }
 
-void TallinnL1PFTauIsolationAnalyzer::beginJob()
+void L1HPSPFTauIsolationAnalyzer::beginJob()
 {
   if ( !edm::Service<dqm::legacy::DQMStore>().isAvailable() ) {
-    throw cms::Exception("TallinnL1PFTauIsolationAnalyzer") 
+    throw cms::Exception("L1HPSPFTauIsolationAnalyzer") 
       << " Failed to access dqmStore --> histograms will NEITHER be booked NOR filled !!\n";
   }
 
@@ -114,9 +114,9 @@ void TallinnL1PFTauIsolationAnalyzer::beginJob()
   }
 }
 
-void TallinnL1PFTauIsolationAnalyzer::analyze(const edm::Event& evt, const edm::EventSetup& es)
+void L1HPSPFTauIsolationAnalyzer::analyze(const edm::Event& evt, const edm::EventSetup& es)
 {
-  edm::Handle<l1t::TallinnL1PFTauCollection> l1PFTaus;
+  edm::Handle<l1t::L1HPSPFTauCollection> l1PFTaus;
   evt.getByToken(token_l1PFTaus_, l1PFTaus);
   
   edm::Handle<reco::GenJetCollection> genTaus;
@@ -133,7 +133,7 @@ void TallinnL1PFTauIsolationAnalyzer::analyze(const edm::Event& evt, const edm::
   
   const double evtWeight = 1.;
   
-  for ( l1t::TallinnL1PFTauCollection::const_iterator l1PFTau = l1PFTaus->begin(); l1PFTau != l1PFTaus->end();  ++l1PFTau )
+  for ( l1t::L1HPSPFTauCollection::const_iterator l1PFTau = l1PFTaus->begin(); l1PFTau != l1PFTaus->end();  ++l1PFTau )
   {
     std::string genTau_decayMode;
     double dRmin = 1.e+3;
@@ -162,7 +162,7 @@ void TallinnL1PFTauIsolationAnalyzer::analyze(const edm::Event& evt, const edm::
         int idxBin = histogram_rhoCorr_->FindBin(TMath::Abs(l1PFTau->eta()));
         if ( !(idxBin >= 1 && idxBin <= histogram_rhoCorr_->GetNbinsX()) )
         {
-	  std::cerr << "Warning in <TallinnL1PFTauIsolationAnalyzer::analyze>:" 
+	  std::cerr << "Warning in <L1HPSPFTauIsolationAnalyzer::analyze>:" 
             	    << " Failed to compute rho correction for abs(eta) = " << l1PFTau->eta() << " --> skipping event !!" << std::endl;
           return;
         }
@@ -185,9 +185,9 @@ void TallinnL1PFTauIsolationAnalyzer::analyze(const edm::Event& evt, const edm::
   }
 }
 
-void TallinnL1PFTauIsolationAnalyzer::endJob()
+void L1HPSPFTauIsolationAnalyzer::endJob()
 {}
 
 #include "FWCore/Framework/interface/MakerMacros.h"
 
-DEFINE_FWK_MODULE(TallinnL1PFTauIsolationAnalyzer);
+DEFINE_FWK_MODULE(L1HPSPFTauIsolationAnalyzer);

@@ -3,7 +3,7 @@
 
 #include "DataFormats/HepMCCandidate/interface/GenParticle.h"   // reco::GenParticle
 #include "DataFormats/TrackReco/interface/Track.h"              // reco::Track
-#include "DataFormats/Phase2L1ParticleFlow/interface/PFTrack.h" // l1t::PFTrack::L1TTTrackType
+#include "DataFormats/L1TParticleFlow/interface/PFTrack.h"      // l1t::PFTrack::L1TTTrackType
 
 namespace l1t
 {

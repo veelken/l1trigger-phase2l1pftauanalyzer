@@ -1,5 +1,5 @@
-#ifndef L1Trigger_TallinnL1PFTauAnalyzer_TallinnL1PFTauSeedAnalyzer_h
-#define L1Trigger_TallinnL1PFTauAnalyzer_TallinnL1PFTauSeedAnalyzer_h
+#ifndef L1Trigger_TallinnL1PFTauAnalyzer_L1HPSPFTauSeedAnalyzer_h
+#define L1Trigger_TallinnL1PFTauAnalyzer_L1HPSPFTauSeedAnalyzer_h
 
 #include "FWCore/Framework/interface/EDAnalyzer.h"
 #include "FWCore/Framework/interface/Event.h"
@@ -10,16 +10,12 @@
 #include "DQMServices/Core/interface/DQMStore.h" 
 #include "DQMServices/Core/interface/MonitorElement.h"
 
-#include "DataFormats/Phase2L1ParticleFlow/interface/PFCandidate.h"       // l1t::PFCandidate
-#include "DataFormats/Phase2L1ParticleFlow/interface/PFCandidateFwd.h"    // l1t::PFCandidateCollection, l1t::PFCandidateRef
-#include "DataFormats/Phase2L1ParticleFlow/interface/PFJet.h"             // l1t::PFJet
-#include "DataFormats/Phase2L1ParticleFlow/interface/PFJetFwd.h"          // l1t::PFJetCollection, l1t::PFJetRef
-#include "DataFormats/L1TVertex/interface/Vertex.h"                       // l1t::Vertex
-#include "DataFormats/L1TVertex/interface/VertexFwd.h"                    // l1t::VertexCollection
+#include "DataFormats/L1TParticleFlow/interface/PFCandidate.h"           // l1t::PFCandidate, l1t::PFCandidateCollection, l1t::PFCandidateRef
+#include "DataFormats/L1TParticleFlow/interface/PFJet.h"                 // l1t::PFJet, l1t::PFJetCollection, l1t::PFJetRef
+#include "DataFormats/L1TCorrelator/interface/TkPrimaryVertex.h"         // l1t::TkPrimaryVertex, l1t::TkPrimaryVertexCollection
 
-#include "L1Trigger/TallinnL1PFTaus/interface/LocalFileInPath.h"              // LocalFileInPath
-#include "L1Trigger/TallinnL1PFTaus/interface/TallinnL1PFTauQualityCut.h"     // TallinnL1PFTauQualityCut
-#include "L1Trigger/TallinnL1PFTauAnalyzer/interface/histogramAuxFunctions.h" // fillWithOverFlow(), fillWithOverFlow2d()
+#include "HLTrigger/TallinnHLTPFTauAnalyzer/interface/LocalFileInPath.h" // LocalFileInPath
+#include "L1Trigger/Phase2L1Taus/interface/L1HPSPFTauQualityCut.h"       // L1HPSPFTauQualityCut
 
 #include <TFile.h>   // TFile
 #include <TH1.h>     // TH1
@@ -30,14 +26,16 @@
 #include <vector>
 #include <string>
 
-class TallinnL1PFTauSeedAnalyzer : public edm::EDAnalyzer 
+using namespace dqm::implementation;
+
+class L1HPSPFTauSeedAnalyzer : public edm::EDAnalyzer 
 {
  public:
   // constructor 
-  explicit TallinnL1PFTauSeedAnalyzer(const edm::ParameterSet&);
+  explicit L1HPSPFTauSeedAnalyzer(const edm::ParameterSet&);
     
   // destructor
-  ~TallinnL1PFTauSeedAnalyzer();
+  ~L1HPSPFTauSeedAnalyzer();
     
  private:
   void beginJob();
@@ -51,9 +49,9 @@ class TallinnL1PFTauSeedAnalyzer : public edm::EDAnalyzer
   edm::InputTag srcL1PFJets_;
   edm::EDGetTokenT<l1t::PFJetCollection> tokenL1PFJets_;
   edm::InputTag srcL1Vertices_;
-  edm::EDGetTokenT<l1t::VertexCollection> tokenL1Vertices_;
+  edm::EDGetTokenT<l1t::TkPrimaryVertexCollection> tokenL1Vertices_;
 
-  std::vector<TallinnL1PFTauQualityCut> signalQualityCuts_dzCut_disabled_;
+  std::vector<L1HPSPFTauQualityCut> signalQualityCuts_dzCut_disabled_;
 
   std::string dqmDirectory_;
 
