@@ -1,6 +1,6 @@
 <use   name="DataFormats/HepMCCandidate"/>
 <use   name="DataFormats/JetReco"/>
-<use   name="DataFormats/L1TVertex"/>
+<use   name="DataFormats/L1TCorrelator"/>
 <use   name="DataFormats/Math"/>
 <use   name="DataFormats/PatCandidates"/>
 <use   name="DataFormats/ParticleFlowCandidate"/>
