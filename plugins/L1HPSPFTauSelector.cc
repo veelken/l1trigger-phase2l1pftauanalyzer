@@ -1,53 +1,70 @@
 #include "L1Trigger/TallinnL1PFTauAnalyzer/plugins/L1HPSPFTauSelector.h"
 
-#include <cmath>
+#include "FWCore/Utilities/interface/InputTag.h"
 
-L1HPSPFTauSelector::L1HPSPFTauSelector(const edm::ParameterSet& cfg)
- : moduleLabel_(cfg.getParameter<std::string>("@module_label"))
+L1HPSPFTauSelector::L1HPSPFTauSelector(const edm::ParameterSet& cfg) 
 {
   src_ = cfg.getParameter<edm::InputTag>("src");
   token_ = consumes<l1t::L1HPSPFTauCollection>(src_);
- 
+
   min_pt_ = cfg.getParameter<double>("min_pt");
   max_pt_ = cfg.getParameter<double>("max_pt");
   min_absEta_ = cfg.getParameter<double>("min_absEta");
   max_absEta_ = cfg.getParameter<double>("max_absEta");
-  min_leadTrack_pt_ = cfg.getParameter<double>("min_leadTrack_pt");
-  max_leadTrack_pt_ = cfg.getParameter<double>("max_leadTrack_pt");
+  min_leadTrackPt_ = cfg.getParameter<double>("min_leadTrackPt");
+  max_leadTrackPt_ = cfg.getParameter<double>("max_leadTrackPt");
+  min_relChargedIso_ = cfg.getParameter<double>("min_relChargedIso");
   max_relChargedIso_ = cfg.getParameter<double>("max_relChargedIso");
+  min_absChargedIso_ = cfg.getParameter<double>("min_absChargedIso");
   max_absChargedIso_ = cfg.getParameter<double>("max_absChargedIso");
+
+  invert_ = cfg.getParameter<bool>("invert");
+
+  produces<l1t::L1HPSPFTauCollection>("");
 }
 
 L1HPSPFTauSelector::~L1HPSPFTauSelector()
 {}
 
-void 
-L1HPSPFTauSelector::produce(edm::Event& evt, const edm::EventSetup& es)
+void L1HPSPFTauSelector::produce(edm::Event& evt, const edm::EventSetup& es)
 {
-  std::unique_ptr<l1t::L1HPSPFTauCollection> l1PFTaus_selected(new l1t::L1HPSPFTauCollection());
+  std::unique_ptr<l1t::L1HPSPFTauCollection> pfTaus_selected(new l1t::L1HPSPFTauCollection());
 
-  edm::Handle<l1t::L1HPSPFTauCollection> l1PFTaus;
-  evt.getByToken(token_, l1PFTaus);
-
-  for ( l1t::L1HPSPFTauCollection::const_iterator l1PFTau = l1PFTaus->begin();
-        l1PFTau != l1PFTaus->end(); ++l1PFTau ) {
-    if ( (min_pt_            < 0. || l1PFTau->pt()                      >=  min_pt_                          ) &&
-         (max_pt_            < 0. || l1PFTau->pt()                      <=  max_pt_                          ) &&
-         (min_absEta_        < 0. || std::fabs(l1PFTau->eta())          >=  min_absEta_                      ) &&
-         (max_absEta_        < 0. || std::fabs(l1PFTau->eta())          <=  max_absEta_                      ) &&
-         (                           l1PFTau->leadChargedPFCand().isNonnull()                                ) && 
-         (min_leadTrack_pt_  < 0. || l1PFTau->leadChargedPFCand()->pt() >=  min_leadTrack_pt_                ) &&
-         (max_leadTrack_pt_  < 0. || l1PFTau->leadChargedPFCand()->pt() <=  max_leadTrack_pt_                ) &&
-         (max_relChargedIso_ < 0. || l1PFTau->sumChargedIso()           <= (max_relChargedIso_*l1PFTau->pt())) &&
-         (max_absChargedIso_ < 0. || l1PFTau->sumChargedIso()           <=  max_absChargedIso_               ) ) 
+  edm::Handle<l1t::L1HPSPFTauCollection> pfTaus;
+  evt.getByToken(token_, pfTaus);
+  
+  size_t numPFTaus = pfTaus->size();
+  for ( size_t idxPFTau = 0; idxPFTau < numPFTaus; ++idxPFTau ) 
+  {  
+    const l1t::L1HPSPFTau& pfTau = pfTaus->at(idxPFTau);
+    double pfTau_absEta = std::fabs(pfTau.eta());
+    double sumChargedIso = pfTau.sumChargedIso();
+    bool isSelected = false;
+    if ( (min_pt_            < 0. || pfTau.pt()                                                       >=  min_pt_                       ) &&
+         (max_pt_            < 0. || pfTau.pt()                                                       <=  max_pt_                       ) &&
+         (min_absEta_        < 0. || pfTau_absEta                                                     >=  min_absEta_                   ) &&
+         (max_absEta_        < 0. || pfTau_absEta                                                     <=  max_absEta_                   ) &&
+         (                           pfTau.leadChargedPFCand().isNonnull()                                                                && 
+                                     pfTau.leadChargedPFCand()->pfTrack().isNonnull()                                                     &&   
+                                     pfTau.leadChargedPFCand()->pfTrack()->track().isNonnull()                                          ) &&
+         (min_leadTrackPt_   < 0. || pfTau.leadChargedPFCand()->pfTrack()->track()->momentum().perp() >=  min_leadTrackPt_              ) &&
+         (max_leadTrackPt_   < 0. || pfTau.leadChargedPFCand()->pfTrack()->track()->momentum().perp() <=  max_leadTrackPt_              ) &&
+         (min_relChargedIso_ < 0. || sumChargedIso                                                    >= (min_relChargedIso_*pfTau.pt())) &&
+         (max_relChargedIso_ < 0. || sumChargedIso                                                    <= (max_relChargedIso_*pfTau.pt())) &&
+         (min_absChargedIso_ < 0. || sumChargedIso                                                    >=  min_absChargedIso_            ) &&
+	 (max_absChargedIso_ < 0. || sumChargedIso                                                    <=  max_absChargedIso_            ) )
     {
-      l1PFTaus_selected->push_back(*l1PFTau);
+      isSelected = true;
+    }
+    if ( (isSelected && !invert_) || (!isSelected && invert_) ) 
+    {
+      pfTaus_selected->push_back(pfTau);
     }
   }
 
-  evt.put(std::move(l1PFTaus_selected));
+  evt.put(std::move(pfTaus_selected));
 }
 
 #include "FWCore/Framework/interface/MakerMacros.h"
-DEFINE_FWK_MODULE(L1HPSPFTauSelector);
 
+DEFINE_FWK_MODULE(L1HPSPFTauSelector);
