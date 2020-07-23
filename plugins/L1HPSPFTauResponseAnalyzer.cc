@@ -54,20 +54,23 @@ void L1HPSPFTauResponseAnalyzer::beginJob()
   dqmStore.setCurrentFolder(dqmDirectory_.data());
 
   std::vector<std::string> decayModes = { "oneProng0Pi0", "oneProng1Pi0", "oneProng2Pi0", "threeProng0Pi0", "threeProng1Pi0", "all" };
+  std::vector<double> min_absEtaValues = { -1.,  -1.,   1.4,   1.4, -1.,    -1.  };
+  std::vector<double> max_absEtaValues = {  1.0,  1.4,  2.172, 2.4,  2.172,  2.4 };
   std::vector<double> min_pts = { 20., 25., 30., 35., 40. };
-  for ( auto decayMode : decayModes )
+  size_t numAbsEtaRanges = min_absEtaValues.size();
+  for ( size_t idxAbsEtaRange = 0; idxAbsEtaRange < numAbsEtaRanges; ++idxAbsEtaRange )
   {
-    for ( auto min_pt : min_pts )
+    double min_absEta = min_absEtaValues[idxAbsEtaRange];
+    double max_absEta = max_absEtaValues[idxAbsEtaRange];
+    for ( auto decayMode : decayModes )
     {
-      responsePlots_.push_back(new responsePlotEntryType(min_pt, 1.0, decayMode, 0.40, -1.)); // vLoose
-      responsePlots_.push_back(new responsePlotEntryType(min_pt, 1.0, decayMode, 0.20, -1.)); // Loose
-      responsePlots_.push_back(new responsePlotEntryType(min_pt, 1.0, decayMode, 0.10, -1.)); // Medium
-      responsePlots_.push_back(new responsePlotEntryType(min_pt, 1.0, decayMode, 0.05, -1.)); // Tight
-    
-      responsePlots_.push_back(new responsePlotEntryType(min_pt, 1.4, decayMode, 0.40, -1.)); // vLoose
-      responsePlots_.push_back(new responsePlotEntryType(min_pt, 1.4, decayMode, 0.20, -1.)); // Loose
-      responsePlots_.push_back(new responsePlotEntryType(min_pt, 1.4, decayMode, 0.10, -1.)); // Medium
-      responsePlots_.push_back(new responsePlotEntryType(min_pt, 1.4, decayMode, 0.05, -1.)); // Tight
+      for ( auto min_pt : min_pts )
+      {
+        responsePlots_.push_back(new responsePlotEntryType(min_pt, min_absEta, max_absEta, decayMode, 0.40, -1.)); // vLoose
+        responsePlots_.push_back(new responsePlotEntryType(min_pt, min_absEta, max_absEta, decayMode, 0.20, -1.)); // Loose
+        responsePlots_.push_back(new responsePlotEntryType(min_pt, min_absEta, max_absEta, decayMode, 0.10, -1.)); // Medium
+        responsePlots_.push_back(new responsePlotEntryType(min_pt, min_absEta, max_absEta, decayMode, 0.05, -1.)); // Tight
+      }
     }
   }
 

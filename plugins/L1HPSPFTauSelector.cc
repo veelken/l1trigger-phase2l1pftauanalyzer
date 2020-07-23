@@ -40,19 +40,17 @@ void L1HPSPFTauSelector::produce(edm::Event& evt, const edm::EventSetup& es)
     double pfTau_absEta = std::fabs(pfTau.eta());
     double sumChargedIso = pfTau.sumChargedIso();
     bool isSelected = false;
-    if ( (min_pt_            < 0. || pfTau.pt()                                                       >=  min_pt_                       ) &&
-         (max_pt_            < 0. || pfTau.pt()                                                       <=  max_pt_                       ) &&
-         (min_absEta_        < 0. || pfTau_absEta                                                     >=  min_absEta_                   ) &&
-         (max_absEta_        < 0. || pfTau_absEta                                                     <=  max_absEta_                   ) &&
-         (                           pfTau.leadChargedPFCand().isNonnull()                                                                && 
-                                     pfTau.leadChargedPFCand()->pfTrack().isNonnull()                                                     &&   
-                                     pfTau.leadChargedPFCand()->pfTrack()->track().isNonnull()                                          ) &&
-         (min_leadTrackPt_   < 0. || pfTau.leadChargedPFCand()->pfTrack()->track()->momentum().perp() >=  min_leadTrackPt_              ) &&
-         (max_leadTrackPt_   < 0. || pfTau.leadChargedPFCand()->pfTrack()->track()->momentum().perp() <=  max_leadTrackPt_              ) &&
-         (min_relChargedIso_ < 0. || sumChargedIso                                                    >= (min_relChargedIso_*pfTau.pt())) &&
-         (max_relChargedIso_ < 0. || sumChargedIso                                                    <= (max_relChargedIso_*pfTau.pt())) &&
-         (min_absChargedIso_ < 0. || sumChargedIso                                                    >=  min_absChargedIso_            ) &&
-	 (max_absChargedIso_ < 0. || sumChargedIso                                                    <=  max_absChargedIso_            ) )
+    if ( (min_pt_            < 0. || pfTau.pt()                      >=  min_pt_                       ) &&
+         (max_pt_            < 0. || pfTau.pt()                      <=  max_pt_                       ) &&
+         (min_absEta_        < 0. || pfTau_absEta                    >=  min_absEta_                   ) &&
+         (max_absEta_        < 0. || pfTau_absEta                    <=  max_absEta_                   ) &&
+         (                           pfTau.leadChargedPFCand().isNonnull()                             ) &&
+         (min_leadTrackPt_   < 0. || pfTau.leadChargedPFCand()->pt() >=  min_leadTrackPt_              ) &&
+         (max_leadTrackPt_   < 0. || pfTau.leadChargedPFCand()->pt() <=  max_leadTrackPt_              ) &&
+         (min_relChargedIso_ < 0. || sumChargedIso                   >= (min_relChargedIso_*pfTau.pt())) &&
+         (max_relChargedIso_ < 0. || sumChargedIso                   <= (max_relChargedIso_*pfTau.pt())) &&
+         (min_absChargedIso_ < 0. || sumChargedIso                   >=  min_absChargedIso_            ) &&
+	 (max_absChargedIso_ < 0. || sumChargedIso                   <=  max_absChargedIso_            ) )
     {
       isSelected = true;
     }

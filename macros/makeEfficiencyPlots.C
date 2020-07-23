@@ -424,7 +424,7 @@ void makeEfficiencyPlots()
   gROOT->SetBatch(true);
 
   std::string inputFilePath = Form("%s/src/L1Trigger/TallinnL1PFTauAnalyzer/test/", gSystem->Getenv("CMSSW_BASE"));
-  std::string inputFileName = "TallinnL1PFTauAnalyzer_signal_qqH_2019Jun21.root";
+  std::string inputFileName = "analyzeL1HPSPFTaus_signal_2020Jul22.root";
   std::string inputFileName_full = inputFilePath;
   if ( inputFileName_full.find_last_of("/") != (inputFileName_full.size() - 1) ) inputFileName_full.append("/");
   inputFileName_full.append(inputFileName);
@@ -435,14 +435,8 @@ void makeEfficiencyPlots()
   }
 
   std::vector<std::string> pfAlgos;
-  //pfAlgos.push_back("WithStripsAndPreselectionPF");
-  pfAlgos.push_back("WithStripsWithoutPreselectionPF");
-  //pfAlgos.push_back("WithoutStripsWithPreselectionPF");
-  pfAlgos.push_back("WithoutStripsAndPreselectionPF");
-  //pfAlgos.push_back("WithStripsAndPreselectionPuppi");
-  //pfAlgos.push_back("WithStripsWithoutPreselectionPuppi");
-  //pfAlgos.push_back("WithoutStripsWithPreselectionPuppi");
-  //pfAlgos.push_back("WithoutStripsAndPreselectionPuppi");
+  pfAlgos.push_back("WithStripsPF");
+  pfAlgos.push_back("WithoutStripsPF");
 
   std::vector<std::string> observables;
   observables.push_back("pt");
@@ -452,9 +446,9 @@ void makeEfficiencyPlots()
 
   std::vector<std::string> absEtaRanges;
   absEtaRanges.push_back("absEtaLt1p40");
-  absEtaRanges.push_back("absEta1p40to2p17");
+  //absEtaRanges.push_back("absEta1p40to2p17");
   absEtaRanges.push_back("absEta1p40to2p40");
-  absEtaRanges.push_back("absEtaLt2p17");
+  //absEtaRanges.push_back("absEtaLt2p17");
   absEtaRanges.push_back("absEtaLt2p40");
 
   std::vector<std::string> decayModes;
@@ -493,12 +487,12 @@ void makeEfficiencyPlots()
   xMax["minDeltaR"] =   5.;
 
   std::map<std::string, std::string> xAxisTitles; // key = observable
-  //xAxisTitles["pt"]        = "True #tau_{h} p_{T} [GeV]";
-  //xAxisTitles["eta"]       = "True #tau_{h} #eta";
-  //xAxisTitles["phi"]       = "True #tau_{h} #phi";
-  xAxisTitles["pt"]        = "Offline #tau_{h} p_{T} [GeV]";
-  xAxisTitles["eta"]       = "Offline #tau_{h} #eta";
-  xAxisTitles["phi"]       = "Offline #tau_{h} #phi";
+  xAxisTitles["pt"]        = "True #tau_{h} p_{T} [GeV]";
+  xAxisTitles["eta"]       = "True #tau_{h} #eta";
+  xAxisTitles["phi"]       = "True #tau_{h} #phi";
+  //xAxisTitles["pt"]        = "Offline #tau_{h} p_{T} [GeV]";
+  //xAxisTitles["eta"]       = "Offline #tau_{h} #eta";
+  //xAxisTitles["phi"]       = "Offline #tau_{h} #phi";
   xAxisTitles["minDeltaR"] = "#Delta R";
   
   std::map<std::string, std::string> legendEntries_vs_isolationWPs; // key = isolationWP
@@ -515,7 +509,7 @@ void makeEfficiencyPlots()
   legendEntries_vs_decayModes["threeProng1Pi0"] = "h^{#pm}h^{#mp}h^{#pm}#pi^{0}";
   legendEntries_vs_decayModes["all"]            = "all";
 
-  std::string dqmDirectory = "DQMData/TallinnL1PFTauAnalyzerSignal";
+  std::string dqmDirectory = "L1HPSPFTauAnalyzerSignal";
 
   int colors[6] = { 1, 2, 8, 4, 6, 7 };
   int lineStyles[6] = { 1, 1, 1, 1, 1, 1 };
@@ -541,15 +535,19 @@ void makeEfficiencyPlots()
 	      ptThreshold != ptThresholds.end(); ++ptThreshold ) {      
           for ( std::vector<std::string>::const_iterator isolationWP = isolationWPs.begin();
 	        isolationWP != isolationWPs.end(); ++isolationWP ) {
-            //std::string histogramName_numerator = Form("%s%s_wrtGenHadTaus/effL1PFTau_vs_%s_numerator_all_%s_%s_%s", 
-            //  dqmDirectory.data(), pfAlgo->data(), observable->data(), absEtaRange->data(), ptThreshold->data(), isolationWP->data());
-	    std::string histogramName_numerator = Form("%s%s_wrtOfflineTaus/effL1PFTau_vs_%s_numerator_all_%s_%s_%s", 
-              dqmDirectory.data(), pfAlgo->data(), observable->data(), absEtaRange->data(), ptThreshold->data(), isolationWP->data());
+            std::string histogramName_numerator = Form("%s%s_wrtGenHadTaus/%s/%s/effL1PFTau_vs_%s_numerator_%s_%s_%s_%s", 
+              dqmDirectory.data(), pfAlgo->data(), absEtaRange->data(), "all", 
+              observable->data(), "all", absEtaRange->data(), ptThreshold->data(), isolationWP->data());
+	    //std::string histogramName_numerator = Form("%s%s_wrtOfflineTaus/%s/%s/effL1PFTau_vs_%s_numerator_%s_%s_%s_%s", 
+            //  dqmDirectory.data(), pfAlgo->data(), absEtaRange->data(), "all", 
+            //  observable->data(), "all", absEtaRange->data(), ptThreshold->data(), isolationWP->data());
             TH1* histogram_numerator = loadHistogram(inputFile, histogramName_numerator);
-	    //std::string histogramName_denominator = Form("%s%s_wrtGenHadTaus/effL1PFTau_vs_%s_denominator_all_%s_%s_%s", 
-            //  dqmDirectory.data(), pfAlgo->data(), observable->data(), absEtaRange->data(), ptThreshold->data(), isolationWP->data());
-	    std::string histogramName_denominator = Form("%s%s_wrtOfflineTaus/effL1PFTau_vs_%s_denominator_all_%s_%s_%s", 
-              dqmDirectory.data(), pfAlgo->data(), observable->data(), absEtaRange->data(), ptThreshold->data(), isolationWP->data());
+	    std::string histogramName_denominator = Form("%s%s_wrtGenHadTaus/%s/%s/effL1PFTau_vs_%s_denominator_%s_%s_%s_%s", 
+              dqmDirectory.data(), pfAlgo->data(), absEtaRange->data(), "all", 
+              observable->data(), "all", absEtaRange->data(), ptThreshold->data(), isolationWP->data());
+	    //std::string histogramName_denominator = Form("%s%s_wrtOfflineTaus/%s/%s/effL1PFTau_vs_%s_denominator_%s_%s_%s_%s", 
+            //  dqmDirectory.data(), pfAlgo->data(), absEtaRange->data(), "all", 
+            //  observable->data(), "all", absEtaRange->data(), ptThreshold->data(), isolationWP->data());
             TH1* histogram_denominator = loadHistogram(inputFile, histogramName_denominator);
 	    TGraph* graph_efficiency = makeEfficiencyGraph(histogram_numerator, histogram_denominator);
 	    graphs_efficiency_vs_isolationWPs[*pfAlgo][*observable][*absEtaRange][*ptThreshold][*isolationWP] = graph_efficiency;
@@ -584,15 +582,19 @@ void makeEfficiencyPlots()
 	        isolationWP != isolationWPs.end(); ++isolationWP ) {  
 	    for ( std::vector<std::string>::const_iterator decayMode = decayModes.begin();
 		  decayMode != decayModes.end(); ++decayMode ) {
-  	      //std::string histogramName_numerator = Form("%s%s_wrtGenHadTaus/effL1PFTau_vs_%s_numerator_%s_%s_%s_%s", 
-	      //  dqmDirectory.data(), pfAlgo->data(), observable->data(), decayMode->data(), absEtaRange->data(), ptThreshold->data(), isolationWP->data());
-	      std::string histogramName_numerator = Form("%s%s_wrtOfflineTaus/effL1PFTau_vs_%s_numerator_%s_%s_%s_%s", 
-	        dqmDirectory.data(), pfAlgo->data(), observable->data(), decayMode->data(), absEtaRange->data(), ptThreshold->data(), isolationWP->data());
+              std::string histogramName_numerator = Form("%s%s_wrtGenHadTaus/%s/%s/effL1PFTau_vs_%s_numerator_%s_%s_%s_%s", 
+              dqmDirectory.data(), pfAlgo->data(), absEtaRange->data(), decayMode->data(),
+              observable->data(), decayMode->data(), absEtaRange->data(), ptThreshold->data(), isolationWP->data());
+	      //std::string histogramName_numerator = Form("%s%s_wrtOfflineTaus/%s/%s/effL1PFTau_vs_%s_numerator_%s_%s_%s_%s", 
+              //  dqmDirectory.data(), pfAlgo->data(), absEtaRange->data(), decayMode->data(),
+              //  observable->data(), decayMode->data(), absEtaRange->data(), ptThreshold->data(), isolationWP->data());
               TH1* histogram_numerator = loadHistogram(inputFile, histogramName_numerator);
-	      //std::string histogramName_denominator = Form("%s%s_wrtGenHadTaus/effL1PFTau_vs_%s_denominator_%s_%s_%s_%s", 
-              //  dqmDirectory.data(), pfAlgo->data(), observable->data(), decayMode->data(), absEtaRange->data(), ptThreshold->data(), isolationWP->data());
-	      std::string histogramName_denominator = Form("%s%s_wrtOfflineTaus/effL1PFTau_vs_%s_denominator_%s_%s_%s_%s", 
-                dqmDirectory.data(), pfAlgo->data(), observable->data(), decayMode->data(), absEtaRange->data(), ptThreshold->data(), isolationWP->data());
+	      std::string histogramName_denominator = Form("%s%s_wrtGenHadTaus/%s/%s/effL1PFTau_vs_%s_denominator_%s_%s_%s_%s", 
+                dqmDirectory.data(), pfAlgo->data(), absEtaRange->data(), decayMode->data(),
+                observable->data(), decayMode->data(), absEtaRange->data(), ptThreshold->data(), isolationWP->data());
+	      //std::string histogramName_denominator = Form("%s%s_wrtOfflineTaus/%s/%s/effL1PFTau_vs_%s_denominator_%s_%s_%s_%s", 
+              //  dqmDirectory.data(), pfAlgo->data(), absEtaRange->data(), decayMode->data(),
+              //  observable->data(), decayMode->data(), absEtaRange->data(), ptThreshold->data(), isolationWP->data());
               TH1* histogram_denominator = loadHistogram(inputFile, histogramName_denominator);
 	      TGraph* graph_efficiency = makeEfficiencyGraph(histogram_numerator, histogram_denominator);
 	      graphs_efficiency_vs_isolationWPs_and_decayModes[*pfAlgo][*observable][*absEtaRange][*ptThreshold][*isolationWP][*decayMode] = graph_efficiency;
@@ -618,154 +620,6 @@ void makeEfficiencyPlots()
 		       false, 0., 1.09, "Efficiency", 1.4, 
 		       outputFileName2);
 	  }
-	}
-      }
-    }
-  }
-
-  // Isobel's L1PFTaus 
-  std::vector<std::string> isolationWPs_isobel;
-  isolationWPs_isobel.push_back("vLooseIso");
-  isolationWPs_isobel.push_back("LooseIso");
-  isolationWPs_isobel.push_back("MediumIso");
-  isolationWPs_isobel.push_back("TightIso");
-
-  std::map<std::string, std::string> legendEntries_vs_isolationWPs_isobel; // key = isolationWP
-  legendEntries_vs_isolationWPs_isobel["vLooseIso"] = "very Loose";
-  legendEntries_vs_isolationWPs_isobel["LooseIso"]  = "Loose";
-  legendEntries_vs_isolationWPs_isobel["MediumIso"] = "Medium";
-  legendEntries_vs_isolationWPs_isobel["TightIso"]  = "Tight";
-
-  std::string dqmDirectory_isobel = "DQMData/L1PFTauAnalyzerSignal";
-
-  string_to_TGraphMap4 graphs_efficiency_vs_isolationWPs_isobel;                // key = observable, absEtaRange, ptThreshold, isolationWP
-  string_to_TGraphMap5 graphs_efficiency_vs_isolationWPs_and_decayModes_isobel; // key = observable, absEtaRange, ptThreshold, isolationWP, decayMode
-
-  for ( std::vector<std::string>::const_iterator observable = observables.begin();
-	observable != observables.end(); ++observable ) {      
-    for ( std::vector<std::string>::const_iterator absEtaRange = absEtaRanges.begin();
-	  absEtaRange != absEtaRanges.end(); ++absEtaRange ) {
-      for ( std::vector<std::string>::const_iterator ptThreshold = ptThresholds.begin();
-	    ptThreshold != ptThresholds.end(); ++ptThreshold ) {      
-	for ( std::vector<std::string>::const_iterator isolationWP = isolationWPs_isobel.begin();
-	      isolationWP != isolationWPs_isobel.end(); ++isolationWP ) {
-	  //std::string histogramName_numerator = Form("%sPF_wrtGenHadTaus/effL1PFTau_vs_%s_numerator_all_%s_%s_%s", 
-	  //  dqmDirectory_isobel.data(), observable->data(), absEtaRange->data(), ptThreshold->data(), isolationWP->data());
-	  std::string histogramName_numerator = Form("%sPF_wrtOfflineTaus/effL1PFTau_vs_%s_numerator_all_%s_%s_%s", 
-            dqmDirectory_isobel.data(), observable->data(), absEtaRange->data(), ptThreshold->data(), isolationWP->data());
-	  TH1* histogram_numerator = loadHistogram(inputFile, histogramName_numerator);
-	  //std::string histogramName_denominator = Form("%sPF_wrtGenHadTaus/effL1PFTau_vs_%s_denominator_all_%s_%s_%s", 
-	  //  dqmDirectory_isobel.data(), pfAlgo->data(), observable->data(), absEtaRange->data(), ptThreshold->data(), isolationWP->data());
-	  std::string histogramName_denominator = Form("%sPF_wrtOfflineTaus/effL1PFTau_vs_%s_denominator_all_%s_%s_%s", 
-            dqmDirectory_isobel.data(), observable->data(), absEtaRange->data(), ptThreshold->data(), isolationWP->data());
-	  TH1* histogram_denominator = loadHistogram(inputFile, histogramName_denominator);
-	  TGraph* graph_efficiency = makeEfficiencyGraph(histogram_numerator, histogram_denominator);
-	  graphs_efficiency_vs_isolationWPs_isobel[*observable][*absEtaRange][*ptThreshold][*isolationWP] = graph_efficiency;
-	}
-
-	string_to_TGraphMap1 graphs3 = graphs_efficiency_vs_isolationWPs_isobel[*observable][*absEtaRange][*ptThreshold];
-	bool addFitFunctions = false;
-	if ( (*observable) == "pt" ) 
-	{
-	  addFitFunctions = true;
-	}
-	std::vector<std::string> labelTextLines = getLabelTextLines(*ptThreshold);
-	std::string outputFileName3 = Form("makeEfficiencyPlots_L1PFTau_vs_%s_%s_%s.png", 
-          observable->data(), absEtaRange->data(), ptThreshold->data());
-	showGraphs(1150, 850,
-		   graphs3["vLooseIso"], legendEntries_vs_isolationWPs_isobel["vLooseIso"],
-		   graphs3["LooseIso"],  legendEntries_vs_isolationWPs_isobel["LooseIso"],
-		   graphs3["MediumIso"], legendEntries_vs_isolationWPs_isobel["MediumIso"],
-		   graphs3["TightIso"],  legendEntries_vs_isolationWPs_isobel["TightIso"],
-		   0, "",
-		   0, "",
-		   addFitFunctions,
-		   colors, markerStyles, lineStyles, 
-		   0.045, 0.68, 0.17, 0.23, 0.26, 
-		   labelTextLines, 0.045,
-		   0.17, 0.85, 0.26, 0.05, 
-		   xMin[*observable], xMax[*observable], xAxisTitles[*observable], 1.2, 
-		   false, 0., 1.09, "Efficiency", 1.4, 
-		   outputFileName3);
-	
-	for ( std::vector<std::string>::const_iterator isolationWP = isolationWPs_isobel.begin();
-	      isolationWP != isolationWPs_isobel.end(); ++isolationWP ) {  
-	  for ( std::vector<std::string>::const_iterator decayMode = decayModes.begin();
-		decayMode != decayModes.end(); ++decayMode ) {
-	    //std::string histogramName_numerator = Form("%sPF_wrtGenHadTaus/effL1PFTau_vs_%s_numerator_%s_%s_%s_%s", 
-	    //  dqmDirectory_isobel.data(), pfAlgo->data(), observable->data(), decayMode->data(), absEtaRange->data(), ptThreshold->data(), isolationWP->data());
-	    std::string histogramName_numerator = Form("%sPF_wrtOfflineTaus/effL1PFTau_vs_%s_numerator_%s_%s_%s_%s", 
-	      dqmDirectory_isobel.data(), observable->data(), decayMode->data(), absEtaRange->data(), ptThreshold->data(), isolationWP->data());
-	    TH1* histogram_numerator = loadHistogram(inputFile, histogramName_numerator);
-	    //std::string histogramName_denominator = Form("%sPF_wrtGenHadTaus/effL1PFTau_vs_%s_denominator_%s_%s_%s_%s", 
-	    //  dqmDirectory_isobel.data(), pfAlgo->data(), observable->data(), decayMode->data(), absEtaRange->data(), ptThreshold->data(), isolationWP->data());
-	    std::string histogramName_denominator = Form("%sPF_wrtOfflineTaus/effL1PFTau_vs_%s_denominator_%s_%s_%s_%s", 
-              dqmDirectory_isobel.data(), observable->data(), decayMode->data(), absEtaRange->data(), ptThreshold->data(), isolationWP->data());
-	    TH1* histogram_denominator = loadHistogram(inputFile, histogramName_denominator);
-	    TGraph* graph_efficiency = makeEfficiencyGraph(histogram_numerator, histogram_denominator);
-	    graphs_efficiency_vs_isolationWPs_and_decayModes_isobel[*observable][*absEtaRange][*ptThreshold][*isolationWP][*decayMode] = graph_efficiency;
-	  }
-	  
-	  string_to_TGraphMap1 graphs4 = graphs_efficiency_vs_isolationWPs_and_decayModes_isobel[*observable][*absEtaRange][*ptThreshold][*isolationWP];
-	  std::vector<std::string> labelTextLines = getLabelTextLines(*ptThreshold);
-	  std::string outputFileName4 = Form("makeEfficiencyPlots_L1PFTau_vs_%s_%s_%s_%s.png", 
-            observable->data(), absEtaRange->data(), ptThreshold->data(), isolationWP->data());
-	  showGraphs(1150, 850,
-		     graphs4["oneProng0Pi0"],   legendEntries_vs_decayModes["oneProng0Pi0"],
-		     graphs4["oneProng1Pi0"],   legendEntries_vs_decayModes["oneProng1Pi0"],
-		     graphs4["oneProng2Pi0"],   legendEntries_vs_decayModes["oneProng2Pi0"],
-		     graphs4["threeProng0Pi0"], legendEntries_vs_decayModes["threeProng0Pi0"],
-		     graphs4["threeProng1Pi0"], legendEntries_vs_decayModes["threeProng1Pi0"],
-		     0, "",
-		     false,
-		     colors, markerStyles, lineStyles, 
-		     0.045, 0.68, 0.17, 0.23, 0.26, 
-		     labelTextLines, 0.045,
-		     0.17, 0.85, 0.26, 0.05, 
-		     xMin[*observable], xMax[*observable], xAxisTitles[*observable], 1.2, 
-		     false, 0., 1.09, "Efficiency", 1.4, 
-		     outputFileName4);
-	}
-      }
-    }
-  }
-
-  for ( std::vector<std::string>::const_iterator observable = observables.begin();
-	observable != observables.end(); ++observable ) {      
-    for ( std::vector<std::string>::const_iterator absEtaRange = absEtaRanges.begin();
-	  absEtaRange != absEtaRanges.end(); ++absEtaRange ) {
-      for ( std::vector<std::string>::const_iterator ptThreshold = ptThresholds.begin();
-	    ptThreshold != ptThresholds.end(); ++ptThreshold ) {      
-	assert(isolationWPs.size() == isolationWPs_isobel.size());
-	for ( int idxIsolationWP = 0; idxIsolationWP < 4; ++idxIsolationWP ) {
-	  const std::string& isolationWP = isolationWPs[idxIsolationWP];
-	  TGraph* graph = graphs_efficiency_vs_isolationWPs["WithoutStripsAndPreselectionPF"][*observable][*absEtaRange][*ptThreshold][isolationWP];
-	  const std::string& isolationWP_isobel = isolationWPs_isobel[idxIsolationWP];
-	  TGraph* graph_isobel = graphs_efficiency_vs_isolationWPs_isobel[*observable][*absEtaRange][*ptThreshold][isolationWP_isobel];
-
-	  bool addFitFunctions = false;
-	  if ( (*observable) == "pt" ) 
-	  {
-	    addFitFunctions = true;
-	  }
-	  std::vector<std::string> labelTextLines = getLabelTextLines(*ptThreshold);
-	  std::string outputFileName5 = Form("makeEfficiencyPlots_HPSatL1_vs_L1PFTau_vs_%s_%s_%s.png", 
-            observable->data(), absEtaRange->data(), ptThreshold->data());
-	  showGraphs(1150, 850,
-		     graph,        "HPS@L1 (Tallinn)",
-		     graph_isobel, "L1PFTau",
-		     0, "",
-		     0, "",
-		     0, "",
-		     0, "",
-		     addFitFunctions,
-		     colors, markerStyles, lineStyles, 
-		     0.045, 0.68, 0.17, 0.23, 0.26, 
-		     labelTextLines, 0.045,
-		     0.17, 0.85, 0.26, 0.05, 
-		     xMin[*observable], xMax[*observable], xAxisTitles[*observable], 1.2, 
-		     false, 0., 1.09, "Efficiency", 1.4, 
-		     outputFileName5);
 	}
       }
     }

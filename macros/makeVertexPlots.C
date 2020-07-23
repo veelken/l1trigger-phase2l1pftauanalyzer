@@ -223,7 +223,7 @@ void makeVertexPlots()
   gROOT->SetBatch(true);
 
   std::string inputFilePath = Form("%s/src/L1Trigger/TallinnL1PFTauAnalyzer/test/", gSystem->Getenv("CMSSW_BASE"));
-  std::string inputFileName_signal = "TallinnL1PFTauAnalyzer_signal_2019May14.root";
+  std::string inputFileName = "analyzeL1HPSPFTaus_signal_2020Jul22.root";
   TFile* inputFile_signal = openFile(inputFilePath, inputFileName_signal);
   std::string inputFileName_background = "TallinnL1PFTauAnalyzer_background_2019May14.root";
   //TFile* inputFile_background = openFile(inputFilePath, inputFileName_background);
